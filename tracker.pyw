@@ -32,11 +32,14 @@ from PIL import Image, ImageDraw, ImageFont, ImageTk
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-POLL_INTERVAL = 5
-SAVE_INTERVAL = 15           # periodic save (also saves on every focus change)
-UI_REFRESH_MS = 1000
-ICON_SIZE     = 22
-BACKUP_KEEP   = 7
+POLL_INTERVAL    = 5
+SAVE_INTERVAL    = 15    # periodic save (also saves on every focus change)
+UI_REFRESH_MS    = 1000
+ICON_SIZE        = 22
+BACKUP_KEEP      = 7
+MIN_DWELL_POLLS  = 2     # app must hold focus for this many consecutive polls
+                         # (~10s) before it registers — kills taskbar/tray flashes
+SESSION_GAP_SECS = 1800  # 30 min gap in focus = new session (not every alt-tab)
 
 # Milestones in hours — toasted when crossed
 MILESTONES_HOURS = [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
@@ -154,14 +157,15 @@ def rotate_backups():
 # ---------------------------------------------------------------------------
 def _default_entry():
     return {
-        'seconds':    0.0,
-        'exe':        None,
-        'launches':   0,
-        'first_seen': None,
-        'buckets':    {},       # {"YYYY-MM-DD": seconds}
-        'alias':      None,
-        'hidden':     False,
-        'milestones': [],       # hours already toasted
+        'seconds':      0.0,
+        'exe':          None,
+        'launches':     0,
+        'first_seen':   None,
+        'last_focused': 0.0,   # unix timestamp — used for session-gap detection
+        'buckets':      {},    # {"YYYY-MM-DD": seconds}
+        'alias':        None,
+        'hidden':       False,
+        'milestones':   [],    # hours already toasted
     }
 
 def _normalize_entry(raw, fallback_seconds=0.0):
@@ -174,7 +178,8 @@ def _normalize_entry(raw, fallback_seconds=0.0):
         e['buckets']    = dict(raw.get('buckets', {}) or {})
         e['alias']      = raw.get('alias')
         e['hidden']     = bool(raw.get('hidden', False))
-        e['milestones'] = list(raw.get('milestones', []) or [])
+        e['milestones']   = list(raw.get('milestones', []) or [])
+        e['last_focused'] = float(raw.get('last_focused', 0) or 0)
     else:
         # v1-style raw seconds number
         e['seconds'] = float(raw or 0)
@@ -470,14 +475,17 @@ class AppTracker:
             if info.get('hidden'):
                 SKIP_PROCS.add(proc)
 
-        self.lock         = threading.Lock()
-        self.running      = True
-        self.paused       = False
-        self.current_app  = None
-        self.current_exe  = None
-        self.current_start = time.monotonic()
-        self.last_save    = time.monotonic()
-        self.notifier     = None      # callable(title, message)
+        self.lock            = threading.Lock()
+        self.running         = True
+        self.paused          = False
+        self.current_app     = None
+        self.current_exe     = None
+        self.current_start   = time.monotonic()
+        self.last_save       = time.monotonic()
+        self.notifier        = None   # callable(title, message)
+        # Dwell tracking — prevents taskbar/tray flashes from registering
+        self._candidate      = None   # proc being watched
+        self._candidate_hits = 0      # consecutive polls it's been foreground
         self.backfill_exes()
 
     # -------- persistence helpers ----------------------------------------
@@ -542,20 +550,49 @@ class AppTracker:
             time.sleep(POLL_INTERVAL)
             proc_name, exe = get_active_process()
             now = time.monotonic()
+            wall = time.time()
             with self.lock:
                 if self.paused:
                     self.current_start = now
+                    self._candidate = None
+                    self._candidate_hits = 0
                     continue
+
+                # ---- dwell filter: require MIN_DWELL_POLLS consecutive polls ----
+                if proc_name == self._candidate:
+                    self._candidate_hits += 1
+                else:
+                    self._candidate = proc_name
+                    self._candidate_hits = 1
+
+                # Only commit a switch once the candidate has dwelled long enough
                 focus_changed = False
-                if proc_name is not None and proc_name != self.current_app:
+                if (self._candidate_hits >= MIN_DWELL_POLLS
+                        and proc_name is not None
+                        and proc_name != self.current_app):
                     self._flush(now)
                     self.current_app = proc_name
                     self.current_exe = exe
+                    focus_changed = True
+
                     entry = self._ensure_entry(proc_name)
-                    entry['launches'] = entry.get('launches', 0) + 1
                     if exe and not entry.get('exe'):
                         entry['exe'] = exe
-                    focus_changed = True
+
+                    # ---- session-gap logic: only count a new session if the
+                    #      app hasn't had focus in the last SESSION_GAP_SECS ----
+                    last_f = entry.get('last_focused', 0) or 0
+                    if wall - last_f > SESSION_GAP_SECS:
+                        entry['launches'] = entry.get('launches', 0) + 1
+
+                    entry['last_focused'] = wall
+
+                elif self.current_app and not focus_changed:
+                    # Update last_focused timestamp while app stays in foreground
+                    entry = self.data.get(self.current_app)
+                    if entry is not None:
+                        entry['last_focused'] = wall
+
                 if focus_changed or now - self.last_save >= SAVE_INTERVAL:
                     self._flush(now)
                     save_data(self.data)
@@ -588,6 +625,8 @@ class AppTracker:
                 self.paused = True
             elif not paused and self.paused:
                 self.current_start = time.monotonic()
+                self._candidate = None
+                self._candidate_hits = 0
                 self.paused = False
 
     def toggle_pause(self):
