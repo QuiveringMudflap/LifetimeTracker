@@ -190,34 +190,70 @@ def _normalize_entry(raw, fallback_seconds=0.0):
             e['milestones'].append(m)
     return e
 
-def load_data():
-    if not DATA_FILE.exists():
-        return {}
-    try:
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
-            raw = json.load(f)
-    except Exception as e:
-        logging.error('load failed: %s', e)
-        return {}
-
+def _load_one_file(path):
+    """Load and parse a single data file. Returns dict of apps or raises."""
+    with open(path, 'r', encoding='utf-8') as f:
+        raw = json.load(f)
     apps = {}
     if isinstance(raw, dict) and isinstance(raw.get('apps'), dict):
         for k, v in raw['apps'].items():
             apps[k.lower()] = _normalize_entry(v)
     else:
-        # v1 flat map
         for k, v in raw.items():
             if isinstance(v, (int, float, dict)):
                 apps[k.lower()] = _normalize_entry(v)
-
-    # Drop ever-present junk processes from the data
     return {k: v for k, v in apps.items() if k not in SKIP_PROCS}
 
+def load_data():
+    """Load usage data, falling back to backups if the primary file is bad."""
+    if not DATA_FILE.exists():
+        return {}
+
+    # 1) Try the main data file
+    try:
+        return _load_one_file(DATA_FILE)
+    except Exception as e:
+        logging.error('primary load failed: %s — trying backups', e)
+
+    # 2) Corrupted primary — quarantine it and try the newest backup
+    try:
+        quarantine = DATA_FILE.with_suffix(
+            f'.json.corrupt-{int(time.time())}'
+        )
+        shutil.copy2(DATA_FILE, quarantine)
+        logging.warning('corrupt data file quarantined to %s', quarantine)
+    except Exception:
+        pass
+
+    candidates = sorted(BACKUP_DIR.glob('app_usage_*.json'), reverse=True)
+    for backup in candidates:
+        try:
+            data = _load_one_file(backup)
+            if data:
+                logging.warning('restored data from backup %s (%d apps)',
+                                backup.name, len(data))
+                return data
+        except Exception as e:
+            logging.error('backup %s unreadable: %s', backup.name, e)
+            continue
+
+    # 3) Every source failed — better to start empty than to crash the tray,
+    #    but signal loudly in the log so it's obvious what happened
+    logging.critical('ALL data sources failed to load — starting empty')
+    return {}
+
 def save_data(apps):
+    # Safety valve — never overwrite an existing non-empty data file with
+    # an empty one. Prevents a load failure from silently wiping user data.
+    if not apps and DATA_FILE.exists() and DATA_FILE.stat().st_size > 32:
+        logging.critical('refusing to save empty apps dict over existing data')
+        return
     try:
         tmp = DATA_FILE.with_suffix('.tmp')
         with open(tmp, 'w', encoding='utf-8') as f:
             json.dump({'version': 3, 'apps': apps}, f, indent=2, sort_keys=True)
+            f.flush()
+            os.fsync(f.fileno())     # force to disk before rename
         tmp.replace(DATA_FILE)
     except Exception as e:
         logging.error('save failed: %s', e)
