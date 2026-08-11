@@ -147,17 +147,32 @@ def test_all_sources_failing_returns_empty_rather_than_raising(storage, write_da
     assert storage.load() == {}
 
 
-def test_one_malformed_entry_rejects_the_whole_file_today(storage, write_data):
-    """Documents a known defect rather than endorsing it.
-
-    _normalize_entry raises on a non-numeric 'seconds', which propagates out
-    of _load_one_file and discards every other app in the file. With no
-    backup present this degrades to a total loss. When per-entry recovery is
-    added, this should expect the good apps to survive.
+def test_one_malformed_entry_does_not_cost_the_whole_file(storage, write_data):
+    """A non-numeric 'seconds' used to raise out of _normalize_entry and
+    discard every other app in the file — a total loss when no backup exists.
     """
     write_data({'apps': {'good.exe': {'seconds': 100.0},
-                         'bad.exe': {'seconds': 'not-a-number'}}})
+                         'bad.exe': {'seconds': 'not-a-number'},
+                         'other.exe': {'seconds': 50.0}}})
+    loaded = storage.load()
+    assert loaded['good.exe']['seconds'] == 100.0
+    assert loaded['other.exe']['seconds'] == 50.0
+    assert 'bad.exe' not in loaded
+
+
+def test_many_good_entries_survive_one_bad_one(storage, write_data):
+    apps = {f'app{i}.exe': {'seconds': 3600.0} for i in range(500)}
+    apps['weird.exe'] = {'seconds': 'not-a-number'}
+    write_data({'apps': apps})
+    assert len(storage.load()) == 500
+
+
+def test_a_non_dict_payload_is_still_a_hard_failure(storage, write_data):
+    # A JSON list is not a data shape we can interpret; it must fall through
+    # to the backup path rather than silently yielding an empty dict.
+    write_data([1, 2, 3])
     assert storage.load() == {}
+    assert list(storage.data_dir.glob('app_usage.json.corrupt-*'))
 
 
 # --------------------------------------------------------------------------

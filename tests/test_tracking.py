@@ -191,20 +191,41 @@ def test_pause_clears_the_dwell_candidate(tracker, clock):
 # --------------------------------------------------------------------------
 # idle / skipped foreground windows
 # --------------------------------------------------------------------------
-def test_none_focus_keeps_crediting_the_previous_app_today(tracker, clock):
-    """Documents a known defect rather than endorsing it.
-
-    When the foreground window is one the tracker skips (lock screen, cloaked
-    window) the provider returns None, but current_app and current_start are
-    left untouched, so the whole idle period is billed to the last app.
-    An 8-hour lock currently lands entirely on chrome.exe.
-    """
+def test_sustained_idle_is_not_billed_to_the_previous_app(tracker, clock):
+    """An 8-hour lock screen used to land entirely on whatever had focus."""
     poll(tracker, clock, 'chrome.exe', times=2)
+    poll(tracker, clock, 'chrome.exe', times=2)      # 10s of real use
     poll(tracker, clock, None, times=(8 * 3600) // POLL)
     tracker._flush(clock.monotonic())
 
-    hours = tracker.data['chrome.exe']['seconds'] / 3600
-    assert hours > 7.9
+    # 10s of use, plus the dwell interval before idle was confirmed
+    assert tracker.data['chrome.exe']['seconds'] <= 10.0 + (POLL * POLL)
+    assert tracker.current_app is None
+
+
+def test_a_brief_flash_to_nothing_does_not_break_focus(tracker, clock):
+    poll(tracker, clock, 'chrome.exe', times=2)
+    poll(tracker, clock, None, times=1)
+    assert tracker.current_app == 'chrome.exe'
+
+
+def test_returning_after_a_long_idle_counts_a_new_session(tracker, clock):
+    poll(tracker, clock, 'chrome.exe', times=2)
+    assert tracker.data['chrome.exe']['launches'] == 1
+
+    poll(tracker, clock, None, times=(2 * 3600) // POLL)
+    poll(tracker, clock, 'chrome.exe', times=2)
+    assert tracker.data['chrome.exe']['launches'] == 2
+
+
+def test_idle_time_lands_in_no_bucket(tracker, clock):
+    poll(tracker, clock, 'chrome.exe', times=2)
+    poll(tracker, clock, None, times=(4 * 3600) // POLL)
+    tracker._flush(clock.monotonic())
+
+    banked = sum(tracker.data['chrome.exe']['buckets'].values())
+    assert banked == tracker.data['chrome.exe']['seconds']
+    assert banked < 60
 
 
 def test_none_focus_before_any_app_records_nothing(tracker, clock):

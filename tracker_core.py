@@ -125,6 +125,9 @@ def default_data_dir():
 # ---------------------------------------------------------------------------
 def fmt_duration(seconds):
     seconds = int(seconds)
+    if seconds < 0:
+        # Python floor-divides negatives, which would render -5 as "59m 55s".
+        seconds = 0
     h = seconds // 3600
     m = (seconds % 3600) // 60
     s = seconds % 60
@@ -276,17 +279,26 @@ class Storage:
 
     # -------- load -------------------------------------------------------
     def _load_one_file(self, path, skip_procs):
-        """Load and parse a single data file. Returns dict of apps or raises."""
+        """Load and parse a single data file. Returns dict of apps or raises.
+
+        A malformed entry is dropped rather than rejecting the whole file —
+        one unreadable record must not cost the user every other app.
+        """
         with open(path, 'r', encoding='utf-8') as f:
             raw = json.load(f)
-        apps = {}
         if isinstance(raw, dict) and isinstance(raw.get('apps'), dict):
-            for k, v in raw['apps'].items():
-                apps[k.lower()] = _normalize_entry(v)
+            items = list(raw['apps'].items())
+        elif isinstance(raw, dict):
+            items = [(k, v) for k, v in raw.items()
+                     if isinstance(v, (int, float, dict))]
         else:
-            for k, v in raw.items():
-                if isinstance(v, (int, float, dict)):
-                    apps[k.lower()] = _normalize_entry(v)
+            raise ValueError(f'unsupported data shape: {type(raw).__name__}')
+        apps = {}
+        for k, v in items:
+            try:
+                apps[k.lower()] = _normalize_entry(v)
+            except Exception as e:
+                log.error('dropping unreadable entry %r: %s', k, e)
         return {k: v for k, v in apps.items() if k not in skip_procs}
 
     def load(self, skip_procs=DEFAULT_SKIP_PROCS):
@@ -502,6 +514,21 @@ class AppTracker:
 
                 entry['last_focused'] = wall
 
+            elif (self._candidate_hits >= MIN_DWELL_POLLS
+                    and proc_name is None
+                    and self.current_app is not None):
+                # Sustained idle — the foreground window is one we skip (lock
+                # screen, cloaked window) or there is none. Bank what the app
+                # legitimately earned and stop the clock, so an unattended
+                # machine is not billed to whatever had focus last.
+                # The dwell threshold applies here too, so a transient flash
+                # to nothing does not disturb an active session.
+                self._flush(now)
+                self.current_app = None
+                self.current_exe = None
+                self.storage.save(self.data)
+                self.last_save = now
+
             elif self.current_app:
                 # Update last_focused timestamp while app stays in foreground
                 entry = self.data.get(self.current_app)
@@ -570,6 +597,10 @@ class AppTracker:
                     self.data[p]['hidden'] = bool(hidden)
                     if hidden:
                         self.skip_procs.add(p)
+                    elif p not in DEFAULT_SKIP_PROCS:
+                        # Only lift a skip the user put there. Shell processes
+                        # are skipped by policy and stay skipped.
+                        self.skip_procs.discard(p)
             self.storage.save(self.data)
 
     def merge_into(self, source_procs, target_display):

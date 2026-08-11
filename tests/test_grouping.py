@@ -165,6 +165,23 @@ def test_hidden_app_keeps_its_time_across_a_restart(storage, clock):
     assert 'code.exe' in t2.skip_procs
 
 
+def test_unhiding_restores_tracking(tracker):
+    tracker.data['code.exe'] = entry(seconds=1.0)
+    tracker.set_hidden(['code.exe'], True)
+    tracker.set_hidden(['code.exe'], False)
+
+    assert 'code.exe' not in tracker.skip_procs
+    assert tracker.data['code.exe']['hidden'] is False
+    assert 'VS Code' in core.group_by_display(tracker.data)
+
+
+def test_unhiding_never_drops_a_default_skip_proc(tracker):
+    tracker.data['dwm.exe'] = entry(seconds=1.0)
+    tracker.set_hidden(['dwm.exe'], False)
+    # dwm.exe is skipped by policy, not by the user's hide action
+    assert 'dwm.exe' in tracker.skip_procs
+
+
 def test_hidden_app_stops_accruing_time(storage, clock):
     t1 = core.AppTracker(storage=storage, clock=clock)
     t1.data['code.exe'] = entry(seconds=100.0)

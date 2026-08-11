@@ -37,14 +37,11 @@ def test_fmt_duration_uses_comma_form_at_10000_hours():
     assert core.fmt_duration(12345 * 3600 + 30 * 60 + 59) == '12,345h 30m'
 
 
-def test_fmt_duration_negative_is_nonsense_today():
-    """Documents a known defect rather than endorsing it.
-
-    Python floor-divides negatives, so -5 becomes h=-1, m=59, s=55 and the
-    h>0 branch is skipped. Not currently reachable via monotonic deltas.
-    When the guard is added this test should be changed to expect '0s'.
-    """
-    assert core.fmt_duration(-5) == '59m 55s'
+@pytest.mark.parametrize('secs', [-1, -5, -3600, -999999])
+def test_fmt_duration_clamps_negatives_to_zero(secs):
+    # Without the guard Python floor-divides negatives and -5 renders as
+    # "59m 55s".
+    assert core.fmt_duration(secs) == '0s'
 
 
 # --------------------------------------------------------------------------
