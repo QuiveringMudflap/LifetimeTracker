@@ -46,13 +46,64 @@ After install, look at your system tray (bottom-right of the taskbar — you may
 
 In the dashboard, **right-click any app row** for Rename / Hide / Merge actions.
 
+## Remote name catalog (optional, off by default)
+
+The two tables that go stale fastest are the friendly-name map and the
+skip-list — a new editor ships and needs a display name, a new background
+service starts showing up and needs ignoring. Both are just dictionary
+entries, so the tracker can fetch them instead of waiting for a reinstall.
+
+Publish a JSON file anywhere reachable over HTTPS:
+
+```json
+{
+  "version": 1,
+  "known_names": { "zed.exe": "Zed", "ghostty.exe": "Ghostty" },
+  "skip_procs":  [ "somenewservice.exe" ]
+}
+```
+
+Then point the tracker at it:
+
+```cmd
+setx LIFETIMETRACKER_CATALOG_URL "https://example.com/catalog.json"
+```
+
+It's fetched on startup in a background thread, so an unreachable host never
+delays the tray icon. The last good copy is cached in
+`%APPDATA%\LifetimeTracker\catalog.json` and used when you're offline. With
+no URL set, nothing is fetched.
+
+**What a catalog can and cannot do.** It carries data only — nothing in it is
+ever executed. It can add or correct display names and add processes to the
+skip-list. It cannot remove a built-in skip (which would start tracking a
+system process), cannot be served over plain HTTP, and cannot delete usage
+you've already recorded: a newly published skip stops *future* time being
+counted and leaves your existing totals intact.
+
+Treat the URL as trusted infrastructure. Anyone who can change that file can
+change what your tracker displays, so host it somewhere only you can write to.
+
 ## Data location
 
 Everything lives in `%APPDATA%\LifetimeTracker\`:
 
 - `app_usage.json` — your lifetime usage data
 - `backups/` — last 7 daily snapshots
+- `catalog.json` — cached name catalog (only if you've configured one)
 - `tracker.log` — error log
+
+## Development
+
+```cmd
+py -m pip install -r requirements-dev.txt
+py -m pytest
+```
+
+`tracker_core.py` holds all the platform-independent logic — persistence, the
+tracking clock, grouping and formatting — and has no Windows dependencies, so
+the test suite runs on any OS. `tracker.pyw` is the Windows entry point: the
+win32 bindings, the Tk dashboard and the tray icon.
 
 To completely reset: delete that folder.
 

@@ -33,9 +33,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from tracker_core import (  # noqa: E402
     ICON_SIZE, MILESTONES_HOURS, UI_REFRESH_MS,
-    AppTracker, Storage,
-    build_visible_rows, color_for, fmt_date, fmt_duration,
-    resolve_display_name, set_exe_describer,
+    AppTracker, CatalogCache, Storage,
+    apply_catalog, build_visible_rows, catalog_url, color_for,
+    fmt_date, fmt_duration, resolve_catalog, resolve_display_name,
+    set_exe_describer,
 )
 
 # ---------------------------------------------------------------------------
@@ -797,8 +798,30 @@ def main():
 
     set_exe_describer(_file_description)
 
+    # Apply the cached catalog synchronously — it is a local file read, and
+    # having it in place before the tracker starts avoids a first-poll gap.
+    catalog_cache = CatalogCache(storage.data_dir / 'catalog.json')
+    cached = catalog_cache.read()
+    if cached:
+        apply_catalog(*cached)
+
     tracker = AppTracker(storage=storage, exe_resolver=resolve_exe)
     tracker.focus_provider = make_focus_provider(tracker.skip_procs)
+
+    def refresh_catalog():
+        """Pull the latest name catalog, if one is configured.
+
+        Runs off the startup path so a slow or unreachable host can never
+        delay the tray icon appearing.
+        """
+        names, skips = resolve_catalog(cache=catalog_cache)
+        if names or skips:
+            apply_catalog(names, skips)
+            tracker.skip_procs.update(skips)
+
+    if catalog_url():
+        threading.Thread(target=refresh_catalog, daemon=True,
+                         name='catalog').start()
 
     # make sure data is saved even on normal interpreter exit
     atexit.register(tracker.stop)

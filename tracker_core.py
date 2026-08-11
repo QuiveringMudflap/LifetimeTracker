@@ -121,6 +121,173 @@ def default_data_dir():
 
 
 # ---------------------------------------------------------------------------
+# Remote name catalog (opt-in)
+# ---------------------------------------------------------------------------
+# The tables that actually go stale in this app are data, not logic: a new
+# editor ships and it needs a friendly name, a new background service starts
+# showing up and needs skipping. Both are dictionary entries.
+#
+# So the tracker can fetch those two tables from a URL instead of waiting for
+# the user to reinstall. The payload is pure data and is never executed. It
+# can only *add* entries: it cannot remove a built-in skip (which would start
+# tracking a system process), cannot reach a non-HTTPS URL, and cannot delete
+# anything the user has already recorded.
+#
+# Disabled unless a URL is configured. Payload shape:
+#
+#   {"version": 1,
+#    "known_names": {"cursor.exe": "Cursor"},
+#    "skip_procs":  ["somebackgroundthing.exe"]}
+
+CATALOG_ENV_VAR      = 'LIFETIMETRACKER_CATALOG_URL'
+CATALOG_TIMEOUT      = 5      # seconds
+CATALOG_MAX_BYTES    = 256 * 1024
+CATALOG_MAX_ENTRIES  = 5000
+CATALOG_MAX_PROC_LEN = 128
+CATALOG_MAX_NAME_LEN = 64
+
+# Skips contributed by a catalog. Kept separate from DEFAULT_SKIP_PROCS so the
+# built-in policy list can never be edited away by a remote payload.
+EXTRA_SKIP_PROCS = set()
+
+
+def catalog_url():
+    """The configured catalog URL, or None when the feature is off."""
+    return os.environ.get(CATALOG_ENV_VAR) or None
+
+
+def sanitize_catalog(payload):
+    """Validate an untrusted catalog payload into (known_names, skip_procs).
+
+    Raises ValueError on a shape we don't recognise. Individual junk entries
+    are dropped rather than failing the whole payload, so one bad line in the
+    published file doesn't cost every other entry.
+    """
+    if not isinstance(payload, dict):
+        raise ValueError('catalog must be a JSON object')
+    if payload.get('version') != 1:
+        raise ValueError(f'unsupported catalog version: {payload.get("version")!r}')
+
+    raw_names = payload.get('known_names') or {}
+    raw_skips = payload.get('skip_procs') or []
+    if not isinstance(raw_names, dict):
+        raise ValueError('known_names must be an object')
+    if not isinstance(raw_skips, list):
+        raise ValueError('skip_procs must be a list')
+    if len(raw_names) + len(raw_skips) > CATALOG_MAX_ENTRIES:
+        raise ValueError('catalog exceeds the entry limit')
+
+    names = {}
+    for k, v in raw_names.items():
+        if not isinstance(k, str) or not isinstance(v, str):
+            continue
+        k = k.strip().lower()
+        v = v.strip()
+        if not k or not v:
+            continue
+        if len(k) > CATALOG_MAX_PROC_LEN or len(v) > CATALOG_MAX_NAME_LEN:
+            continue
+        # A display name goes straight into the dashboard and toast text;
+        # control characters have no business there.
+        if any(ch in v for ch in '\r\n\t\x00'):
+            continue
+        names[k] = v
+
+    skips = set()
+    for p in raw_skips:
+        if not isinstance(p, str):
+            continue
+        p = p.strip().lower()
+        if p and len(p) <= CATALOG_MAX_PROC_LEN:
+            skips.add(p)
+
+    return names, skips
+
+
+def _https_get(url, timeout):
+    """Fetch bytes over HTTPS with certificate verification (urllib default)."""
+    import urllib.request
+    req = urllib.request.Request(
+        url, headers={'User-Agent': 'LifetimeTracker'})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        # Read one byte past the cap so an oversized body is detectable
+        # without buffering the whole thing.
+        return resp.read(CATALOG_MAX_BYTES + 1)
+
+
+def fetch_catalog(url, timeout=CATALOG_TIMEOUT, opener=None):
+    """Download and validate a catalog. Raises on any problem."""
+    if not isinstance(url, str) or not url.lower().startswith('https://'):
+        raise ValueError('catalog URL must be https')
+    body = (opener or _https_get)(url, timeout)
+    if len(body) > CATALOG_MAX_BYTES:
+        raise ValueError('catalog response exceeds the size limit')
+    if isinstance(body, bytes):
+        body = body.decode('utf-8')
+    return sanitize_catalog(json.loads(body))
+
+
+class CatalogCache:
+    """Last-known-good catalog on disk, so an offline start still benefits."""
+
+    def __init__(self, path):
+        self.path = Path(path)
+
+    def read(self):
+        try:
+            with open(self.path, 'r', encoding='utf-8') as f:
+                return sanitize_catalog(json.load(f))
+        except Exception:
+            return None
+
+    def write(self, names, skips):
+        try:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            tmp = self.path.with_suffix('.tmp')
+            with open(tmp, 'w', encoding='utf-8') as f:
+                json.dump({'version': 1,
+                           'known_names': names,
+                           'skip_procs': sorted(skips)},
+                          f, indent=2, sort_keys=True)
+            tmp.replace(self.path)
+            return True
+        except Exception as e:
+            log.error('catalog cache write failed: %s', e)
+            return False
+
+
+def resolve_catalog(cache=None, url=None, opener=None):
+    """Best available catalog: network, else cache, else nothing.
+
+    Never raises and never blocks longer than the fetch timeout — a catalog
+    problem must not stop the tracker from tracking.
+    """
+    url = url if url is not None else catalog_url()
+    if url:
+        try:
+            names, skips = fetch_catalog(url, opener=opener)
+            if cache:
+                cache.write(names, skips)
+            return names, skips
+        except Exception as e:
+            log.warning('catalog fetch failed (%s) — falling back to cache', e)
+    if cache:
+        cached = cache.read()
+        if cached:
+            return cached
+    return {}, set()
+
+
+def apply_catalog(names, skips):
+    """Overlay a catalog onto the in-memory tables. Additive only."""
+    KNOWN_NAMES.update(names)
+    EXTRA_SKIP_PROCS.update(skips)
+    # Display names are memoised; drop the cache so new entries take effect
+    # in a session that is already running.
+    clear_caches()
+
+
+# ---------------------------------------------------------------------------
 # Formatting
 # ---------------------------------------------------------------------------
 def fmt_duration(seconds):
@@ -391,8 +558,11 @@ class AppTracker:
         # hidden apps. The order matters: hidden entries must be read out of
         # the file *before* they start being filtered, or their accumulated
         # time would disappear on the next restart.
-        self.skip_procs = set(DEFAULT_SKIP_PROCS)
+        # Note which set is used where. Loading filters on the built-in list
+        # only: catalog skips and user hides stop *new* time being recorded,
+        # but must never make existing entries vanish from the file.
         self.data = self.storage.load(DEFAULT_SKIP_PROCS)
+        self.skip_procs = set(DEFAULT_SKIP_PROCS) | set(EXTRA_SKIP_PROCS)
         for proc, info in self.data.items():
             if info.get('hidden'):
                 self.skip_procs.add(proc)
@@ -484,6 +654,13 @@ class AppTracker:
                 self._candidate = None
                 self._candidate_hits = 0
                 return
+
+            # A skipped process is indistinguishable from an empty desktop.
+            # The focus provider already filters these, but a hide or a
+            # catalog skip can land mid-session, and without this a skipped
+            # app would still get an entry and a session count created for it.
+            if proc_name in self.skip_procs:
+                proc_name, exe = None, None
 
             # ---- dwell filter: require MIN_DWELL_POLLS consecutive polls ----
             if proc_name == self._candidate:
