@@ -18,3 +18,8 @@ backups/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Test / coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/

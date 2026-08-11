@@ -1,24 +1,24 @@
 """
-Lifetime App Tracker
+Lifetime App Tracker — Windows entry point.
+
 Sits in the system tray and permanently accumulates how long each app has focus.
 Right-click the tray icon -> View Stats to see your lifetime totals.
 Data lives in %APPDATA%\\LifetimeTracker\\app_usage.json and never resets.
+
+All platform-independent logic lives in tracker_core.py. This file holds the
+Windows API bindings, the Tk dashboard and the tray plumbing.
 """
 
 import atexit
 import ctypes
 from ctypes import wintypes
-from datetime import date, datetime, timedelta
-import json
 import logging
 import math
 import os
-import shutil
-import time
+import sys
 import threading
 import tkinter as tk
 import winreg
-from pathlib import Path
 
 import win32api
 import win32con
@@ -29,240 +29,21 @@ import psutil
 import pystray
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 
-# ---------------------------------------------------------------------------
-# Config
-# ---------------------------------------------------------------------------
-POLL_INTERVAL    = 5
-SAVE_INTERVAL    = 15    # periodic save (also saves on every focus change)
-UI_REFRESH_MS    = 1000
-ICON_SIZE        = 22
-BACKUP_KEEP      = 7
-MIN_DWELL_POLLS  = 2     # app must hold focus for this many consecutive polls
-                         # (~10s) before it registers — kills taskbar/tray flashes
-SESSION_GAP_SECS = 1800  # 30 min gap in focus = new session (not every alt-tab)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-# Milestones in hours — toasted when crossed
-MILESTONES_HOURS = [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
-
-DATA_DIR   = Path(os.environ['APPDATA']) / 'LifetimeTracker'
-DATA_FILE  = DATA_DIR / 'app_usage.json'
-BACKUP_DIR = DATA_DIR / 'backups'
-LOG_FILE   = DATA_DIR / 'tracker.log'
-
-SKIP_PROCS = {
-    'tracker.pyw', 'python.exe', 'pythonw.exe',
-    'searchhost.exe', 'textinputhost.exe', 'shellexperiencehost.exe',
-    'startmenuexperiencehost.exe', 'lockapp.exe',
-    'applicationframehost.exe',
-    'dwm.exe', 'sihost.exe', 'csrss.exe', 'winlogon.exe',
-    'services.exe', 'svchost.exe', 'dllhost.exe', 'rundll32.exe',
-    'conhost.exe', 'werfault.exe', 'dashost.exe', 'ctfmon.exe',
-    'runtimebroker.exe', 'smartscreen.exe', 'widgets.exe',
-    'searchindexer.exe', 'searchapp.exe', 'searchui.exe',
-    'securityhealthservice.exe', 'securityhealthsystray.exe',
-    'nissrv.exe', 'msmpeng.exe', 'fontdrvhost.exe',
-    'systemsettings.exe',
-    'nvcontainer.exe', 'nvidia web helper.exe',
-}
-
-KNOWN_NAMES = {
-    # creative / media
-    'fl64.exe': 'FL Studio', 'fl.exe': 'FL Studio', 'fl32.exe': 'FL Studio',
-    'afterfx.exe': 'After Effects', 'afterfxlib.exe': 'After Effects',
-    'photoshop.exe': 'Photoshop', 'illustrator.exe': 'Illustrator',
-    'premiere.exe': 'Premiere Pro', 'premierepro.exe': 'Premiere Pro',
-    'audition.exe': 'Audition', 'animate.exe': 'Animate',
-    'mediaencoder.exe': 'Media Encoder', 'lightroom.exe': 'Lightroom',
-    'blender.exe': 'Blender', 'obs64.exe': 'OBS Studio', 'obs32.exe': 'OBS Studio',
-    'ableton live.exe': 'Ableton Live',
-    'resolve.exe': 'DaVinci Resolve', 'figma.exe': 'Figma',
-    'krita.exe': 'Krita', 'aseprite.exe': 'Aseprite',
-    # browsers
-    'chrome.exe': 'Google Chrome', 'firefox.exe': 'Firefox',
-    'msedge.exe': 'Microsoft Edge', 'brave.exe': 'Brave',
-    'opera.exe': 'Opera', 'arc.exe': 'Arc', 'vivaldi.exe': 'Vivaldi',
-    # dev
-    'code.exe': 'VS Code', 'cursor.exe': 'Cursor', 'windsurf.exe': 'Windsurf',
-    'devenv.exe': 'Visual Studio', 'idea64.exe': 'IntelliJ IDEA',
-    'pycharm64.exe': 'PyCharm', 'webstorm64.exe': 'WebStorm',
-    'rider64.exe': 'JetBrains Rider', 'clion64.exe': 'CLion',
-    'sublime_text.exe': 'Sublime Text', 'notepad++.exe': 'Notepad++',
-    'windowsterminal.exe': 'Windows Terminal', 'wt.exe': 'Windows Terminal',
-    'powershell.exe': 'PowerShell', 'pwsh.exe': 'PowerShell',
-    'cmd.exe': 'Command Prompt', 'wezterm-gui.exe': 'WezTerm',
-    'alacritty.exe': 'Alacritty',
-    'godot.exe': 'Godot', 'unity.exe': 'Unity Editor', 'unityhub.exe': 'Unity Hub',
-    'ue4editor.exe': 'Unreal Engine', 'unrealeditor.exe': 'Unreal Engine',
-    # comms
-    'discord.exe': 'Discord', 'slack.exe': 'Slack',
-    'teams.exe': 'Microsoft Teams', 'ms-teams.exe': 'Microsoft Teams',
-    'zoom.exe': 'Zoom', 'whatsapp.exe': 'WhatsApp',
-    'telegram.exe': 'Telegram', 'signal.exe': 'Signal',
-    # entertainment
-    'steam.exe': 'Steam', 'steamwebhelper.exe': 'Steam',
-    'spotify.exe': 'Spotify', 'vlc.exe': 'VLC',
-    'epicgameslauncher.exe': 'Epic Games',
-    'riotclientux.exe': 'Riot Client', 'leagueclientux.exe': 'League of Legends',
-    'battle.net.exe': 'Battle.net',
-    'roblox.exe': 'Roblox', 'robloxplayerbeta.exe': 'Roblox',
-    'minecraft.exe': 'Minecraft',
-    # office
-    'winword.exe': 'Microsoft Word', 'excel.exe': 'Microsoft Excel',
-    'powerpnt.exe': 'Microsoft PowerPoint', 'outlook.exe': 'Microsoft Outlook',
-    'onenote.exe': 'Microsoft OneNote', 'onenotem.exe': 'Microsoft OneNote',
-    'acrord32.exe': 'Adobe Acrobat Reader', 'acrobat.exe': 'Adobe Acrobat',
-    # system
-    'explorer.exe': 'File Explorer', 'notepad.exe': 'Notepad',
-    'mspaint.exe': 'Paint', 'calculatorapp.exe': 'Calculator',
-    'calculator.exe': 'Calculator', 'taskmgr.exe': 'Task Manager',
-    'snippingtool.exe': 'Snipping Tool', 'screenclip.exe': 'Snipping Tool',
-    'mstsc.exe': 'Remote Desktop',
-}
-
-# ---------------------------------------------------------------------------
-# Logging
-# ---------------------------------------------------------------------------
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-logging.basicConfig(
-    filename=str(LOG_FILE),
-    level=logging.WARNING,
-    format='%(asctime)s %(levelname)s %(message)s',
+from tracker_core import (  # noqa: E402
+    ICON_SIZE, MILESTONES_HOURS, UI_REFRESH_MS,
+    AppTracker, Storage,
+    build_visible_rows, color_for, fmt_date, fmt_duration,
+    resolve_display_name, set_exe_describer,
 )
-
-# ---------------------------------------------------------------------------
-# Backups
-# ---------------------------------------------------------------------------
-def rotate_backups():
-    """Copy current data file to backups/ with today's date; keep last N."""
-    if not DATA_FILE.exists():
-        return
-    try:
-        today = date.today().isoformat()
-        dest = BACKUP_DIR / f'app_usage_{today}.json'
-        if not dest.exists():
-            shutil.copy2(DATA_FILE, dest)
-        existing = sorted(BACKUP_DIR.glob('app_usage_*.json'))
-        while len(existing) > BACKUP_KEEP:
-            try:
-                existing[0].unlink()
-            except Exception:
-                pass
-            existing = existing[1:]
-    except Exception as e:
-        logging.error('rotate_backups failed: %s', e)
-
-# ---------------------------------------------------------------------------
-# Persistence (schema v3)
-# ---------------------------------------------------------------------------
-def _default_entry():
-    return {
-        'seconds':      0.0,
-        'exe':          None,
-        'launches':     0,
-        'first_seen':   None,
-        'last_focused': 0.0,   # unix timestamp — used for session-gap detection
-        'buckets':      {},    # {"YYYY-MM-DD": seconds}
-        'alias':        None,
-        'hidden':       False,
-        'milestones':   [],    # hours already toasted
-    }
-
-def _normalize_entry(raw, fallback_seconds=0.0):
-    e = _default_entry()
-    if isinstance(raw, dict):
-        e['seconds']    = float(raw.get('seconds', fallback_seconds) or 0)
-        e['exe']        = raw.get('exe')
-        e['launches']   = int(raw.get('launches', 0) or 0)
-        e['first_seen'] = raw.get('first_seen')
-        e['buckets']    = dict(raw.get('buckets', {}) or {})
-        e['alias']      = raw.get('alias')
-        e['hidden']     = bool(raw.get('hidden', False))
-        e['milestones']   = list(raw.get('milestones', []) or [])
-        e['last_focused'] = float(raw.get('last_focused', 0) or 0)
-    else:
-        # v1-style raw seconds number
-        e['seconds'] = float(raw or 0)
-    # Pre-mark already-reached milestones so migrating users don't get spammed
-    hours = e['seconds'] / 3600
-    for m in MILESTONES_HOURS:
-        if hours >= m and m not in e['milestones']:
-            e['milestones'].append(m)
-    return e
-
-def _load_one_file(path):
-    """Load and parse a single data file. Returns dict of apps or raises."""
-    with open(path, 'r', encoding='utf-8') as f:
-        raw = json.load(f)
-    apps = {}
-    if isinstance(raw, dict) and isinstance(raw.get('apps'), dict):
-        for k, v in raw['apps'].items():
-            apps[k.lower()] = _normalize_entry(v)
-    else:
-        for k, v in raw.items():
-            if isinstance(v, (int, float, dict)):
-                apps[k.lower()] = _normalize_entry(v)
-    return {k: v for k, v in apps.items() if k not in SKIP_PROCS}
-
-def load_data():
-    """Load usage data, falling back to backups if the primary file is bad."""
-    if not DATA_FILE.exists():
-        return {}
-
-    # 1) Try the main data file
-    try:
-        return _load_one_file(DATA_FILE)
-    except Exception as e:
-        logging.error('primary load failed: %s — trying backups', e)
-
-    # 2) Corrupted primary — quarantine it and try the newest backup
-    try:
-        quarantine = DATA_FILE.with_suffix(
-            f'.json.corrupt-{int(time.time())}'
-        )
-        shutil.copy2(DATA_FILE, quarantine)
-        logging.warning('corrupt data file quarantined to %s', quarantine)
-    except Exception:
-        pass
-
-    candidates = sorted(BACKUP_DIR.glob('app_usage_*.json'), reverse=True)
-    for backup in candidates:
-        try:
-            data = _load_one_file(backup)
-            if data:
-                logging.warning('restored data from backup %s (%d apps)',
-                                backup.name, len(data))
-                return data
-        except Exception as e:
-            logging.error('backup %s unreadable: %s', backup.name, e)
-            continue
-
-    # 3) Every source failed — better to start empty than to crash the tray,
-    #    but signal loudly in the log so it's obvious what happened
-    logging.critical('ALL data sources failed to load — starting empty')
-    return {}
-
-def save_data(apps):
-    # Safety valve — never overwrite an existing non-empty data file with
-    # an empty one. Prevents a load failure from silently wiping user data.
-    if not apps and DATA_FILE.exists() and DATA_FILE.stat().st_size > 32:
-        logging.critical('refusing to save empty apps dict over existing data')
-        return
-    try:
-        tmp = DATA_FILE.with_suffix('.tmp')
-        with open(tmp, 'w', encoding='utf-8') as f:
-            json.dump({'version': 3, 'apps': apps}, f, indent=2, sort_keys=True)
-            f.flush()
-            os.fsync(f.fileno())     # force to disk before rename
-        tmp.replace(DATA_FILE)
-    except Exception as e:
-        logging.error('save failed: %s', e)
 
 # ---------------------------------------------------------------------------
 # Active window detection
 # ---------------------------------------------------------------------------
-_dwm = ctypes.windll.dwmapi
+_dwm = None
 _DWMWA_CLOAKED = 14
+
 
 def _is_cloaked(hwnd):
     val = ctypes.c_int(0)
@@ -275,38 +56,41 @@ def _is_cloaked(hwnd):
         return False
     return val.value != 0
 
-def get_active_process():
-    try:
-        hwnd = win32gui.GetForegroundWindow()
-        if not hwnd or not win32gui.IsWindowVisible(hwnd):
-            return None, None
-        if _is_cloaked(hwnd):
-            return None, None
-        title = win32gui.GetWindowText(hwnd) or ''
-        if not title.strip():
-            return None, None
 
-        _, pid = win32process.GetWindowThreadProcessId(hwnd)
-        if pid <= 0:
-            return None, None
-        proc = psutil.Process(pid)
-        name = proc.name().lower()
-        if name in SKIP_PROCS:
-            return None, None
-        exe = None
+def make_focus_provider(skip_procs):
+    """Return a callable() -> (proc_name, exe_path) for the foreground window."""
+    def get_active_process():
         try:
-            exe = proc.exe()
-        except (psutil.AccessDenied, psutil.NoSuchProcess):
-            pass
-        return name, exe
-    except Exception:
-        return None, None
+            hwnd = win32gui.GetForegroundWindow()
+            if not hwnd or not win32gui.IsWindowVisible(hwnd):
+                return None, None
+            if _is_cloaked(hwnd):
+                return None, None
+            title = win32gui.GetWindowText(hwnd) or ''
+            if not title.strip():
+                return None, None
+
+            _, pid = win32process.GetWindowThreadProcessId(hwnd)
+            if pid <= 0:
+                return None, None
+            proc = psutil.Process(pid)
+            name = proc.name().lower()
+            if name in skip_procs:
+                return None, None
+            exe = None
+            try:
+                exe = proc.exe()
+            except (psutil.AccessDenied, psutil.NoSuchProcess):
+                pass
+            return name, exe
+        except Exception:
+            return None, None
+    return get_active_process
+
 
 # ---------------------------------------------------------------------------
-# Display name resolution
+# Display name resolution (Windows half)
 # ---------------------------------------------------------------------------
-_name_cache = {}
-
 def _file_description(exe_path):
     try:
         info = win32api.GetFileVersionInfo(exe_path, '\\VarFileInfo\\Translation')
@@ -319,24 +103,10 @@ def _file_description(exe_path):
     except Exception:
         return None
 
-def resolve_display_name(proc_name, exe_path):
-    key = proc_name.lower()
-    if key in _name_cache:
-        return _name_cache[key]
-    name = KNOWN_NAMES.get(key)
-    if not name and exe_path:
-        name = _file_description(exe_path)
-    if not name:
-        stem = proc_name.rsplit('.', 1)[0] if '.' in proc_name else proc_name
-        name = stem if stem else proc_name
-    _name_cache[key] = name
-    return name
 
 # ---------------------------------------------------------------------------
 # Icon extraction + letter avatar fallback
 # ---------------------------------------------------------------------------
-_icon_pil_cache = {}
-
 def _extract_icon_pil(exe_path):
     if not exe_path or not os.path.isfile(exe_path):
         return None
@@ -386,7 +156,10 @@ def _extract_icon_pil(exe_path):
         logging.warning('icon extraction failed for %s: %s', exe_path, e)
         return None
 
+
 _font_cache = {}
+
+
 def _get_font(size_px):
     if size_px in _font_cache:
         return _font_cache[size_px]
@@ -402,6 +175,7 @@ def _get_font(size_px):
         font = ImageFont.load_default()
     _font_cache[size_px] = font
     return font
+
 
 def make_letter_icon(display_name, size, bg_color):
     letter = (display_name[:1] or '?').upper()
@@ -421,10 +195,12 @@ def make_letter_icon(display_name, size, bg_color):
     d.text((x, y), letter, fill='white', font=font)
     return img
 
+
 # ---------------------------------------------------------------------------
 # EXE discovery
 # ---------------------------------------------------------------------------
 _exe_lookup_cache = {}
+
 
 def find_exe_in_registry(exe_name):
     subkey = rf'Software\Microsoft\Windows\CurrentVersion\App Paths\{exe_name}'
@@ -449,6 +225,7 @@ def find_exe_in_registry(exe_name):
             continue
     return None
 
+
 def find_exe_in_running(exe_name):
     name_l = exe_name.lower()
     try:
@@ -462,6 +239,7 @@ def find_exe_in_running(exe_name):
         pass
     return None
 
+
 def resolve_exe(proc_name, known_exe=None):
     if known_exe and os.path.isfile(known_exe):
         return known_exe
@@ -472,290 +250,6 @@ def resolve_exe(proc_name, known_exe=None):
     _exe_lookup_cache[key] = found
     return found
 
-# ---------------------------------------------------------------------------
-# Formatting
-# ---------------------------------------------------------------------------
-def fmt_duration(seconds):
-    seconds = int(seconds)
-    h = seconds // 3600
-    m = (seconds % 3600) // 60
-    s = seconds % 60
-    if h >= 10000:
-        return f"{h:,}h {m}m"
-    if h > 0:
-        return f"{h}h {m}m {s}s"
-    if m > 0:
-        return f"{m}m {s}s"
-    return f"{s}s"
-
-def fmt_date(iso):
-    if not iso:
-        return None
-    try:
-        d = date.fromisoformat(iso)
-        return f"{d.strftime('%b')} {d.day}, {d.year}"
-    except Exception:
-        return iso
-
-def today_iso():
-    return date.today().isoformat()
-
-# ---------------------------------------------------------------------------
-# Tracker core
-# ---------------------------------------------------------------------------
-class AppTracker:
-    def __init__(self):
-        self.data         = load_data()
-        # Apps previously marked hidden should still be skipped by the tracker
-        for proc, info in self.data.items():
-            if info.get('hidden'):
-                SKIP_PROCS.add(proc)
-
-        self.lock            = threading.Lock()
-        self.running         = True
-        self.paused          = False
-        self.current_app     = None
-        self.current_exe     = None
-        self.current_start   = time.monotonic()
-        self.last_save       = time.monotonic()
-        self.notifier        = None   # callable(title, message)
-        # Dwell tracking — prevents taskbar/tray flashes from registering
-        self._candidate      = None   # proc being watched
-        self._candidate_hits = 0      # consecutive polls it's been foreground
-        self.backfill_exes()
-
-    # -------- persistence helpers ----------------------------------------
-    def _ensure_entry(self, proc_name):
-        if proc_name not in self.data:
-            entry = _default_entry()
-            entry['first_seen'] = today_iso()
-            self.data[proc_name] = entry
-        else:
-            e = self.data[proc_name]
-            if not e.get('first_seen'):
-                e['first_seen'] = today_iso()
-        return self.data[proc_name]
-
-    def backfill_exes(self):
-        try:
-            for proc_name, entry in list(self.data.items()):
-                if entry.get('exe'):
-                    continue
-                found = resolve_exe(proc_name)
-                if found:
-                    entry['exe'] = found
-        except Exception as e:
-            logging.error('backfill_exes failed: %s', e)
-
-    # -------- core clock -------------------------------------------------
-    def _flush(self, now):
-        if self.current_app and self.current_app not in SKIP_PROCS:
-            elapsed = now - self.current_start
-            if elapsed > 0:
-                entry = self._ensure_entry(self.current_app)
-                pre_secs = entry['seconds']
-                entry['seconds'] += elapsed
-                d = today_iso()
-                entry['buckets'][d] = entry['buckets'].get(d, 0.0) + elapsed
-                if self.current_exe and not entry.get('exe'):
-                    entry['exe'] = self.current_exe
-                self._check_milestones(self.current_app, pre_secs, entry['seconds'])
-        self.current_start = now
-
-    def _check_milestones(self, proc_name, pre_secs, new_secs):
-        entry = self.data[proc_name]
-        hit = entry.setdefault('milestones', [])
-        for m in MILESTONES_HOURS:
-            m_secs = m * 3600
-            if pre_secs < m_secs <= new_secs and m not in hit:
-                hit.append(m)
-                display = entry.get('alias') or resolve_display_name(
-                    proc_name, entry.get('exe')
-                )
-                if self.notifier:
-                    try:
-                        self.notifier(
-                            'Lifetime App Tracker',
-                            f'{m} hours in {display}! 🎉',
-                        )
-                    except Exception as e:
-                        logging.error('notify failed: %s', e)
-
-    def track_loop(self):
-        while self.running:
-            time.sleep(POLL_INTERVAL)
-            proc_name, exe = get_active_process()
-            now = time.monotonic()
-            wall = time.time()
-            with self.lock:
-                if self.paused:
-                    self.current_start = now
-                    self._candidate = None
-                    self._candidate_hits = 0
-                    continue
-
-                # ---- dwell filter: require MIN_DWELL_POLLS consecutive polls ----
-                if proc_name == self._candidate:
-                    self._candidate_hits += 1
-                else:
-                    self._candidate = proc_name
-                    self._candidate_hits = 1
-
-                # Only commit a switch once the candidate has dwelled long enough
-                focus_changed = False
-                if (self._candidate_hits >= MIN_DWELL_POLLS
-                        and proc_name is not None
-                        and proc_name != self.current_app):
-                    self._flush(now)
-                    self.current_app = proc_name
-                    self.current_exe = exe
-                    focus_changed = True
-
-                    entry = self._ensure_entry(proc_name)
-                    if exe and not entry.get('exe'):
-                        entry['exe'] = exe
-
-                    # ---- session-gap logic: only count a new session if the
-                    #      app hasn't had focus in the last SESSION_GAP_SECS ----
-                    last_f = entry.get('last_focused', 0) or 0
-                    if wall - last_f > SESSION_GAP_SECS:
-                        entry['launches'] = entry.get('launches', 0) + 1
-
-                    entry['last_focused'] = wall
-
-                elif self.current_app and not focus_changed:
-                    # Update last_focused timestamp while app stays in foreground
-                    entry = self.data.get(self.current_app)
-                    if entry is not None:
-                        entry['last_focused'] = wall
-
-                if focus_changed or now - self.last_save >= SAVE_INTERVAL:
-                    self._flush(now)
-                    save_data(self.data)
-                    self.last_save = now
-
-    def snapshot(self):
-        with self.lock:
-            now = time.monotonic()
-            copy = {k: {**v, 'buckets': dict(v.get('buckets', {}))}
-                    for k, v in self.data.items()}
-            if (not self.paused
-                    and self.current_app
-                    and self.current_app not in SKIP_PROCS):
-                elapsed = now - self.current_start
-                entry = copy.setdefault(self.current_app, _default_entry())
-                entry['seconds'] = entry.get('seconds', 0) + elapsed
-                d = today_iso()
-                entry.setdefault('buckets', {})
-                entry['buckets'][d] = entry['buckets'].get(d, 0.0) + elapsed
-                if self.current_exe and not entry.get('exe'):
-                    entry['exe'] = self.current_exe
-            return copy, self.current_app, self.paused
-
-    # -------- state controls --------------------------------------------
-    def set_paused(self, paused):
-        with self.lock:
-            if paused and not self.paused:
-                self._flush(time.monotonic())
-                save_data(self.data)
-                self.paused = True
-            elif not paused and self.paused:
-                self.current_start = time.monotonic()
-                self._candidate = None
-                self._candidate_hits = 0
-                self.paused = False
-
-    def toggle_pause(self):
-        self.set_paused(not self.paused)
-        return self.paused
-
-    def set_alias(self, procs, alias):
-        with self.lock:
-            clean = (alias or '').strip() or None
-            for p in procs:
-                if p in self.data:
-                    self.data[p]['alias'] = clean
-            save_data(self.data)
-
-    def set_hidden(self, procs, hidden):
-        with self.lock:
-            for p in procs:
-                if p in self.data:
-                    self.data[p]['hidden'] = bool(hidden)
-                    if hidden:
-                        SKIP_PROCS.add(p)
-            save_data(self.data)
-
-    def merge_into(self, source_procs, target_display):
-        """Alias all source procs so they render under target_display."""
-        with self.lock:
-            for p in source_procs:
-                if p in self.data:
-                    self.data[p]['alias'] = target_display
-            save_data(self.data)
-
-    def stop(self):
-        with self.lock:
-            if self.running:
-                self.running = False
-                self._flush(time.monotonic())
-                save_data(self.data)
-
-# ---------------------------------------------------------------------------
-# Grouping
-# ---------------------------------------------------------------------------
-def _group_by_display(data, include_hidden=False):
-    groups = {}
-    for proc, info in data.items():
-        if info.get('hidden') and not include_hidden:
-            continue
-        alias = info.get('alias')
-        display = alias or resolve_display_name(proc, info.get('exe'))
-        g = groups.get(display)
-        if g is None:
-            g = {
-                'display':     display,
-                'seconds':     0.0,
-                'launches':    0,
-                'exe':         None,
-                'dominant':    proc,
-                'dominant_secs': 0.0,
-                'first_seen':  None,
-                'procs':       [],
-                'buckets':     {},
-            }
-            groups[display] = g
-        secs = info.get('seconds', 0.0)
-        g['seconds']  += secs
-        g['launches'] += info.get('launches', 0)
-        g['procs'].append(proc)
-        for day, ds in info.get('buckets', {}).items():
-            g['buckets'][day] = g['buckets'].get(day, 0.0) + ds
-        fs = info.get('first_seen')
-        if fs and (not g['first_seen'] or fs < g['first_seen']):
-            g['first_seen'] = fs
-        if secs > g['dominant_secs']:
-            g['dominant'] = proc
-            g['dominant_secs'] = secs
-            if info.get('exe'):
-                g['exe'] = info.get('exe')
-        elif not g['exe'] and info.get('exe'):
-            g['exe'] = info.get('exe')
-    return groups
-
-def range_seconds(group, rng):
-    if rng == 'lifetime':
-        return group['seconds']
-    today = date.today()
-    if rng == 'today':
-        return group['buckets'].get(today.isoformat(), 0.0)
-    if rng == 'week':
-        total = 0.0
-        for i in range(7):
-            d = today - timedelta(days=i)
-            total += group['buckets'].get(d.isoformat(), 0.0)
-        return total
-    return group['seconds']
 
 # ---------------------------------------------------------------------------
 # Stats Window
@@ -781,11 +275,9 @@ DOT_PALETTE = [
     '#e879f9', '#38bdf8', '#4ade80', '#facc15', '#fda4af',
 ]
 
-def color_for(name):
-    h = 0
-    for c in name:
-        h = (h * 31 + ord(c)) & 0xFFFFFFFF
-    return DOT_PALETTE[h % len(DOT_PALETTE)]
+
+def dot_color(name):
+    return color_for(name, DOT_PALETTE)
 
 
 def show_stats_window(tracker):
@@ -872,6 +364,7 @@ def show_stats_window(tracker):
     range_frame.pack(side=tk.LEFT)
 
     range_buttons = {}
+
     def paint_range():
         for key, btn in range_buttons.items():
             if key == range_mode[0]:
@@ -940,7 +433,7 @@ def show_stats_window(tracker):
             if resolved:
                 pil = _extract_icon_pil(resolved)
         if pil is None:
-            pil = make_letter_icon(display, ICON_SIZE, color_for(display))
+            pil = make_letter_icon(display, ICON_SIZE, dot_color(display))
         if pil.size != (ICON_SIZE, ICON_SIZE):
             pil = pil.resize((ICON_SIZE, ICON_SIZE), Image.LANCZOS)
         photo = ImageTk.PhotoImage(pil)
@@ -1068,7 +561,7 @@ def show_stats_window(tracker):
 
     # ---- row factory ----
     def make_row(display, group):
-        accent = color_for(display)
+        accent = dot_color(display)
         f = tk.Frame(inner, bg=CARD)
         f.columnconfigure(2, weight=1)
 
@@ -1115,9 +608,6 @@ def show_stats_window(tracker):
         # Right-click context menu
         def bind_ctx(w, display=display):
             def popup(event):
-                groups_now = [
-                    d for d in rows.keys() if d != display
-                ]
                 menu = tk.Menu(root, tearoff=0, bg=CARD, fg=TEXT,
                                activebackground=ACCENT,
                                activeforeground='white', bd=0)
@@ -1162,7 +652,7 @@ def show_stats_window(tracker):
     tk.Label(footer, text='● LIVE', font=('Segoe UI', 8, 'bold'),
              bg=BG, fg=ACCENT_2).pack(side=tk.LEFT)
     tk.Label(footer, text='   Right-click an app to rename / hide / merge.  '
-                          f'Data: {DATA_FILE}',
+                          f'Data: {tracker.storage.data_file}',
              font=('Segoe UI', 8), bg=BG, fg=MUTED).pack(side=tk.LEFT)
 
     # ---- refresh loop ----
@@ -1175,24 +665,9 @@ def show_stats_window(tracker):
             logging.error('snapshot failed: %s', e)
             data, current, paused = {}, None, False
 
-        all_groups = _group_by_display(data)
-
         rng = range_mode[0]
-        query = search_var.get().strip().lower()
-
-        # Build visible list with range-based seconds
-        visible = []
-        for display, g in all_groups.items():
-            g['display_seconds'] = range_seconds(g, rng)
-            if query and query not in display.lower():
-                continue
-            if g['display_seconds'] <= 0 and rng != 'lifetime':
-                continue
-            visible.append((display, g))
-        visible.sort(key=lambda x: x[1]['display_seconds'], reverse=True)
-
-        total_secs = sum(g['display_seconds'] for _, g in visible)
-        max_secs   = visible[0][1]['display_seconds'] if visible else 1
+        visible, total_secs, max_secs = build_visible_rows(
+            data, rng, search_var.get())
 
         range_label = {'today': 'TIME TODAY',
                        'week':  'TIME THIS WEEK',
@@ -1205,11 +680,10 @@ def show_stats_window(tracker):
         if paused:
             pill_text.config(text='Paused — no time being recorded')
             pill_dot.config(fg=PAUSE_FG)
-        elif current and current not in SKIP_PROCS:
-            cur_exe = data.get(current, {}).get('exe')
+        elif current and current not in tracker.skip_procs:
             cur_entry = data.get(current, {})
             cur_display = (cur_entry.get('alias')
-                           or resolve_display_name(current, cur_exe))
+                           or resolve_display_name(current, cur_entry.get('exe')))
             pill_text.config(text=f'Now tracking: {cur_display}')
             pill_dot.config(fg=ACCENT_2)
         else:
@@ -1236,7 +710,7 @@ def show_stats_window(tracker):
         new_order = [d for d, _ in visible]
         order_changed = new_order != last_order[0]
         current_display = None
-        if current and current not in SKIP_PROCS:
+        if current and current not in tracker.skip_procs:
             cur_info = data.get(current, {})
             current_display = (cur_info.get('alias')
                                or resolve_display_name(current, cur_info.get('exe')))
@@ -1283,6 +757,7 @@ def show_stats_window(tracker):
     root.focus_force()
     root.mainloop()
 
+
 # ---------------------------------------------------------------------------
 # Tray icon
 # ---------------------------------------------------------------------------
@@ -1303,12 +778,27 @@ def make_icon():
     d.ellipse([cx - 3, cy - 3, cx + 3, cy + 3], fill='#c084fc')
     return img
 
+
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 def main():
-    rotate_backups()
-    tracker = AppTracker()
+    global _dwm
+    _dwm = ctypes.windll.dwmapi
+
+    storage = Storage()
+    storage.ensure_dirs()
+    logging.basicConfig(
+        filename=str(storage.log_file),
+        level=logging.WARNING,
+        format='%(asctime)s %(levelname)s %(message)s',
+    )
+    storage.rotate_backups()
+
+    set_exe_describer(_file_description)
+
+    tracker = AppTracker(storage=storage, exe_resolver=resolve_exe)
+    tracker.focus_provider = make_focus_provider(tracker.skip_procs)
 
     # make sure data is saved even on normal interpreter exit
     atexit.register(tracker.stop)

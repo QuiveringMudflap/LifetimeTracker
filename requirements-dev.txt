@@ -1,0 +1,4 @@
+# Test-only dependencies. The runtime deps in requirements.txt are Windows-only;
+# tracker_core.py deliberately has none, so the suite runs on any platform.
+pytest>=8.0
+pytest-cov>=5.0
