@@ -32,12 +32,23 @@
         const s = JSON.parse(raw);
         if (!s.categories || !s.categories.length) s.categories = clone(DEFAULT_CATEGORIES);
         if (!s.leads) s.leads = [];
+        if (!s.batches) s.batches = [];
         if (!s.settings) s.settings = defaultSettings();
         if (typeof s.totalTalkSeconds !== "number") s.totalTalkSeconds = 0;
+        // migrate: give any pre-batch leads a legacy batch
+        const orphan = s.leads.filter(l => !l.batchId);
+        if (orphan.length) {
+          const b = { id: "legacy", name: "Legacy Leads", createdAt: Date.now(), count: orphan.length };
+          s.batches.unshift(b);
+          orphan.forEach(l => l.batchId = "legacy");
+        }
+        // UI prefs
+        if (!s.ui) s.ui = { activeBatch: "", hideWithWebsite: true };
+        if (typeof s.ui.hideWithWebsite !== "boolean") s.ui.hideWithWebsite = true;
         return s;
       }
     } catch (e) { console.warn("load failed", e); }
-    return { leads: [], categories: clone(DEFAULT_CATEGORIES), settings: defaultSettings(), totalTalkSeconds: 0 };
+    return { leads: [], batches: [], categories: clone(DEFAULT_CATEGORIES), settings: defaultSettings(), totalTalkSeconds: 0, ui: { activeBatch: "", hideWithWebsite: true } };
   }
   function defaultSettings() {
     return { callMode: "click", twilioTokenUrl: "", twilioCallerId: "" };
@@ -105,7 +116,11 @@
   function filteredLeads() {
     const q = $("#search").value.trim().toLowerCase();
     const f = $("#filterCategory").value;
+    const activeBatch = state.ui.activeBatch;
+    const hideWithWebsite = state.ui.hideWithWebsite;
     return state.leads.filter(l => {
+      if (activeBatch && l.batchId !== activeBatch) return false;
+      if (hideWithWebsite && l.website) return false;
       if (f === "__none" && l.category) return false;
       if (f && f !== "__none" && l.category !== f) return false;
       if (q) {
@@ -184,8 +199,79 @@
     $("#phoneMode").textContent = state.settings.callMode === "twilio" ? "Twilio Web Dialer" : "Click-to-Call";
   }
 
+  function renderBatches() {
+    const bar = $("#batchBar");
+    if (!bar) return;
+    bar.innerHTML = "";
+    // "All" chip
+    const all = document.createElement("button");
+    all.className = "batch-chip" + (!state.ui.activeBatch ? " selected" : "");
+    all.innerHTML = `<span>All batches</span><small>${state.leads.length}</small>`;
+    all.onclick = () => { state.ui.activeBatch = ""; save(); renderBatches(); renderList(); };
+    bar.appendChild(all);
+    // Each batch
+    state.batches.forEach(b => {
+      const count = state.leads.filter(l => l.batchId === b.id).length;
+      const chip = document.createElement("button");
+      chip.className = "batch-chip" + (state.ui.activeBatch === b.id ? " selected" : "");
+      chip.innerHTML = `<span>${escapeHtml(b.name)}</span><small>${count}</small><span class="batch-x" title="Batch options">⋯</span>`;
+      chip.querySelector("span:first-child").onclick = () => {
+        state.ui.activeBatch = b.id; save(); renderBatches(); renderList();
+      };
+      chip.onclick = (e) => {
+        if (e.target.classList.contains("batch-x")) { openBatchMenu(b, e); return; }
+        state.ui.activeBatch = b.id; save(); renderBatches(); renderList();
+      };
+      bar.appendChild(chip);
+    });
+    // "Hide has-website" toggle
+    const cb = $("#hideWithWebsite");
+    if (cb) cb.checked = state.ui.hideWithWebsite;
+  }
+
+  function openBatchMenu(batch, ev) {
+    ev.stopPropagation();
+    const choice = prompt(
+      `Batch: ${batch.name}\n\n` +
+      `Type a number:\n` +
+      `  1 — Rename\n` +
+      `  2 — Reset call progress (keep leads, clear dialed/category)\n` +
+      `  3 — Delete this batch (removes its leads permanently)\n` +
+      `  4 — Cancel`, "4");
+    if (!choice || choice === "4") return;
+    if (choice === "1") {
+      const name = prompt("New name for this batch:", batch.name);
+      if (name && name.trim()) { batch.name = name.trim(); save(); renderAll(); }
+    } else if (choice === "2") {
+      if (!confirm(`Reset call progress for "${batch.name}"? Leads stay, but dialed/category tags are cleared.`)) return;
+      resetCallProgress(l => l.batchId === batch.id);
+      toast(`Reset "${batch.name}"`);
+    } else if (choice === "3") {
+      if (!confirm(`DELETE batch "${batch.name}" and all ${state.leads.filter(l=>l.batchId===batch.id).length} of its leads? This cannot be undone.`)) return;
+      state.leads = state.leads.filter(l => l.batchId !== batch.id);
+      state.batches = state.batches.filter(b => b.id !== batch.id);
+      if (state.ui.activeBatch === batch.id) state.ui.activeBatch = "";
+      save(); renderAll();
+      toast(`Deleted "${batch.name}"`);
+    }
+  }
+
+  function resetCallProgress(matchFn) {
+    state.leads.forEach(l => {
+      if (matchFn(l)) {
+        l.dialed = false;
+        l.dialedAt = null;
+        l.dialCount = 0;
+        l.category = null;
+        l.lastCallSeconds = 0;
+      }
+    });
+    save(); renderAll();
+  }
+
   function renderAll() {
     renderFilterOptions();
+    renderBatches();
     renderList();
     renderStats();
     renderPhone();
@@ -554,22 +640,42 @@
     else if ($("#importPreview")._rows && $("#importPreview")._rows.length) rows = $("#importPreview")._rows;
     else rows = parseImport($("#pasteArea").value).rows;
     if (!rows.length) { toast("Nothing to import — no real phone numbers found"); return; }
+    // Create a batch for this import
+    const rawName = ($("#batchNameInput").value || "").trim();
+    const batch = {
+      id: uid(),
+      name: rawName || `Batch ${state.batches.length + 1} — ${new Date().toLocaleDateString(undefined, { month: "short", day: "numeric" })}`,
+      createdAt: Date.now(),
+    };
     // De-dupe against existing phones
     const existing = new Set(state.leads.map(l => l.phone));
     let added = 0;
     rows.forEach(r => {
       if (existing.has(r.phone)) return;
       existing.add(r.phone);
-      state.leads.push(makeLead(r));
+      state.leads.push(makeLead(r, batch.id));
       added++;
     });
+    if (added > 0) {
+      state.batches.push(batch);
+      state.ui.activeBatch = batch.id;   // jump to the new batch
+    }
+    $("#batchNameInput").value = "";
     save(); closeModals(); renderAll();
-    toast(`Imported ${added} lead${added!==1?"s":""}${added<rows.length?` (${rows.length-added} skipped)`:""}`);
-    if (!selectedId && state.leads.length) selectLead(state.leads[0].id);
+    const withSite = rows.filter(r => r.website).length;
+    const msg = state.ui.hideWithWebsite && withSite > 0
+      ? `Imported ${added} into "${batch.name}" (${withSite} hidden — already have websites)`
+      : `Imported ${added} into "${batch.name}"`;
+    toast(msg);
+    if (!selectedId && state.leads.length) {
+      const first = filteredLeads()[0];
+      if (first) selectLead(first.id);
+    }
   }
-  function makeLead(r) {
+  function makeLead(r, batchId) {
     return {
-      id: uid(), name: r.name || "", phone: cleanPhone(r.phone), company: r.company || "",
+      id: uid(), batchId: batchId || "legacy",
+      name: r.name || "", phone: cleanPhone(r.phone), company: r.company || "",
       title: r.title || "", email: r.email || "", website: r.website || "", notes: r.notes || "",
       category: null, dialed: false, dialCount: 0, createdAt: Date.now(), updatedAt: Date.now(),
     };
@@ -774,17 +880,42 @@
     $("#btnDoAdd").onclick = () => {
       const phone = cleanPhone($("#f_phone").value);
       if (!phone) { toast("Phone is required"); return; }
+      // Ensure a "Manual" batch exists
+      let manual = state.batches.find(b => b.id === "manual");
+      if (!manual) {
+        manual = { id: "manual", name: "Manual Adds", createdAt: Date.now() };
+        state.batches.push(manual);
+      }
       const rec = {
         name: $("#f_name").value, phone, company: $("#f_company").value,
         title: $("#f_title").value, email: $("#f_email").value,
         website: $("#f_website").value, notes: $("#f_notes").value,
       };
-      state.leads.unshift(makeLead(rec));
+      state.leads.unshift(makeLead(rec, "manual"));
       ["f_phone","f_name","f_company","f_title","f_email","f_website","f_notes"].forEach(id => $("#"+id).value = "");
       save(); closeModals(); renderAll();
       selectLead(state.leads[0].id);
       toast("Lead added");
     };
+
+    // hide-has-website toggle
+    const hideCb = $("#hideWithWebsite");
+    if (hideCb) hideCb.addEventListener("change", () => {
+      state.ui.hideWithWebsite = hideCb.checked;
+      save(); renderList();
+    });
+
+    // reset dropdown
+    const resetBtn = $("#btnResetCalls");
+    if (resetBtn) resetBtn.addEventListener("click", () => {
+      const scope = state.ui.activeBatch
+        ? state.batches.find(b => b.id === state.ui.activeBatch)?.name
+        : "ALL leads";
+      if (!confirm(`Reset call progress for ${scope}?\n\nThis clears dialed status, category tags, and per-call timers. Leads themselves are kept.`)) return;
+      const target = state.ui.activeBatch;
+      resetCallProgress(l => !target || l.batchId === target);
+      toast(`Reset ${scope}`);
+    });
 
     // settings — categories
     $("#btnAddCat").onclick = addCategory;
@@ -801,8 +932,8 @@
 
     // danger
     $("#btnClearAll").onclick = () => {
-      if (!confirm("Delete ALL leads and reset everything? This cannot be undone.")) return;
-      state = { leads: [], categories: clone(DEFAULT_CATEGORIES), settings: defaultSettings(), totalTalkSeconds: 0 };
+      if (!confirm("Delete ALL leads, batches, and reset everything? This cannot be undone.")) return;
+      state = { leads: [], batches: [], categories: clone(DEFAULT_CATEGORIES), settings: defaultSettings(), totalTalkSeconds: 0, ui: { activeBatch: "", hideWithWebsite: true } };
       selectedId = null; save(); closeModals(); renderAll(); renderCategoryEditor();
       toast("All data cleared");
     };

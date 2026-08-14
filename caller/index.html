@@ -101,9 +101,17 @@
 
     <!-- ======================= RIGHT: LEAD LIST ======================= -->
     <section class="list-panel">
+      <div class="batch-bar" id="batchBar"><!-- filled by JS --></div>
       <div class="list-toolbar">
         <input id="search" class="search" placeholder="🔍 Search name, company, number…" />
         <select id="filterCategory" class="filter-select"><option value="">All categories</option></select>
+      </div>
+      <div class="list-toolbar list-toolbar-2">
+        <label class="check-toggle" title="Selling websites — hide anyone who already has one">
+          <input type="checkbox" id="hideWithWebsite" checked />
+          <span>Only show businesses <strong>without a website</strong></span>
+        </label>
+        <button id="btnResetCalls" class="btn-tiny" title="Clear dialed / category tags on this batch (keeps the leads)">↺ Reset calls</button>
       </div>
       <div class="list-counts" id="listCounts"></div>
       <div class="lead-list" id="leadList"><!-- filled by JS --></div>
@@ -122,6 +130,10 @@
     <div class="modal-head"><h2>Import Leads</h2><button class="modal-x" data-close>✕</button></div>
     <div class="modal-body">
       <p class="hint">Paste rows or upload a CSV — scraper output is fine. Every cell is scored and only <strong>real phone numbers</strong> are kept (ratings, review counts, zip codes, lat/long, prices, IDs are stripped out). Name, company, email and website are auto-detected too.</p>
+      <label class="batch-name-label">
+        <span>Batch name <small>(optional — leave blank to auto-name)</small></span>
+        <input id="batchNameInput" placeholder="e.g. Utah landscapers — Aug 14" />
+      </label>
       <div class="import-tabs">
         <button class="tab active" data-tab="paste">Paste</button>
         <button class="tab" data-tab="upload">Upload CSV</button>

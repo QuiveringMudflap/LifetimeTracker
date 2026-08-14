@@ -132,7 +132,38 @@ section { background: var(--panel); border-radius: var(--radius); box-shadow: va
 
 /* ---------- List panel ---------- */
 .list-panel { padding: 16px; display: flex; flex-direction: column; max-height: calc(100vh - 100px); }
+.batch-bar {
+  display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px;
+  border-bottom: 1px dashed var(--line);
+}
+.batch-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px;
+  background: var(--panel-2); border: 1.5px solid var(--line); border-radius: 20px;
+  cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap; color: var(--ink);
+  transition: .12s;
+}
+.batch-chip:hover { border-color: var(--brand); }
+.batch-chip.selected { background: var(--brand); border-color: var(--brand); color: #fff; }
+.batch-chip small {
+  background: rgba(0,0,0,.08); padding: 1px 7px; border-radius: 10px; font-weight: 700; font-size: 11px;
+}
+.batch-chip.selected small { background: rgba(255,255,255,.25); color: #fff; }
+.batch-chip .batch-x { padding-left: 4px; opacity: .6; font-weight: 700; }
+.batch-chip .batch-x:hover { opacity: 1; }
 .list-toolbar { display: flex; gap: 8px; margin-bottom: 10px; }
+.list-toolbar-2 { align-items: center; justify-content: space-between; }
+.check-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; color: var(--ink-soft); }
+.check-toggle input { width: 15px; height: 15px; cursor: pointer; accent-color: var(--brand); }
+.check-toggle strong { color: var(--ink); }
+.btn-tiny {
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px;
+  cursor: pointer; font-size: 11px; font-weight: 600; color: var(--ink-soft); white-space: nowrap;
+}
+.btn-tiny:hover { background: #eef2f8; color: var(--ink); border-color: var(--brand); }
+.batch-name-label { display: block; margin-top: 12px; }
+.batch-name-label > span { display: block; font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-bottom: 5px; }
+.batch-name-label > span small { font-weight: 400; }
+.batch-name-label input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px; font: inherit; }
 .search { flex: 1; border: 1px solid var(--line); border-radius: 9px; padding: 9px 12px; font: inherit; }
 .filter-select { border: 1px solid var(--line); border-radius: 9px; padding: 9px; font: inherit; background: #fff; }
 .list-counts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
