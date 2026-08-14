@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProspectDialer — Cold Call CRM</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ======================= TOP BAR ======================= -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">P</div>
+      <div class="brand-text">
+        <strong>ProspectDialer</strong>
+        <span id="callStatus" class="call-status">Ready</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="btnImport" class="btn btn-primary">＋ Import Leads</button>
+      <button id="btnAddOne" class="btn btn-ghost">＋ Add One</button>
+      <button id="btnSettings" class="btn btn-ghost" title="Settings">⚙</button>
+      <button id="btnExport" class="btn btn-ghost" title="Export CSV">⬇ Export</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- ======================= LEFT: PHONE ======================= -->
+    <section class="phone-panel">
+      <div class="phone-header">
+        <div class="phone-agent">
+          <div class="agent-avatar">🎧</div>
+          <div>
+            <div class="agent-name">Your Line</div>
+            <div class="agent-sub" id="phoneMode">Click-to-Call</div>
+          </div>
+        </div>
+        <div class="phone-timer" id="callTimer">00:00:00</div>
+      </div>
+
+      <div class="phone-lead">
+        <div class="phone-lead-name" id="phoneLeadName">No lead selected</div>
+        <div class="phone-lead-company" id="phoneLeadCompany">—</div>
+      </div>
+
+      <div class="phone-number" id="phoneNumber">+1 000 000 0000</div>
+
+      <div class="dialpad" id="dialpad">
+        <button data-key="1"><span>1</span><small>&nbsp;</small></button>
+        <button data-key="2"><span>2</span><small>ABC</small></button>
+        <button data-key="3"><span>3</span><small>DEF</small></button>
+        <button data-key="4"><span>4</span><small>GHI</small></button>
+        <button data-key="5"><span>5</span><small>JKL</small></button>
+        <button data-key="6"><span>6</span><small>MNO</small></button>
+        <button data-key="7"><span>7</span><small>PQRS</small></button>
+        <button data-key="8"><span>8</span><small>TUV</small></button>
+        <button data-key="9"><span>9</span><small>WXYZ</small></button>
+        <button data-key="*"><span>*</span><small>&nbsp;</small></button>
+        <button data-key="0"><span>0</span><small>+</small></button>
+        <button data-key="#"><span>#</span><small>&nbsp;</small></button>
+      </div>
+
+      <div class="phone-controls">
+        <button id="btnCall" class="call-btn call">📞 Call</button>
+        <button id="btnHangup" class="call-btn hangup" disabled>⛔ Hang Up</button>
+      </div>
+      <div class="phone-controls secondary">
+        <button id="btnPrev" class="mini-btn">⏮ Prev</button>
+        <button id="btnSkip" class="mini-btn">Skip ⏭</button>
+      </div>
+    </section>
+
+    <!-- ======================= CENTER: OUTCOME + STATS ======================= -->
+    <section class="center-panel">
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat"><span class="stat-label">Queued</span><span class="stat-val" id="statQueued">0</span></div>
+        <div class="stat"><span class="stat-label">Dialed</span><span class="stat-val" id="statDialed">0</span></div>
+        <div class="stat"><span class="stat-label">Connected</span><span class="stat-val" id="statConnected">0</span></div>
+        <div class="stat"><span class="stat-label">Accepted</span><span class="stat-val stat-good" id="statAccepted">0</span></div>
+        <div class="stat"><span class="stat-label">Talk Time</span><span class="stat-val" id="statTalk">00:00</span></div>
+      </div>
+
+      <div class="outcome-card">
+        <div class="outcome-head">
+          <h3>Log Outcome</h3>
+          <span class="outcome-lead" id="outcomeLead">Select a lead to begin</span>
+        </div>
+
+        <label class="field-label">Category / Outcome</label>
+        <div class="category-picker" id="categoryPicker"><!-- filled by JS --></div>
+
+        <label class="field-label">Notes</label>
+        <textarea id="leadNotes" class="notes" placeholder="Call notes, objections, best callback time…"></textarea>
+
+        <div class="outcome-actions">
+          <button id="btnSaveNext" class="btn btn-primary big">💾 Save &amp; Dial Next</button>
+          <button id="btnSave" class="btn btn-ghost">Save Only</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= RIGHT: LEAD LIST ======================= -->
+    <section class="list-panel">
+      <div class="list-toolbar">
+        <input id="search" class="search" placeholder="🔍 Search name, company, number…" />
+        <select id="filterCategory" class="filter-select"><option value="">All categories</option></select>
+      </div>
+      <div class="list-counts" id="listCounts"></div>
+      <div class="lead-list" id="leadList"><!-- filled by JS --></div>
+      <div class="list-empty" id="listEmpty">
+        <p>No leads yet.</p>
+        <p>Click <strong>Import Leads</strong> to paste or upload your list.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ======================= MODALS ======================= -->
+  <div class="modal-backdrop" id="modalBackdrop" hidden></div>
+
+  <!-- Import -->
+  <div class="modal" id="importModal" hidden>
+    <div class="modal-head"><h2>Import Leads</h2><button class="modal-x" data-close>✕</button></div>
+    <div class="modal-body">
+      <p class="hint">Paste rows or upload a CSV. First row can be a header. Recognised columns: <code>name, phone, company, title, email, website, notes</code>. Only <strong>phone</strong> is required.</p>
+      <div class="import-tabs">
+        <button class="tab active" data-tab="paste">Paste</button>
+        <button class="tab" data-tab="upload">Upload CSV</button>
+        <button class="tab" data-tab="sample">Sample data</button>
+      </div>
+      <div class="tab-body" data-panel="paste">
+        <textarea id="pasteArea" class="paste-area" placeholder="Mary J Laub, +14352397850, Precision Landscape, Owner
+Joe's Plumbing, 801-555-0134
+name,phone,company
+Acme Roofing,+13105551212,Acme Roofing Co"></textarea>
+      </div>
+      <div class="tab-body" data-panel="upload" hidden>
+        <input type="file" id="fileInput" accept=".csv,.txt" />
+        <p class="hint">Or drag a .csv file onto the paste box.</p>
+      </div>
+      <div class="tab-body" data-panel="sample" hidden>
+        <p class="hint">Load 12 fake businesses so you can try the app instantly.</p>
+      </div>
+      <div id="importPreview" class="import-preview"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close>Cancel</button>
+      <button id="btnDoImport" class="btn btn-primary">Import</button>
+    </div>
+  </div>
+
+  <!-- Add One -->
+  <div class="modal" id="addModal" hidden>
+    <div class="modal-head"><h2>Add a Lead</h2><button class="modal-x" data-close>✕</button></div>
+    <div class="modal-body form-grid">
+      <label>Phone *<input id="f_phone" /></label>
+      <label>Name<input id="f_name" /></label>
+      <label>Company<input id="f_company" /></label>
+      <label>Title<input id="f_title" /></label>
+      <label>Email<input id="f_email" /></label>
+      <label>Website<input id="f_website" /></label>
+      <label class="full">Notes<textarea id="f_notes"></textarea></label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close>Cancel</button>
+      <button id="btnDoAdd" class="btn btn-primary">Add Lead</button>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="modal" id="settingsModal" hidden>
+    <div class="modal-head"><h2>Settings</h2><button class="modal-x" data-close>✕</button></div>
+    <div class="modal-body">
+      <h3 class="settings-h">Categories</h3>
+      <p class="hint">Sort each business after a call. Add, rename, recolor or remove.</p>
+      <div id="categoryEditor" class="category-editor"></div>
+      <div class="add-cat-row">
+        <input id="newCatName" placeholder="New category name" />
+        <input id="newCatColor" type="color" value="#4f8cff" />
+        <button id="btnAddCat" class="btn btn-primary">Add</button>
+      </div>
+
+      <h3 class="settings-h">Calling mode</h3>
+      <label class="radio"><input type="radio" name="callmode" value="click" checked /> <strong>Click-to-Call</strong> — opens your phone / Skype / system dialer (works now, no setup)</label>
+      <label class="radio"><input type="radio" name="callmode" value="twilio" /> <strong>Twilio Web Dialer</strong> — real in-browser audio (needs a Twilio account + token URL)</label>
+      <div id="twilioConfig" class="twilio-config" hidden>
+        <label>Token endpoint URL<input id="twilioTokenUrl" placeholder="https://your-server.com/twilio-token" /></label>
+        <label>Caller ID (your Twilio number)<input id="twilioCallerId" placeholder="+13105551212" /></label>
+        <p class="hint">See <code>caller/README.md</code> for the ~30 line serverless token function you deploy once. Until then, Click-to-Call keeps you dialing.</p>
+      </div>
+
+      <h3 class="settings-h">Danger zone</h3>
+      <button id="btnClearAll" class="btn btn-danger">Delete all leads &amp; data</button>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" data-close>Done</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
