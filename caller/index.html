@@ -121,7 +121,7 @@
   <div class="modal" id="importModal" hidden>
     <div class="modal-head"><h2>Import Leads</h2><button class="modal-x" data-close>✕</button></div>
     <div class="modal-body">
-      <p class="hint">Paste rows or upload a CSV. First row can be a header. Recognised columns: <code>name, phone, company, title, email, website, notes</code>. Only <strong>phone</strong> is required.</p>
+      <p class="hint">Paste rows or upload a CSV — scraper output is fine. Every cell is scored and only <strong>real phone numbers</strong> are kept (ratings, review counts, zip codes, lat/long, prices, IDs are stripped out). Name, company, email and website are auto-detected too.</p>
       <div class="import-tabs">
         <button class="tab active" data-tab="paste">Paste</button>
         <button class="tab" data-tab="upload">Upload CSV</button>

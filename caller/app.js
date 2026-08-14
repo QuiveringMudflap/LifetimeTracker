@@ -308,19 +308,43 @@
 
   /* ============================================================
      IMPORT / PARSING
+
+     Scraper CSVs are messy: they include ratings ("4.6"), review counts
+     ("26"), zip codes ("84101"), lat/long ("-111.891"), prices ("$85"),
+     hours ("9:00-17:00"), years ("2019"), Google Place IDs, image URLs,
+     etc. We score every cell for what it looks like and only keep the
+     real phone number + real name/company/email/website.
      ============================================================ */
   const HEADER_ALIASES = {
-    name: ["name","full name","contact","lead","contact name"],
-    phone: ["phone","number","phone number","tel","telephone","mobile","cell"],
-    company: ["company","business","org","organization","account"],
-    title: ["title","role","position"],
-    email: ["email","e-mail","mail"],
-    website: ["website","site","url","web"],
+    name: ["name","full name","contact","lead","contact name","owner","first name"],
+    phone: ["phone","number","phone number","phone_number","tel","telephone","mobile","cell","phone1","primary phone"],
+    company: ["company","business","org","organization","account","business name","company name","title"],
+    email: ["email","e-mail","mail","email1","contact email"],
+    website: ["website","site","url","web","domain","homepage"],
     notes: ["notes","note","comment","comments"],
+    // headers we recognise but IGNORE (never use their value for anything)
+    ignore: [
+      "rating","reviews","review count","reviews count","review_count","reviews_count","review",
+      "latitude","longitude","lat","lng","lon","place id","place_id","cid",
+      "price","price level","hours","hours of operation","status","open",
+      "category","categories","type","types","subtype",
+      "zip","zip code","postal","postal code","postcode",
+      "state","city","country","county","region","address","street","address1","address2",
+      "image","photo","thumbnail","photo url","image url","photos",
+      "year","founded","established","reviews_link","google_url","maps_url","google url"
+    ],
   };
   function matchHeader(cell) {
-    const c = cell.trim().toLowerCase();
+    const c = cell.trim().toLowerCase().replace(/[_\-]+/g, " ").replace(/\s+/g, " ");
     for (const key in HEADER_ALIASES) if (HEADER_ALIASES[key].includes(c)) return key;
+    // fuzzy: "primary_phone_1" -> phone, "business_name_en" -> company
+    if (/(^|\W)(phone|tel|mobile|cell)(\W|$)/.test(c)) return "phone";
+    if (/(^|\W)(email|mail)(\W|$)/.test(c)) return "email";
+    if (/(^|\W)(website|url|domain|site)(\W|$)/.test(c)) return "website";
+    if (/(^|\W)(company|business|org)(\W|$)/.test(c)) return "company";
+    if (/(^|\W)(name|contact|owner)(\W|$)/.test(c)) return "name";
+    // known-junk fuzzy → ignore
+    if (/(rating|review|latitude|longitude|zip|postal|address|photo|image|hours|price|place.?id|cid)/.test(c)) return "ignore";
     return null;
   }
   function parseCSVLine(line) {
@@ -340,63 +364,196 @@
     out.push(cur);
     return out.map(s => s.trim());
   }
+
+  /* ---------- Field detectors ---------- */
+
+  // Real phone-number detector. Rejects zip codes, ratings, review counts,
+  // years, lat/long, prices, times, IDs. Accepts formatted or bare 10/11-digit
+  // North American numbers and E.164 international.
+  function extractPhone(val) {
+    if (!val) return "";
+    const s = String(val).trim();
+    if (!s) return "";
+    // Kill obvious non-phones early
+    if (/^https?:\/\//i.test(s)) return "";      // URL
+    if (s.includes("@")) return "";                // email
+    if (/^\d+\.\d+$/.test(s)) return "";           // decimal (rating, price, lat/long)
+    if (/^-?\d{1,3}\.\d{2,}$/.test(s)) return ""; // lat/lng
+    if (/^\$?\d+(\.\d{2})?$/.test(s)) return "";   // price like $85 or 85.00
+    if (/\d{1,2}:\d{2}/.test(s)) return "";       // time / hours
+    // Strip common phone formatting; keep leading +
+    const hasPlus = s.trim().startsWith("+");
+    // Grab the first phone-shaped chunk in the string
+    // (handles cells like "Phone: (435) 239-7850 ext 12")
+    const m = s.match(/(\+?\d[\d\s().\-]{7,}\d)/);
+    if (!m) return "";
+    let raw = m[1];
+    const digits = raw.replace(/\D/g, "");
+    // Length gate: 10, 11 (US with 1), or 8-15 (international with +)
+    if (hasPlus || raw.startsWith("+")) {
+      if (digits.length < 8 || digits.length > 15) return "";
+    } else {
+      if (digits.length !== 10 && digits.length !== 11) return "";
+      if (digits.length === 11 && digits[0] !== "1") return ""; // 11-digit must start with 1
+    }
+    // Reject obvious junk numbers
+    if (/^0{5,}/.test(digits) || /^(\d)\1{6,}$/.test(digits)) return "";
+    // Reject years / zip codes / IDs (already caught by length, but belt-and-braces)
+    if (digits.length < 10) return "";
+    // Normalize to E.164-ish
+    if (digits.length === 10) return "+1" + digits;
+    if (digits.length === 11 && digits[0] === "1") return "+" + digits;
+    return (hasPlus || raw.startsWith("+") ? "+" : "+") + digits;
+  }
+
+  function extractEmail(val) {
+    if (!val) return "";
+    const m = String(val).match(/[\w.+\-]+@[\w\-]+\.[\w.\-]+/);
+    return m ? m[0] : "";
+  }
+  function extractWebsite(val) {
+    if (!val) return "";
+    const s = String(val).trim();
+    if (!s) return "";
+    // Real URL or bare domain like "acme.com" / "www.acme.com"
+    if (/^https?:\/\/\S+\.\S+/i.test(s)) return s.split(/\s+/)[0];
+    if (/^www\.[\w\-]+\.[\w.\-]+/i.test(s)) return "https://" + s.split(/\s+/)[0];
+    if (/^[\w\-]+\.(com|net|org|io|co|us|biz|info|shop|store|app|dev|xyz)(\/\S*)?$/i.test(s)) return "https://" + s;
+    return "";
+  }
+  // Company-name-ish: mostly letters, no digits-only, not a phone/URL/email
+  function looksLikeCompany(val) {
+    if (!val) return false;
+    const s = String(val).trim();
+    if (s.length < 2 || s.length > 120) return false;
+    if (extractPhone(s) || extractEmail(s) || extractWebsite(s)) return false;
+    if (/^\d/.test(s)) return false;                    // starts with a digit → address
+    if (/^\d+(\.\d+)?$/.test(s)) return false;          // pure number
+    const letters = (s.match(/[A-Za-z]/g) || []).length;
+    if (letters < 2) return false;
+    if (letters / s.length < 0.5) return false;         // too many symbols
+    // reject street-address-ish: "123 Main St"
+    if (/\b(st|street|ave|avenue|rd|road|blvd|dr|drive|ln|lane|way|hwy|suite|ste|apt|unit)\b/i.test(s) && /\d/.test(s)) return false;
+    return true;
+  }
+  // Person-name-ish: 2-4 capitalised words, no digits
+  function looksLikePersonName(val) {
+    if (!val) return false;
+    const s = String(val).trim();
+    if (/\d/.test(s) || s.length > 60 || s.length < 3) return false;
+    if (s.includes("@") || /https?:/i.test(s)) return false;
+    const parts = s.split(/\s+/);
+    if (parts.length < 2 || parts.length > 4) return false;
+    return parts.every(p => /^[A-Z][a-zA-Z'.\-]+$/.test(p) || /^[A-Z]\.?$/.test(p));
+  }
+
   function parseImport(text) {
     const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-    if (!lines.length) return [];
+    if (!lines.length) return { rows: [], stats: { total:0, kept:0, noPhone:0, dup:0 } };
     let cols = parseCSVLine(lines[0]);
     let mapping = cols.map(matchHeader);
     let hasHeader = mapping.filter(Boolean).length >= 2;
     let dataLines = hasHeader ? lines.slice(1) : lines;
-    if (!hasHeader) {
-      // Guess: find the column that looks like a phone; treat first as name.
-      mapping = cols.map(() => null);
-    }
+
     const rows = [];
+    const stats = { total: 0, kept: 0, noPhone: 0, dup: 0 };
+    const seenPhones = new Set();
+
     dataLines.forEach(line => {
       const cells = parseCSVLine(line);
+      if (!cells.length || cells.every(c => !c)) return;
+      stats.total++;
       const rec = { name:"", phone:"", company:"", title:"", email:"", website:"", notes:"" };
+
+      // Which cell indices are ignore-listed by the header (rating, reviews,
+      // lat/long, zip, category, reviews_link, etc.). These cells are OFF
+      // LIMITS for the whole row — they never contribute to any field.
+      const isIgnored = (i) => hasHeader && mapping[i] === "ignore";
+
+      // 1) Header-guided extraction (only for whitelisted keys)
       if (hasHeader) {
-        cells.forEach((val, i) => { const key = mapping[i]; if (key) rec[key] = val; });
-      } else {
-        // Heuristic positional parse
-        cells.forEach((val) => {
-          const digits = val.replace(/[^\d]/g, "");
-          if (!rec.phone && digits.length >= 7 && /[\d()+\-\s]/.test(val)) rec.phone = val;
-          else if (!rec.name) rec.name = val;
-          else if (!rec.company) rec.company = val;
-          else if (!rec.title) rec.title = val;
-          else if (val.includes("@") && !rec.email) rec.email = val;
+        cells.forEach((val, i) => {
+          const key = mapping[i];
+          if (!key || key === "ignore") return;
+          if (key === "phone") { const p = extractPhone(val); if (p && !rec.phone) rec.phone = p; }
+          else if (key === "email") { const e = extractEmail(val); if (e && !rec.email) rec.email = e; }
+          else if (key === "website") { const w = extractWebsite(val); if (w && !rec.website) rec.website = w; }
+          else if (key === "company" && !rec.company && looksLikeCompany(val)) rec.company = val.trim();
+          else if (key === "name" && !rec.name) rec.name = val.trim();
+          else if (key === "notes" && !rec.notes) rec.notes = val.trim();
         });
       }
-      rec.phone = cleanPhone(rec.phone);
-      if (rec.phone) rows.push(rec);
+
+      // 2) Sweep non-ignored cells to fill blanks — this is what saves us on
+      //    scraper dumps where the header lies or is missing.
+      cells.forEach((val, i) => {
+        if (!val || isIgnored(i)) return;
+        if (!rec.phone) { const p = extractPhone(val); if (p) rec.phone = p; }
+        if (!rec.email) { const e = extractEmail(val); if (e) rec.email = e; }
+        if (!rec.website) { const w = extractWebsite(val); if (w) rec.website = w; }
+      });
+
+      // 3) Name/company fallback — pick best-looking non-ignored cell that
+      //    isn't already used as phone/email/website.
+      if (!rec.name || !rec.company) {
+        const nameCands = [], compCands = [];
+        cells.forEach((val, i) => {
+          if (!val || isIgnored(i)) return;
+          const s = val.trim();
+          if (s === rec.phone || s === rec.email || s === rec.website) return;
+          if (looksLikePersonName(s)) nameCands.push(s);
+          else if (looksLikeCompany(s)) compCands.push(s);
+        });
+        if (!rec.name && nameCands.length) rec.name = nameCands[0];
+        if (!rec.company && compCands.length) {
+          rec.company = compCands.find(c => c !== rec.name) || compCands[0];
+        }
+      }
+
+      // 4) Gate: must have a real phone number
+      if (!rec.phone) { stats.noPhone++; return; }
+      if (seenPhones.has(rec.phone)) { stats.dup++; return; }
+      seenPhones.add(rec.phone);
+      rows.push(rec);
+      stats.kept++;
     });
-    return rows;
+
+    return { rows, stats };
   }
 
   function previewImport() {
     const active = $(".import-tabs .tab.active").dataset.tab;
-    let text = "";
-    if (active === "sample") { renderPreviewRows(sampleData()); return; }
-    text = $("#pasteArea").value;
-    const rows = parseImport(text);
-    renderPreviewRows(rows);
+    if (active === "sample") { renderPreviewRows(sampleData(), null); return; }
+    const { rows, stats } = parseImport($("#pasteArea").value);
+    renderPreviewRows(rows, stats);
   }
-  function renderPreviewRows(rows) {
+  function renderPreviewRows(rows, stats) {
     const box = $("#importPreview");
-    if (!rows.length) { box.innerHTML = '<span class="hint">No valid rows detected yet (each row needs a phone number).</span>'; box._rows = []; return; }
+    if (!rows.length) {
+      const msg = stats && stats.total
+        ? `<span class="hint">Sifted <strong>${stats.total}</strong> rows — no real phone numbers found. Ratings, zip codes, prices and IDs are ignored on purpose.</span>`
+        : '<span class="hint">Paste rows above. Each lead needs a real phone number (10+ digits, formatted or bare).</span>';
+      box.innerHTML = msg; box._rows = []; return;
+    }
     box._rows = rows;
-    const head = ["name","phone","company","title","email"].map(h => `<th>${h}</th>`).join("");
+    const head = ["name","phone","company","email","website"].map(h => `<th>${h}</th>`).join("");
     const body = rows.slice(0, 8).map(r =>
-      `<tr><td>${escapeHtml(r.name)}</td><td>${escapeHtml(prettyPhone(r.phone))}</td><td>${escapeHtml(r.company)}</td><td>${escapeHtml(r.title)}</td><td>${escapeHtml(r.email)}</td></tr>`
+      `<tr><td>${escapeHtml(r.name)}</td><td>${escapeHtml(prettyPhone(r.phone))}</td><td>${escapeHtml(r.company)}</td><td>${escapeHtml(r.email)}</td><td>${escapeHtml(r.website)}</td></tr>`
     ).join("");
-    box.innerHTML = `<strong>${rows.length}</strong> lead${rows.length>1?"s":""} ready.<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>${rows.length>8?`<span class="hint">…and ${rows.length-8} more</span>`:""}`;
+    const dropped = stats ? (stats.total - stats.kept) : 0;
+    const siftLine = stats
+      ? `Sifted <strong>${stats.total}</strong> row${stats.total!==1?"s":""} → kept <strong>${stats.kept}</strong> · dropped ${dropped} (${stats.noPhone} without a real phone${stats.dup?`, ${stats.dup} duplicates`:""}).`
+      : `<strong>${rows.length}</strong> lead${rows.length!==1?"s":""} ready.`;
+    box.innerHTML = `${siftLine}<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>${rows.length>8?`<span class="hint">…and ${rows.length-8} more</span>`:""}`;
   }
 
   function doImport() {
     const active = $(".import-tabs .tab.active").dataset.tab;
-    let rows = active === "sample" ? sampleData() : ($("#importPreview")._rows || parseImport($("#pasteArea").value));
-    if (!rows.length) { toast("Nothing to import"); return; }
+    let rows;
+    if (active === "sample") rows = sampleData();
+    else if ($("#importPreview")._rows && $("#importPreview")._rows.length) rows = $("#importPreview")._rows;
+    else rows = parseImport($("#pasteArea").value).rows;
+    if (!rows.length) { toast("Nothing to import — no real phone numbers found"); return; }
     // De-dupe against existing phones
     const existing = new Set(state.leads.map(l => l.phone));
     let added = 0;
@@ -407,7 +564,7 @@
       added++;
     });
     save(); closeModals(); renderAll();
-    toast(`Imported ${added} lead${added!==1?"s":""}${added<rows.length?` (${rows.length-added} duplicates skipped)`:""}`);
+    toast(`Imported ${added} lead${added!==1?"s":""}${added<rows.length?` (${rows.length-added} skipped)`:""}`);
     if (!selectedId && state.leads.length) selectLead(state.leads[0].id);
   }
   function makeLead(r) {
