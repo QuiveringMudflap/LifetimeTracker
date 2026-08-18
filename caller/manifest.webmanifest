@@ -1,0 +1,12 @@
+{
+  "name": "ProspectDialer",
+  "short_name": "ProspectDialer",
+  "description": "Cold-call CRM for selling websites",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#1c2434",
+  "theme_color": "#1c2434",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
