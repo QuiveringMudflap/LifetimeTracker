@@ -11,32 +11,24 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: "pages-deploy"
+  cancel-in-progress: true
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload caller/ folder as Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Push caller/ to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: ./caller
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./caller
+          publish_branch: gh-pages
+          force_orphan: true
+          commit_message: "Deploy from ${{ github.sha }}"
