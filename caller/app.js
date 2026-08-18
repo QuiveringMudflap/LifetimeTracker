@@ -497,37 +497,55 @@
     const m = String(val).match(/[\w.+\-]+@[\w\-]+\.[\w.\-]+/);
     return m ? m[0] : "";
   }
+  // Domains that are NEVER the business's own website — Google Maps place URLs,
+  // search links, social profiles, directory listings. Scrapers dump these all
+  // over the place; treating them as "has a website" would hide real prospects.
+  const NON_BIZ_URL = /(?:^|[/.])(?:google\.[a-z.]+\/(?:maps|search|url|localservices|shopping)|maps\.google\.[a-z.]+|goo\.gl\/maps|search\.google\.[a-z.]+|business\.google\.[a-z.]+|g\.page|g\.co\/kgs|maps\.app\.goo\.gl|facebook\.com|fb\.com|instagram\.com|twitter\.com|x\.com|linkedin\.com|yelp\.com|yellowpages\.com|yp\.com|bbb\.org|mapquest\.com|foursquare\.com|tripadvisor\.[a-z.]+|bing\.com\/maps|apple\.com\/maps|youtube\.com|youtu\.be|tiktok\.com|pinterest\.com|nextdoor\.com|angi\.com|angieslist\.com|houzz\.com|thumbtack\.com|homeadvisor\.com|manta\.com|dnb\.com|zillow\.com|wa\.me|api\.whatsapp\.com|t\.me)/i;
   function extractWebsite(val) {
     if (!val) return "";
     const s = String(val).trim();
     if (!s) return "";
-    // Real URL or bare domain like "acme.com" / "www.acme.com"
-    if (/^https?:\/\/\S+\.\S+/i.test(s)) return s.split(/\s+/)[0];
-    if (/^www\.[\w\-]+\.[\w.\-]+/i.test(s)) return "https://" + s.split(/\s+/)[0];
-    if (/^[\w\-]+\.(com|net|org|io|co|us|biz|info|shop|store|app|dev|xyz)(\/\S*)?$/i.test(s)) return "https://" + s;
-    return "";
+    let url = "";
+    if (/^https?:\/\/\S+\.\S+/i.test(s)) url = s.split(/\s+/)[0];
+    else if (/^www\.[\w\-]+\.[\w.\-]+/i.test(s)) url = "https://" + s.split(/\s+/)[0];
+    else if (/^[\w\-]+\.(com|net|org|io|co|us|biz|info|shop|store|app|dev|xyz|ca|uk|au|nz)(\/\S*)?$/i.test(s)) url = "https://" + s;
+    else return "";
+    // Reject Maps / social / directory links — they aren't the business's site.
+    let host = "", path = "";
+    try { const u = new URL(url); host = u.hostname.toLowerCase(); path = u.pathname; }
+    catch { host = url.toLowerCase(); }
+    if (NON_BIZ_URL.test(host + path)) return "";
+    return url;
   }
-  // Company-name-ish: mostly letters, no digits-only, not a phone/URL/email
+  // Company-name-ish: mostly letters, no digits-only, not a phone/URL/email/address
   function looksLikeCompany(val) {
     if (!val) return false;
     const s = String(val).trim();
     if (s.length < 2 || s.length > 120) return false;
-    if (extractPhone(s) || extractEmail(s) || extractWebsite(s)) return false;
-    if (/^\d/.test(s)) return false;                    // starts with a digit → address
+    // Reject anything URL-shaped — Maps URLs now pass extractWebsite() as blank,
+    // so we can't rely on that check alone anymore.
+    if (/^https?:\/\//i.test(s)) return false;
+    if (/^www\./i.test(s)) return false;
+    if (/\.(com|net|org|io|co|ca|us|uk|au|biz|info)(\/|$)/i.test(s)) return false;
+    if (extractPhone(s) || extractEmail(s)) return false;
+    if (/^\d/.test(s)) return false;                    // starts with a digit → address / rating / etc.
     if (/^\d+(\.\d+)?$/.test(s)) return false;          // pure number
     const letters = (s.match(/[A-Za-z]/g) || []).length;
     if (letters < 2) return false;
     if (letters / s.length < 0.5) return false;         // too many symbols
-    // reject street-address-ish: "123 Main St"
-    if (/\b(st|street|ave|avenue|rd|road|blvd|dr|drive|ln|lane|way|hwy|suite|ste|apt|unit)\b/i.test(s) && /\d/.test(s)) return false;
+    // Reject addresses — either "123 Main St" style (starts with digit, above)
+    // OR ending in a street-suffix word ("Kootenay Dr", "Main St.")
+    if (/\b(st|street|ave|avenue|rd|road|blvd|dr|drive|ln|lane|way|hwy|highway|ct|court|pl|place|pkwy|parkway|terrace|ter|circle|cir|suite|ste|apt|unit)\b\.?$/i.test(s)) return false;
     return true;
   }
-  // Person-name-ish: 2-4 capitalised words, no digits
+  // Person-name-ish: 2-4 capitalised words, no digits, not an address
   function looksLikePersonName(val) {
     if (!val) return false;
     const s = String(val).trim();
     if (/\d/.test(s) || s.length > 60 || s.length < 3) return false;
     if (s.includes("@") || /https?:/i.test(s)) return false;
+    // Reject street-address-ish: "Kootenay Dr", "Main St", "Park Ave"
+    if (/\b(st|street|ave|avenue|rd|road|blvd|dr|drive|ln|lane|way|hwy|highway|ct|court|pl|place|pkwy|parkway|terrace|ter|circle|cir)\b\.?$/i.test(s)) return false;
     const parts = s.split(/\s+/);
     if (parts.length < 2 || parts.length > 4) return false;
     return parts.every(p => /^[A-Z][a-zA-Z'.\-]+$/.test(p) || /^[A-Z]\.?$/.test(p));
