@@ -282,9 +282,6 @@ def get_active_process():
             return None, None
         if _is_cloaked(hwnd):
             return None, None
-        title = win32gui.GetWindowText(hwnd) or ''
-        if not title.strip():
-            return None, None
 
         _, pid = win32process.GetWindowThreadProcessId(hwnd)
         if pid <= 0:
@@ -293,6 +290,25 @@ def get_active_process():
         name = proc.name().lower()
         if name in SKIP_PROCS:
             return None, None
+
+        # Title check: many fullscreen games strip their title bar mid-play,
+        # so a strict "must have a title" rule loses hours of gameplay.
+        # Allow the window through if any of these hold:
+        #   - it has a non-empty title (normal apps)
+        #   - the process is in our KNOWN_NAMES table (recognized apps/games)
+        #   - the window is large enough to plausibly be an app window
+        #     (filters out empty-title tooltips, IME popups, etc.)
+        title = (win32gui.GetWindowText(hwnd) or '').strip()
+        if not title and name not in KNOWN_NAMES:
+            try:
+                rect = win32gui.GetWindowRect(hwnd)
+                w = rect[2] - rect[0]
+                h = rect[3] - rect[1]
+                if w < 400 or h < 300:
+                    return None, None
+            except Exception:
+                return None, None
+
         exe = None
         try:
             exe = proc.exe()
@@ -551,6 +567,13 @@ class AppTracker:
     def _flush(self, now):
         if self.current_app and self.current_app not in SKIP_PROCS:
             elapsed = now - self.current_start
+            # Cap elapsed to catch PC sleep/hibernate/debugger-pause — on
+            # Windows time.monotonic() advances during sleep, so a wake would
+            # otherwise credit hours of unattended time to whatever app was
+            # focused before the sleep. Anything above ~6x the poll interval
+            # is impossible during normal tracking; discard those samples.
+            if elapsed > POLL_INTERVAL * 6:
+                elapsed = 0
             if elapsed > 0:
                 entry = self._ensure_entry(self.current_app)
                 pre_secs = entry['seconds']
