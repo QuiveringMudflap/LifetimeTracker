@@ -157,23 +157,30 @@ SERVICES = [
      "Uncover the root cause, so your body, mind, and spirit can return to their natural state of healing."),
 ]
 
-def services_grid(items):
-    cards = ""
-    for slug, icon, name, blurb in items:
-        cards += f"""<article class="service">
+def _card(slug, icon, name, blurb, pos):
+    return f"""<article class="service s-{pos}">
         <div class="service-icon">{IC[icon]}</div>
         <h3>{name}</h3>
         <p>{blurb}</p>
         <a class="more" href="/{slug}">Learn more</a>
       </article>"""
-    return cards
+
+def services_grid(items):
+    return "".join(_card(s, i, n, b, "flow") for s, i, n, b in items)
+
+def services_diamond(items, center=""):
+    # items in order: top, left, right, bottom
+    positions = ["top", "left", "right", "bottom"]
+    cards = "".join(_card(items[k][0], items[k][1], items[k][2], items[k][3], positions[k]) for k in range(4))
+    mid = f'<div class="diamond-center">{center}</div>' if center else ''
+    return f'<div class="service-diamond">{cards}{mid}</div>'
 
 # ================================================================ PAGES
 
 # ---- Home
 home_body = f"""<section class="hero">
   <div class="hero-inner">
-    <div class="hero-logo"><img src="/logo.png" alt="Maison Claire &ndash; Natural Healing, Higher Wellbeing, A Brighter You" width="1600" height="621" /></div>
+    <div class="hero-crest"><img src="/crest.png" alt="Maison Claire" width="620" height="306" /></div>
     <div class="divider" aria-hidden="true"><span></span><i>&#10022;</i><span></span></div>
     <h1 class="hero-title">Healing at the root. Living in harmony.</h1>
     <p class="hero-text">At Maison Claire, we support your journey back to wellness by combining ancient wisdom with intuitive care, so your body, mind, and spirit can heal naturally.</p>
@@ -188,14 +195,14 @@ home_body = f"""<section class="hero">
 <section class="pad">
   <div class="container">
     <div class="section-head"><div class="rule"></div><p class="eyebrow">Our Services</p><div class="rule"></div></div>
-    <div class="service-grid">{services_grid(SERVICES)}</div>
-    <p class="motto"><em>Your Health. Your Power. Your Natural Path.</em></p>
+    {services_diamond(SERVICES, center='<em>Your Health.<br/>Your Power.<br/>Your Natural Path.</em>')}
   </div>
 </section>
 
 <section class="pad tint">
-  <div class="container narrow center">
+  <div class="container">
     <div class="section-head"><div class="rule"></div><p class="eyebrow">A Gentle Approach</p><div class="rule"></div></div>
+    <p class="approach-lead">Healing here is never rushed. Every session follows the same unhurried rhythm, so you always feel safe, heard, and cared for as a whole person.</p>
     <div class="steps">
       <div class="step"><span class="step-num">01</span><h3>Listen</h3><p>We begin with a warm, unhurried conversation about how you feel, what you carry, and what you long to release.</p></div>
       <div class="step"><span class="step-num">02</span><h3>Uncover</h3><p>Through energy work, intuitive guidance, and gentle inquiry, we look beneath the symptoms for the root that is asking for care.</p></div>
@@ -276,8 +283,7 @@ services_body = f"""<section class="page-hero">
 
 <section class="pad">
   <div class="container">
-    <div class="service-grid">{services_grid(SERVICES)}</div>
-    <p class="motto"><em>Your Health. Your Power. Your Natural Path.</em></p>
+    {services_diamond(SERVICES, center='<em>Your Health.<br/>Your Power.<br/>Your Natural Path.</em>')}
   </div>
 </section>
 
