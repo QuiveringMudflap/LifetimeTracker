@@ -8,8 +8,9 @@ consistent. Edit the CONTENT blocks below (or the templates) and run:
 
 It writes the .html files, sitemap.xml and robots.txt into this folder.
 """
-import os
+import os, time
 
+VER = str(int(time.time()))  # cache-buster, bumped every build
 BASE = "https://maisonclaire-mauve.vercel.app"
 OG = BASE + "/og.jpg"
 EMAIL = "booking@MaisonClaireHealing.com"
@@ -45,7 +46,7 @@ def nav(active):
     items = "".join(parts)
     return f"""<header class="nav">
   <div class="nav-inner">
-    <a href="/" class="nav-brand" aria-label="Maison Claire home"><img src="/logo-sm.png" alt="Maison Claire" width="515" height="200" /></a>
+    <a href="/" class="nav-brand" aria-label="Maison Claire home"><img src="/crest.png" alt="Maison Claire" width="620" height="306" /></a>
     <nav class="nav-links" aria-label="Primary">{items}</nav>
     <a href="/contact" class="nav-cta">Book a Session</a>
     <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
@@ -130,6 +131,10 @@ def page(path, title, desc, body, active, jsonld=""):
 </body>
 </html>
 """
+    # Cache-busting: version every local asset so redeploys always refresh
+    for asset in ["/styles.css", "/logo.png", "/logo-sm.png", "/logo-foot.png",
+                  "/crest.png", "/crest-mark.png", "/favicon.png", "/og.jpg"]:
+        html = html.replace(asset, asset + "?v=" + VER)
     fn = os.path.join(HERE, ("index" if path == "index" else path) + ".html")
     with open(fn, "w", encoding="utf-8") as f:
         f.write(html)
@@ -180,7 +185,7 @@ def services_diamond(items, center=""):
 # ---- Home
 home_body = f"""<section class="hero">
   <div class="hero-inner">
-    <div class="hero-crest"><img src="/crest.png" alt="Maison Claire" width="620" height="306" /></div>
+    <div class="hero-logo"><img src="/logo.png" alt="Maison Claire &ndash; Natural Healing, Higher Wellbeing, A Brighter You" width="900" height="349" /></div>
     <div class="divider" aria-hidden="true"><span></span><i>&#10022;</i><span></span></div>
     <h1 class="hero-title">Healing at the root. Living in harmony.</h1>
     <p class="hero-text">At Maison Claire, we support your journey back to wellness by combining ancient wisdom with intuitive care, so your body, mind, and spirit can heal naturally.</p>
