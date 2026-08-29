@@ -10,7 +10,7 @@ It writes the .html files, sitemap.xml and robots.txt into this folder.
 """
 import os
 
-BASE = "https://maison-claire-eight.vercel.app"
+BASE = "https://maisonclaire-mauve.vercel.app"
 OG = BASE + "/og.jpg"
 EMAIL = "booking@MaisonClaireHealing.com"
 PHONE_DISPLAY = "604-841-4833"
