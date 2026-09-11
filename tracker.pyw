@@ -504,6 +504,19 @@ def fmt_duration(seconds):
         return f"{m}m {s}s"
     return f"{s}s"
 
+# Click-to-cycle units for the total tile. Each entry: (caption suffix, formatter)
+TOTAL_UNITS = [
+    ('',            lambda s: fmt_duration(s) if s else '0s'),
+    (' · DAYS',     lambda s: f'{s / 86400:.2f} days'),
+    (' · WEEKS',    lambda s: f'{s / 604800:.2f} weeks'),
+    (' · MONTHS',   lambda s: f'{s / 2629746:.2f} months'),   # avg month (30.44d)
+    (' · YEARS',    lambda s: f'{s / 31557600:.3f} years'),   # avg year (365.25d)
+]
+
+def fmt_total_time(seconds, mode):
+    mode = mode % len(TOTAL_UNITS)
+    return TOTAL_UNITS[mode][1](seconds)
+
 def fmt_date(iso):
     if not iso:
         return None
@@ -881,11 +894,26 @@ def show_stats_window(tracker):
         lbl = tk.Label(wrap, text=label.upper(), font=('Segoe UI', 8, 'bold'),
                        bg=CARD, fg=MUTED)
         lbl.pack(anchor='w', pady=(2, 0))
-        return val, lbl
+        return wrap, val, lbl
 
-    total_val, total_lbl = mk_tile(tiles, 'Total Time',   ACCENT)
-    apps_val,  _         = mk_tile(tiles, 'Apps Tracked', CYAN)
-    top_val,   _         = mk_tile(tiles, 'Most Used',    ACCENT_2)
+    total_wrap, total_val, total_lbl = mk_tile(tiles, 'Total Time',   ACCENT)
+    _,          apps_val,  _         = mk_tile(tiles, 'Apps Tracked', CYAN)
+    _,          top_val,   _         = mk_tile(tiles, 'Most Used',    ACCENT_2)
+
+    # Click the total tile to cycle its unit: hms -> days -> weeks -> months -> years
+    total_mode = [0]
+    last_total = [0.0]
+    base_caption = ['TOTAL LIFETIME']
+
+    def cycle_total(_=None):
+        total_mode[0] = (total_mode[0] + 1) % len(TOTAL_UNITS)
+        # instant feedback without waiting for the next refresh tick
+        total_val.config(text=fmt_total_time(last_total[0], total_mode[0]))
+        total_lbl.config(text=base_caption[0] + TOTAL_UNITS[total_mode[0]][0])
+
+    for _w in (total_wrap, total_val, total_lbl):
+        _w.configure(cursor='hand2')
+        _w.bind('<Button-1>', cycle_total)
 
     # range + search
     tools = tk.Frame(root, bg=BG)
@@ -1220,8 +1248,10 @@ def show_stats_window(tracker):
         range_label = {'today': 'TIME TODAY',
                        'week':  'TIME THIS WEEK',
                        'lifetime': 'TOTAL LIFETIME'}[rng]
-        total_lbl.configure(text=range_label)
-        total_val.config(text=fmt_duration(total_secs) if total_secs else '0s')
+        base_caption[0] = range_label
+        last_total[0] = total_secs
+        total_lbl.configure(text=range_label + TOTAL_UNITS[total_mode[0]][0])
+        total_val.config(text=fmt_total_time(total_secs, total_mode[0]))
         apps_val.config(text=str(len(visible)))
         top_val.config(text=visible[0][0] if visible else '—')
 
