@@ -226,7 +226,7 @@ home_body = f"""<section class="photo-hero" style="background-image:linear-gradi
   <div class="container">
     <div class="section-head"><div class="rule"></div><p class="eyebrow">Is something asking to change?</p><div class="rule"></div></div>
     <div class="prompts">{prompts_html}</div>
-    <div class="center" style="margin-top:34px"><a href="/contact" class="btn btn-ghost">Explore the Journey</a></div>
+    <div class="center" style="margin-top:34px"><a href="/journeys" class="btn btn-ghost">Explore the Journey</a></div>
   </div>
 </section>
 
@@ -236,7 +236,7 @@ home_body = f"""<section class="photo-hero" style="background-image:linear-gradi
       <p class="eyebrow" style="color:var(--gold-soft)">Healing from the inside out</p>
       <h2>We look deeper.<br/>Beyond the surface.</h2>
       <p>Because true healing is not just about what you can see. It is about what lies beneath, in the physical, emotional, and energetic patterns that shape how you feel and live.</p>
-      <a href="/services" class="btn btn-ghost light">The Maison Claire Approach</a>
+      <a href="/approach" class="btn btn-ghost light">The Maison Claire Approach</a>
     </div>
   </div>
 </section>
