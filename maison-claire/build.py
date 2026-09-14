@@ -57,9 +57,9 @@ FOOTER = f"""<footer class="foot">
   <div class="container">
     <div class="foot-top">
       <div class="foot-brand-block">
-        <img src="/logo-foot.png" alt="Maison Claire" />
-        <p class="foot-tag">Natural Healing &nbsp;&bull;&nbsp; Higher Wellbeing &nbsp;&bull;&nbsp; A Brighter You</p>
-        <p class="foot-desc">A gentle sanctuary for root cause healing with Stanislava, combining ancient wisdom with intuitive care.</p>
+        <img src="/logo-foot.png" alt="Maison Claire Healing" />
+        <p class="foot-tag">A Clearer You &nbsp;&bull;&nbsp; A Brighter Tomorrow</p>
+        <p class="foot-desc">A private space for deeper change with Stani, a whole-person healing practice on Bowen Island, British Columbia. In-person &amp; online.</p>
       </div>
       <div class="foot-col">
         <h4>Explore</h4>
@@ -80,8 +80,8 @@ FOOTER = f"""<footer class="foot">
       </div>
     </div>
     <div class="foot-bottom">
-      <p class="heal">Heal deeper &nbsp;&bull;&nbsp; Live brighter &nbsp;&bull;&nbsp; All is possible</p>
-      <p>&copy; <span id="year"></span> Maison Claire Healing. All rights reserved.</p>
+      <p class="heal">Listen &nbsp;&bull;&nbsp; Heal &nbsp;&bull;&nbsp; Live Fully</p>
+      <p>&copy; <span id="year"></span> Maison Claire Healing &middot; Bowen Island, BC. All rights reserved.</p>
     </div>
   </div>
 </footer>
@@ -141,12 +141,12 @@ def page(path, title, desc, body, active, jsonld=""):
     return path
 
 # ---------------------------------------------------------------- shared blocks
-def cta_band(heading="Begin your natural path", text="Book a session with Stanislava and take the first gentle step back to balance."):
+def cta_band(heading="Your first step is a conversation", text="A free 15-minute introductory consultation. A simple, no-pressure conversation to share what&rsquo;s happening, ask questions, and discover whether working together feels right for you."):
     return f"""<section class="pad cta-band"><div class="container center">
     <h2>{heading}</h2>
     <p>{text}</p>
     <div class="hero-cta" style="justify-content:center">
-      <a href="/contact" class="btn btn-primary">Book a Session</a>
+      <a href="/contact" class="btn btn-primary">Request a Consultation</a>
       <a href="tel:{PHONE_TEL}" class="btn btn-ghost">Call {PHONE_DISPLAY}</a>
     </div>
   </div></section>"""
@@ -185,13 +185,13 @@ def services_diamond(items, center=""):
 # ---- Home
 home_body = f"""<section class="hero">
   <div class="hero-inner">
-    <div class="hero-logo"><img src="/logo.png" alt="Maison Claire &ndash; Natural Healing, Higher Wellbeing, A Brighter You" width="900" height="349" /></div>
+    <div class="hero-logo"><img src="/logo.png" alt="Maison Claire Healing &ndash; A clearer you, a brighter tomorrow" width="900" height="349" /></div>
     <div class="divider" aria-hidden="true"><span></span><i>&#10022;</i><span></span></div>
-    <h1 class="hero-title">Healing at the root. Living in harmony.</h1>
-    <p class="hero-text">At Maison Claire, we support your journey back to wellness by combining ancient wisdom with intuitive care, so your body, mind, and spirit can heal naturally.</p>
+    <h1 class="hero-title">Come back to yourself.</h1>
+    <p class="hero-text">A private space for deeper change. Sometimes we know something isn&rsquo;t working, but we don&rsquo;t know why. Maison Claire offers a whole-person approach to exploring the physical, emotional, and inner patterns that may be keeping you from feeling fully yourself.</p>
     <div class="hero-cta">
-      <a href="/services" class="btn btn-primary">Explore Services</a>
-      <a href="/contact" class="btn btn-ghost">Book a Session</a>
+      <a href="/contact" class="btn btn-primary">Request a Private Consultation</a>
+      <a href="/services" class="btn btn-ghost">Explore Your Journey</a>
     </div>
   </div>
   {MOUNTAINS}

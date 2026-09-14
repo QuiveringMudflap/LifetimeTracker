@@ -16,6 +16,12 @@
   --line: rgba(138, 106, 53, 0.30);
   --line-soft: rgba(138, 106, 53, 0.14);
 
+  /* deep navy (mockup direction) */
+  --navy: #1f4062;
+  --navy-deep: #16304a;
+  --navy-soft: #35577a;
+  --navy-ink: #21374d;
+
   --serif: "Cormorant Garamond", "Cormorant", Georgia, "Times New Roman", serif;
   --display: "Cinzel", "Cormorant Garamond", Georgia, serif;
   --sans: "Montserrat", "Helvetica Neue", Arial, sans-serif;
@@ -62,8 +68,8 @@ h1, h2, h3, h4 { margin: 0; }
   cursor: pointer;
   transition: background .25s ease, color .25s ease, border-color .25s ease, transform .25s ease, box-shadow .25s ease;
 }
-.btn-primary { background: var(--gold); color: #fff8ea; border: 1px solid var(--gold); }
-.btn-primary:hover { background: var(--gold-deep); border-color: var(--gold-deep); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(138,106,53,0.22); }
+.btn-primary { background: var(--navy); color: #f4ecdc; border: 1px solid var(--navy); }
+.btn-primary:hover { background: var(--navy-deep); border-color: var(--navy-deep); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(31,64,98,0.28); }
 .btn-ghost { background: transparent; color: var(--gold-deep); border: 1px solid var(--gold); }
 .btn-ghost:hover { background: var(--gold-wash); }
 
@@ -96,11 +102,11 @@ h1, h2, h3, h4 { margin: 0; }
 .nav-links a:hover, .nav-links a.active { color: var(--gold-deep); border-bottom-color: var(--gold-soft); }
 .nav-cta {
   font-family: var(--sans); font-size: 11.5px; letter-spacing: 0.2em; text-transform: uppercase;
-  color: #fff8ea !important; background: var(--gold);
+  color: #f4ecdc !important; background: var(--navy);
   padding: 10px 18px; border-radius: 999px; border-bottom: 0 !important;
   transition: background .25s ease;
 }
-.nav-cta:hover { background: var(--gold-deep); }
+.nav-cta:hover { background: var(--navy-deep); }
 .nav-toggle { display: none; background: transparent; border: 0; padding: 8px; cursor: pointer; margin-left: auto; }
 .nav-toggle span { display: block; width: 24px; height: 1.6px; background: var(--gold-deep); margin: 5px 0; border-radius: 2px; transition: transform .25s ease, opacity .25s ease; }
 
@@ -121,7 +127,7 @@ h1, h2, h3, h4 { margin: 0; }
 .divider.center { margin-top: 28px; }
 .hero-title {
   font-family: var(--serif); font-weight: 500;
-  color: var(--ink);
+  color: var(--navy-ink);
   font-size: clamp(30px, 5.2vw, 52px);
   letter-spacing: 0.01em; line-height: 1.15; margin: 6px 0 20px;
 }
@@ -241,9 +247,11 @@ section { position: relative; }
 .quote cite { display: block; margin-top: 22px; font-family: var(--sans); font-style: normal; font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold-deep); }
 
 /* ---------- CTA band ---------- */
-.cta-band { text-align: center; background: linear-gradient(160deg, #efe4cb, #e6d5ae); }
-.cta-band h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(28px, 4.6vw, 44px); color: var(--ink); margin: 0 0 14px; }
-.cta-band p { color: var(--ink-soft); font-size: clamp(17px, 2vw, 20px); margin: 0 auto 28px; max-width: 560px; }
+.cta-band { text-align: center; background: linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%); }
+.cta-band h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(28px, 4.6vw, 44px); color: #f4ecdc; margin: 0 0 14px; }
+.cta-band p { color: #c7d5e2; font-size: clamp(17px, 2vw, 20px); margin: 0 auto 28px; max-width: 560px; }
+.cta-band .btn-ghost { color: #ecd9a8; border-color: var(--gold-soft); }
+.cta-band .btn-ghost:hover { background: rgba(216,189,138,0.12); }
 
 /* ---------- Contact cards ---------- */
 .contact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(18px, 2.5vw, 26px); max-width: 760px; margin: 0 auto; }
@@ -256,7 +264,7 @@ section { position: relative; }
 .contact-note { text-align: center; color: var(--ink-mute); font-style: italic; margin: 30px auto 0; max-width: 520px; }
 
 /* ---------- Footer ---------- */
-.foot { background: #2b2213; color: #e6d9b8; padding: clamp(52px, 7vw, 72px) 0 40px; }
+.foot { background: var(--navy-deep); color: #cfdce8; padding: clamp(52px, 7vw, 72px) 0 40px; }
 .foot-top { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 40px; }
 .foot-brand-block img { height: 58px; width: auto; opacity: 0.95; margin-bottom: 16px; }
 .foot p { margin: 0 0 10px; }
