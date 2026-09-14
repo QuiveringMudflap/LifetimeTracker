@@ -325,9 +325,58 @@ section { position: relative; }
 .testimonial { font-family: var(--serif); font-style: italic; font-size: clamp(20px, 2.7vw, 28px); line-height: 1.45; color: var(--navy-ink); margin: 0 auto; max-width: 760px; }
 .testimonial-sec cite { display: block; margin-top: 24px; font-family: var(--sans); font-style: normal; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-deep); }
 
+/* ---------- Journeys list ---------- */
+.journey-list { display: flex; flex-direction: column; gap: 18px; }
+.journey-row { display: flex; align-items: center; gap: 24px; padding: 16px 22px 16px 16px; background: var(--paper); border: 1px solid var(--line-soft); border-radius: var(--radius); transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease; }
+.journey-row:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--gold); }
+.jr-img { flex: 0 0 128px; height: 84px; border-radius: 10px; background-size: cover; background-position: center; }
+.jr-text { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.jr-name { font-family: var(--serif); font-weight: 600; font-size: clamp(20px, 2.4vw, 25px); color: var(--navy-ink); letter-spacing: 0.03em; }
+.jr-tag { color: var(--ink-soft); font-size: 16px; }
+.jr-arrow { color: var(--gold); font-size: 24px; flex: 0 0 auto; transition: transform .3s ease; }
+.journey-row:hover .jr-arrow { transform: translateX(5px); }
+
+/* journey detail: includes + for-you */
+.journey-include .eyebrow { margin-bottom: 16px; }
+.journey-include ul { list-style: none; padding: 0; margin: 0 0 18px; }
+.journey-include li { position: relative; padding-left: 26px; margin-bottom: 12px; color: var(--ink-soft); font-size: 17px; }
+.journey-include li::before { content: "\2726"; position: absolute; left: 0; color: var(--gold); font-size: 12px; top: 3px; }
+.include-note { font-style: italic; color: var(--ink-mute); font-size: 15.5px; }
+.foryou { list-style: none; padding: 0; max-width: 640px; margin: 0 auto; }
+.foryou li { position: relative; padding-left: 30px; margin-bottom: 14px; color: var(--navy-ink); font-size: clamp(16px, 1.9vw, 19px); }
+.foryou li::before { content: ""; position: absolute; left: 6px; top: 10px; width: 8px; height: 8px; border-radius: 999px; background: var(--gold); }
+
+/* ---------- Approach modalities ---------- */
+.apmods { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.apmod { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 26px 14px; background: var(--paper); border: 1px solid var(--line-soft); border-radius: var(--radius); }
+.apmod-ic { width: 54px; height: 54px; border-radius: 999px; background: linear-gradient(160deg, var(--navy-soft), var(--navy)); color: #fff; display: grid; place-items: center; }
+.apmod-ic svg { width: 55%; height: 55%; }
+.apmod span:last-child { font-family: var(--serif); font-weight: 600; font-size: 15.5px; color: var(--navy-ink); }
+.center-prose { text-align: center; }
+.center-prose h2 { text-align: center; }
+
+/* 5-up steps */
+.steps.five { grid-template-columns: repeat(5, 1fr); }
+
+/* ---------- Body Mind Spirit band ---------- */
+.bms { background: linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%); padding: clamp(40px, 6vw, 66px) 0; }
+.bms-line { font-family: var(--display); letter-spacing: 0.3em; text-transform: uppercase; color: #ecd9a8; font-size: clamp(15px, 2.4vw, 22px); margin: 0; text-align: center; }
+
+/* ---------- About split ---------- */
+.split-about { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: clamp(32px, 5vw, 64px); align-items: center; }
+.about-photo img { width: 100%; height: auto; border-radius: var(--radius); box-shadow: var(--shadow); }
+.split-about .eyebrow { margin-bottom: 10px; }
+
+.contact-grid.three { grid-template-columns: repeat(3, 1fr); max-width: 900px; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .prompts { grid-template-columns: repeat(3, 1fr); row-gap: 34px; }
+  .apmods { grid-template-columns: repeat(2, 1fr); }
+  .steps.five { grid-template-columns: 1fr 1fr; }
+  .split-about { grid-template-columns: 1fr; }
+  .about-photo { max-width: 440px; margin: 0 auto; }
+  .contact-grid.three { grid-template-columns: 1fr; }
   .split-approach { grid-template-columns: 1fr; }
   .photo-hero { background-position: center; }
   .service-grid { grid-template-columns: 1fr; gap: 46px; }

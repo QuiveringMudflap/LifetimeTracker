@@ -31,10 +31,9 @@ MOUNTAINS = """<div class="hero-mountains" aria-hidden="true"><svg viewBox="0 0 
 # ---------------------------------------------------------------- nav / footer
 NAVLINKS = [
     ("Home", "/"),
+    ("Journeys", "/journeys"),
+    ("Approach", "/approach"),
     ("About", "/about"),
-    ("Services", "/services"),
-    ("Reiki Healing", "/reiki-healing"),
-    ("FAQ", "/faq"),
     ("Contact", "/contact"),
 ]
 
@@ -64,19 +63,19 @@ FOOTER = f"""<footer class="foot">
       <div class="foot-col">
         <h4>Explore</h4>
         <a href="/">Home</a>
+        <a href="/journeys">Journeys</a>
+        <a href="/approach">Approach</a>
         <a href="/about">About</a>
-        <a href="/services">Services</a>
-        <a href="/faq">FAQ</a>
         <a href="/contact">Contact</a>
       </div>
       <div class="foot-col">
-        <h4>Sessions</h4>
-        <a href="/reiki-healing">Reiki Healing</a>
-        <a href="/hypnotherapy-intuitive-guidance">Hypnotherapy &amp; Guidance</a>
-        <a href="/liver-cleanse-detox">Liver Cleanse &amp; Detox</a>
-        <a href="/root-cause-healing">Root Cause Healing</a>
+        <h4>Journeys</h4>
+        <a href="/the-reset">The Reset</a>
+        <a href="/the-shift">The Shift</a>
+        <a href="/the-reconnection">The Reconnection</a>
+        <a href="/the-next-chapter">The Next Chapter</a>
+        <a href="/the-deep-dive">The Deep Dive</a>
         <a href="mailto:{EMAIL}">{EMAIL}</a>
-        <a href="tel:{PHONE_TEL}">{PHONE_DISPLAY}</a>
       </div>
     </div>
     <div class="foot-bottom">
@@ -271,247 +270,309 @@ page("index", "Maison Claire | Reiki Healing & Natural Wellness with Stanislava"
      "Maison Claire offers Reiki healing, hypnotherapy, intuitive guidance, liver cleanse and detox, and root cause healing. Heal at the root and return to your natural state of balance with Stanislava.",
      home_body, "/", home_ld)
 
-# ---- About
-about_body = f"""<section class="page-hero">
+
+# ---- extra icons for approach
+IC["leaf"] = '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M20 44 C20 28 34 18 46 18 C46 34 36 46 20 44 Z" fill="none" stroke="#fff" stroke-width="1.4"/><path d="M20 44 C26 38 34 32 44 26" fill="none" stroke="#fff" stroke-width="1.1"/></svg>'
+
+# ================================================================ JOURNEYS
+JOURNEYS = [
+    ("the-reset", "The Reset", "Return to balance.", "lighthouse-warm.jpg"),
+    ("the-shift", "The Shift", "Change what keeps repeating.", "mountains.jpg"),
+    ("the-reconnection", "The Reconnection", "Come back to yourself.", "hero.jpg"),
+    ("the-next-chapter", "The Next Chapter", "Move consciously into what comes next.", "horses.jpg"),
+    ("the-deep-dive", "The Deep Dive", "Go beneath the surface.", "lighthouse-blue.jpg"),
+]
+
+def journey_row(slug, name, tagline, img):
+    return f"""<a class="journey-row" href="/{slug}">
+      <span class="jr-img" style="background-image:url('/{img}')"></span>
+      <span class="jr-text"><span class="jr-name">{name}</span><span class="jr-tag">{tagline}</span></span>
+      <span class="jr-arrow" aria-hidden="true">&rarr;</span>
+    </a>"""
+
+journeys_body = f"""<section class="page-hero">
   <div class="container">
-    <p class="eyebrow">About Maison Claire</p>
-    <h1>A gentle space to remember your wholeness.</h1>
-    <p>Ancient wisdom and intuitive care, held together with warmth, so you can heal from the inside out.</p>
+    <p class="eyebrow">Journeys</p>
+    <h1>Different places.<br/>The same destination: you.</h1>
+    <p>Every journey at Maison Claire is private and personal. Explore the paths below, or begin with a conversation and we will find the one that fits.</p>
   </div>
 </section>
 
 <section class="pad">
-  <div class="container narrow prose">
-    <p class="lead">Maison Claire is a sanctuary for those who feel called to heal from the inside out. We hold space for the whole person, body, mind, and spirit, weaving together time honoured healing traditions with intuitive care.</p>
-    <p>Every session is created around you: your story, your rhythm, and the quiet signals your body has been waiting to share. Together we uncover the root of what is asking to be released, so you can return to your natural state of clarity, energy, and light.</p>
-
-    <h2>Meet Stanislava</h2>
-    <p>Sessions at Maison Claire are guided by Stanislava, a natural healing practitioner devoted to helping people feel at home in themselves again. Her work blends Reiki, hypnotherapy, intuitive guidance, and gentle detox support into a calm, personal experience.</p>
-    <p>Stanislava believes healing is not something done to you. It is a partnership. Her role is to hold a steady, compassionate space while your body remembers how to restore itself.</p>
-
-    <h2>What we believe</h2>
-    <ul>
-      <li><strong>Treat the root, not only the symptom.</strong> Lasting change comes from understanding what lies beneath.</li>
-      <li><strong>The body is wise.</strong> Given the right support, it knows how to return to balance.</li>
-      <li><strong>Healing is holistic.</strong> Body, mind, and spirit move together, so we care for all three.</li>
-      <li><strong>Gentleness is powerful.</strong> Real transformation can feel soft, safe, and unhurried.</li>
-    </ul>
+  <div class="container narrow">
+    <div class="journey-list">{''.join(journey_row(*j) for j in JOURNEYS)}</div>
   </div>
 </section>
 
 <section class="pad tint">
   <div class="container center">
-    <div class="section-head"><div class="rule"></div><p class="eyebrow">How Sessions Flow</p><div class="rule"></div></div>
-    <div class="steps">
-      <div class="step"><span class="step-num">01</span><h3>Listen</h3><p>A warm, unhurried conversation about how you feel and what you long to release.</p></div>
-      <div class="step"><span class="step-num">02</span><h3>Uncover</h3><p>Energy work and intuitive guidance to look beneath the symptoms for the root cause.</p></div>
-      <div class="step"><span class="step-num">03</span><h3>Restore</h3><p>You leave lighter, supported, and reconnected to your own natural knowing.</p></div>
-    </div>
+    <h2 class="approach-title" style="max-width:640px;margin:0 auto 14px">Not sure which journey is yours?</h2>
+    <p class="approach-lead">You do not have to decide before you arrive. We begin with a conversation.</p>
+    <a href="/contact" class="btn btn-primary">Request a Private Consultation</a>
   </div>
-</section>
+</section>"""
+journeys_ld = ('{"@context":"https://schema.org","@type":"ItemList","name":"Maison Claire Journeys","itemListElement":['
+    + ",".join('{"@type":"ListItem","position":%d,"name":"%s","url":"%s/%s"}' % (i+1, j[1], BASE, j[0]) for i, j in enumerate(JOURNEYS))
+    + "]}")
+page("journeys", "Journeys | Maison Claire Healing with Stanislava",
+     "Private, personal healing journeys with Stanislava at Maison Claire: The Reset, The Shift, The Reconnection, The Next Chapter, and The Deep Dive.",
+     journeys_body, "/journeys", journeys_ld)
 
-{cta_band("Ready when you are", "Reach out to Stanislava to begin your natural path back to balance.")}"""
-
-about_ld = """{"@context":"https://schema.org","@type":"AboutPage","name":"About Maison Claire","about":{"@type":"Person","name":"Stanislava","jobTitle":"Natural Healing Practitioner","worksFor":{"@type":"Organization","name":"Maison Claire"}}}"""
-
-page("about", "About Maison Claire | Natural Healing with Stanislava",
-     "Meet Stanislava and the philosophy behind Maison Claire: root cause healing that blends Reiki, hypnotherapy, and intuitive care for body, mind, and spirit.",
-     about_body, "/about", about_ld)
-
-# ---- Services hub
-services_body = f"""<section class="page-hero">
-  <div class="container">
-    <p class="eyebrow">Our Services</p>
-    <h1>Ways we can heal together.</h1>
-    <p>Each session is tailored to you. Explore the paths below, or reach out and we will find the right starting point together.</p>
+def journey_page(slug, name, tagline, img, whatis, includes, foryou, mtitle, mdesc):
+    wp = "".join(f"<p>{p}</p>" for p in whatis)
+    inc = "".join(f"<li>{x}</li>" for x in includes)
+    fyi = "".join(f"<li>{x}</li>" for x in foryou)
+    body = f"""<section class="photo-hero journey-hero" style="background-image:linear-gradient(90deg, rgba(22,38,58,0.82) 0%, rgba(22,38,58,0.40) 55%, rgba(22,38,58,0.08) 100%), url('/{img}');">
+  <div class="container photo-hero-inner">
+    <p class="ph-eyebrow">A Maison Claire Journey</p>
+    <h1 class="ph-title">{name}</h1>
+    <p class="ph-lead">{tagline}</p>
+    <div class="hero-cta"><a href="/contact" class="btn btn-primary">Request a Private Consultation</a></div>
   </div>
 </section>
 
 <section class="pad">
-  <div class="container">
-    {services_diamond(SERVICES, center='<em>Your Health.<br/>Your Power.<br/>Your Natural Path.</em>')}
+  <div class="container split-approach">
+    <div class="prose">{wp}</div>
+    <div class="journey-include">
+      <p class="eyebrow">Your journey may include</p>
+      <ul>{inc}</ul>
+      <p class="include-note">Every journey is individual. There is no predetermined formula, only what is right for you.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pad tint">
+  <div class="container narrow">
+    <div class="section-head"><div class="rule"></div><p class="eyebrow">This journey is for you if</p><div class="rule"></div></div>
+    <ul class="foryou">{fyi}</ul>
   </div>
 </section>
 
 {cta_band()}"""
+    ld = '{"@context":"https://schema.org","@type":"Service","serviceType":"%s","provider":{"@type":"HealthAndBeautyBusiness","name":"Maison Claire"},"areaServed":"Bowen Island, British Columbia","description":"%s","url":"%s/%s"}' % (name, mdesc.replace('"', ''), BASE, slug)
+    page(slug, mtitle, mdesc, body, "/journeys", ld)
 
-services_ld = """{"@context":"https://schema.org","@type":"ItemList","name":"Maison Claire Services","itemListElement":[{"@type":"ListItem","position":1,"name":"Reiki Healing","url":"%s/reiki-healing"},{"@type":"ListItem","position":2,"name":"Hypnotherapy and Intuitive Guidance","url":"%s/hypnotherapy-intuitive-guidance"},{"@type":"ListItem","position":3,"name":"Liver Cleanse and Detox","url":"%s/liver-cleanse-detox"},{"@type":"ListItem","position":4,"name":"Root Cause Healing","url":"%s/root-cause-healing"}]}""" % (BASE, BASE, BASE, BASE)
+journey_page("the-reset", "The Reset", "A return to balance, from the inside out.", "lighthouse-warm.jpg",
+    ["Sometimes the body asks us to slow down before the mind is ready to listen. You may feel depleted, foggy, disconnected, or simply not quite like yourself.",
+     "The Reset is a private, whole-person healing journey designed to support you from the inside out. Together we gently clear what has accumulated, physically, emotionally, and energetically, and create a healthier foundation for the next chapter."],
+    ["Supportive cleansing and nutrition", "Sound and light", "Intuitive guidance", "Hypnotherapy", "Reiki and energy work", "Personalized practices"],
+    ["You feel your energy and vitality have changed", "You feel physically or emotionally weighed down", "You want to make meaningful changes to the way you care for yourself", "You are curious about supporting your body through cleansing and healthier practices", "You feel disconnected from yourself and want to come back into balance"],
+    "The Reset | Maison Claire Healing",
+    "The Reset is a private, whole-person healing journey with Stanislava: a gentle return to balance through cleansing, energy work, and personalized care on Bowen Island.")
 
-page("services", "Services | Reiki, Hypnotherapy, Detox & Root Cause Healing",
-     "Explore Maison Claire services: Reiki healing, hypnotherapy and intuitive guidance, liver cleanse and detox, and root cause healing, each tailored to you.",
-     services_body, "/services", services_ld)
+journey_page("the-shift", "The Shift", "Change what keeps repeating.", "mountains.jpg",
+    ["Some patterns follow us for years: the same reactions, the same stories, the same quiet limits on what feels possible.",
+     "The Shift works gently with hypnotherapy and intuitive guidance to loosen those patterns at the root, so you can meet life from a freer, clearer place."],
+    ["Hypnotherapy", "Intuitive guidance", "Reiki and energy work", "Gentle inquiry and reflection", "Personalized practices"],
+    ["You keep repeating a pattern you cannot seem to shift", "You feel held back by old beliefs or stories", "You are ready to respond to life differently", "You want lasting change, not a quick fix", "You are curious about what lies beneath the surface"],
+    "The Shift | Maison Claire Healing",
+    "The Shift uses hypnotherapy and intuitive guidance with Stanislava to release old patterns and beliefs at the root, for lasting, gentle change.")
 
-# ---- Service detail template
-def service_page(slug, icon, name_html, plain_name, title, desc, intro, whatis, helps, expect, ld_name):
-    helps_li = "".join(f"<li>{h}</li>" for h in helps)
-    body = f"""<section class="page-hero">
+journey_page("the-reconnection", "The Reconnection", "Come back to yourself.", "hero.jpg",
+    ["Life can pull us far from our own centre. The Reconnection is a gentle way home: to your body, your intuition, and your sense of who you are.",
+     "Through energy work, intuitive guidance, and time in stillness, we rebuild the quiet trust between you and yourself."],
+    ["Reiki and energy work", "Intuitive guidance", "Grounding and nature-based practices", "Breath and stillness", "Personalized practices"],
+    ["You feel disconnected from yourself", "You have been living in your head more than your body", "You long for more calm, clarity, and presence", "You want to hear your own inner voice again", "You are ready to feel at home in yourself"],
+    "The Reconnection | Maison Claire Healing",
+    "The Reconnection is a gentle journey back to yourself with Stanislava, rebuilding trust with your body and intuition through energy work and stillness.")
+
+journey_page("the-next-chapter", "The Next Chapter", "Move consciously into what comes next.", "horses.jpg",
+    ["Every threshold, a move, a loss, a new season, asks something of us. The Next Chapter offers steady, compassionate support as you move through change with intention.",
+     "Rather than rushing forward, we make space to honour what is ending and to step consciously into what is beginning."],
+    ["Intuitive guidance", "Hypnotherapy", "Reiki and energy work", "Reflection and ritual", "Personalized practices"],
+    ["You are moving through a major life transition", "You feel between chapters and unsure of the way forward", "You want to move forward with clarity and intention", "You are ready to release what is complete", "You want support as you begin again"],
+    "The Next Chapter | Maison Claire Healing",
+    "The Next Chapter supports you through life transitions with Stanislava, moving consciously into what comes next with clarity, intention, and care.")
+
+journey_page("the-deep-dive", "The Deep Dive", "Go beneath the surface.", "lighthouse-blue.jpg",
+    ["For those who feel called to explore further, The Deep Dive opens into the spiritual dimension of healing, including mediumship and connection with spirit.",
+     "The emphasis of this work is mediumship: making connections with, and delivering messages from, those who are no longer living to those who still are. Working as a mental medium, Stanislava receives messages through the clairs, hearing, seeing, knowing, and feeling, acting as a bridge between the spiritual and physical worlds, with the intention of healing both."],
+    ["Mediumship and spirit connection", "Intuitive and spiritual guidance", "Reiki and energy work", "Connection with guides and ancestors", "Personalized practices"],
+    ["You are seeking to connect with your spirit guides or loved ones on the other side", "You feel drawn to the spiritual side of healing", "You are looking for clarity, meaning, or closure", "You are open to messages that arrive with love", "You want to explore what lies beneath the surface"],
+    "The Deep Dive | Maison Claire Healing",
+    "The Deep Dive opens into the spiritual side of healing with Stanislava, including mediumship and connection with spirit guides, ancestors, and loved ones.")
+
+# ================================================================ APPROACH
+APPROACH_MOD = [
+    ("spiral", "Root-Cause Exploration"),
+    ("lotus", "Cleansing &amp; Nutrition"),
+    ("sun2b", "Sound &amp; Light"),
+    ("caduceus", "Hypnotherapy"),
+    ("rays", "Reiki &amp; Energy Work"),
+    ("eyeb", "Intuitive Guidance"),
+    ("leaf", "Nature &amp; Environment"),
+]
+_AP_INLINE = {
+ "sun2b": '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="9" fill="none" stroke="#fff" stroke-width="1.5"/><g stroke="#fff" stroke-width="1.4" stroke-linecap="round"><line x1="32" y1="10" x2="32" y2="17"/><line x1="32" y1="47" x2="32" y2="54"/><line x1="10" y1="32" x2="17" y2="32"/><line x1="47" y1="32" x2="54" y2="32"/><line x1="16" y1="16" x2="21" y2="21"/><line x1="43" y1="43" x2="48" y2="48"/><line x1="48" y1="16" x2="43" y2="21"/><line x1="21" y1="43" x2="16" y2="48"/></g></svg>',
+ "eyeb": '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M12 32 Q32 16 52 32 Q32 48 12 32 Z" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="32" cy="32" r="6" fill="none" stroke="#fff" stroke-width="1.5"/></svg>',
+}
+def _apicon(key):
+    return _AP_INLINE.get(key) or IC.get(key) or ""
+approach_mods_html = "".join(
+    f'<div class="apmod"><span class="apmod-ic">{_apicon(k)}</span><span>{n}</span></div>' for k, n in APPROACH_MOD)
+
+APPROACH_STEPS = [
+    ("Discover", "Look beneath the surface."),
+    ("Clear", "Support the body&rsquo;s natural processes."),
+    ("Rebalance", "Bring body, mind, and emotions into harmony."),
+    ("Reconnect", "Work with intuition, light, and energy."),
+    ("Restore", "Feel more whole, calm, and connected."),
+]
+approach_steps_html = "".join(
+    f'<div class="step"><span class="step-num">0{i+1}</span><h3>{n}</h3><p>{d}</p></div>'
+    for i, (n, d) in enumerate(APPROACH_STEPS))
+
+approach_body = f"""<section class="page-hero">
   <div class="container">
-    <p class="eyebrow">Maison Claire Services</p>
-    <h1>{name_html}</h1>
-    <p>{intro}</p>
+    <p class="eyebrow">The Maison Claire Approach</p>
+    <h1>Healing begins beneath the surface.</h1>
+    <p>We look at the whole person, body, mind, and spirit, and the many influences that shape how you feel and live.</p>
   </div>
 </section>
 
-<section class="pad-sm">
+<section class="pad">
+  <div class="container narrow prose center-prose">
+    <p class="lead">Rather than focusing only on what is showing up on the surface, we explore what may be contributing to it at a deeper level.</p>
+    <p>Our approach may draw from root-cause exploration, supportive cleansing and nutrition, sound and light, hypnotherapy, Reiki and energy work, intuitive guidance, and connection with nature. Each is simply a different doorway.</p>
+  </div>
+  <div class="container" style="margin-top:40px">
+    <div class="apmods">{approach_mods_html}</div>
+  </div>
+</section>
+
+<section class="pad tint">
+  <div class="container center">
+    <div class="section-head"><div class="rule"></div><p class="eyebrow">How healing unfolds</p><div class="rule"></div></div>
+    <div class="steps five">{approach_steps_html}</div>
+  </div>
+</section>
+
+<section class="bms">
+  <div class="container center">
+    <p class="bms-line">Body &nbsp;&middot;&nbsp; Mind &nbsp;&middot;&nbsp; Spirit</p>
+  </div>
+</section>
+
+{cta_band()}"""
+approach_ld = '{"@context":"https://schema.org","@type":"MedicalWebPage","name":"The Maison Claire Approach","about":"Whole-person natural healing: root-cause exploration, cleansing and nutrition, sound and light, hypnotherapy, Reiki and energy work, intuitive guidance, and nature."}'
+page("approach", "The Approach | Whole-Person Healing at Maison Claire",
+     "The Maison Claire approach to whole-person healing with Stanislava: root-cause exploration, cleansing, sound and light, hypnotherapy, Reiki, intuitive guidance, and nature.",
+     approach_body, "/approach", approach_ld)
+
+# ================================================================ ABOUT
+about_body = f"""<section class="page-hero">
   <div class="container">
-    <div class="split">
-      <div class="prose">
-        <h2>What it is</h2>
-        <p>{whatis}</p>
-        <h3>How it may help</h3>
-        <ul>{helps_li}</ul>
-      </div>
-      <div class="media"><img class="crest-mark" src="/crest-mark.png" alt="" aria-hidden="true" /></div>
+    <p class="eyebrow">About</p>
+    <h1>My path led me here.<br/>And yours can too.</h1>
+    <p>Real healing is not about becoming someone new. It is about remembering who you already are.</p>
+  </div>
+</section>
+
+<section class="pad">
+  <div class="container split-about">
+    <div class="about-photo"><img src="/portrait.jpg" alt="Stanislava, founder of Maison Claire Healing" width="1500" height="1000" /></div>
+    <div class="prose">
+      <p class="eyebrow">I&rsquo;m Stanislava</p>
+      <h2 class="approach-title">A guide, and a fellow traveller.</h2>
+      <p>For many years, I have been drawn to the healing power of nature, the wisdom of the body, and the invisible energies that shape our lives. My path has led me to bring together a range of complementary practices, not as a formula, but as a personalized approach to support each person who comes here.</p>
+      <p>Maison Claire was born from a deep belief in the incredible capacity we all have to heal, to grow, and to come back to ourselves.</p>
     </div>
   </div>
 </section>
 
 <section class="pad tint">
   <div class="container narrow prose">
-    <h2>What to expect</h2>
-    <p>{expect}</p>
-    <p>Every session is gentle, personal, and paced to you. There is nothing to prepare and nothing to prove. You simply arrive as you are.</p>
+    <p class="eyebrow">Mediumship</p>
+    <h2>A bridge between two worlds.</h2>
+    <p>The emphasis of my work is mediumship: making connections with, and delivering messages from, people who are no longer living to those who still are. I receive information primarily and directly from spirit guides, angels, and from those who have passed.</p>
+    <p>While there are a number of forms of mediumship, I work as a mental medium, meaning I communicate with spirits through telepathy. Spirits impress my mind and body with thoughts and feelings that come in through the clairs. Mentally I hear (clairaudience), see (clairvoyance), know (claircognizance), and feel (clairsentience) messages from spirit.</p>
+    <p>I act as the bridge between the spiritual and the physical world, with the intention of healing both.</p>
   </div>
 </section>
 
-{cta_band("Book " + plain_name, "Reach out to Stanislava to arrange your session.")}"""
-    jsonld = """{"@context":"https://schema.org","@type":"Service","serviceType":"%s","provider":{"@type":"HealthAndBeautyBusiness","name":"Maison Claire"},"areaServed":"Greater Vancouver","description":"%s","url":"%s/%s"}""" % (ld_name, desc.replace('"',''), BASE, slug)
-    page(slug, title, desc, body, "/reiki-healing" if slug=="reiki-healing" else "/services", jsonld)
+<section class="pad quote">
+  <div class="container">
+    <blockquote><span class="mark" aria-hidden="true">&ldquo;</span>Healing is not about becoming someone different, but about removing what has obscured who you already are.</blockquote>
+  </div>
+</section>
 
-service_page(
-    "reiki-healing", "rays", "Reiki Healing", "Reiki Healing",
-    "Reiki Healing | Maison Claire",
-    "Reiki healing at Maison Claire helps restore energetic balance, reduce stress, and support your body&rsquo;s natural healing on every level.",
-    "A calm, hands light energy practice that helps your whole system settle, so healing can begin.",
-    "Reiki is a gentle energy healing practice. Through light, resting hand positions, it encourages your nervous system to soften out of stress and into a state where restoration becomes possible. Nothing is forced. The work simply supports the balance your body is always reaching for.",
-    ["Reduce stress and quiet a busy mind",
-     "Restore a sense of energetic balance and calm",
-     "Ease tension held in the body",
-     "Support rest, sleep, and emotional release",
-     "Complement other healing and medical care"],
-    "You rest fully clothed and comfortable while Stanislava works through a series of gentle hand positions. Many people feel warmth, a deep calm, or simply drift into rest. Afterwards there is space to sit quietly and return in your own time.",
-    "Reiki Healing")
+<section class="pad testimonial-sec">
+  <div class="container narrow center">
+    <span class="mark" aria-hidden="true">&ldquo;</span>
+    <blockquote class="testimonial">Stani is a natural intuitive. Her ability to connect to the Spirit World, to hear the clear messages from our passed ancestors and to relay them in a healing way is truly beautiful. If you are seeking to connect to your spirit guides, your family on the &lsquo;other side&rsquo; (human and animal), or just to get some clarity, I recommend a session with Stani.</blockquote>
+    <cite>Andrea &middot; @nectaryoga</cite>
+  </div>
+</section>
 
-service_page(
-    "hypnotherapy-intuitive-guidance", "caduceus", "Hypnotherapy &amp; Intuitive Guidance", "Hypnotherapy & Intuitive Guidance",
-    "Hypnotherapy & Intuitive Guidance | Maison Claire",
-    "Hypnotherapy and intuitive guidance at Maison Claire help you clear blocks, release old patterns, and reconnect with your inner wisdom for lasting transformation.",
-    "Clear blocks, release old patterns, and reconnect with your inner wisdom for lasting transformation.",
-    "Working with the calm, focused state of hypnosis alongside intuitive guidance, we gently explore the patterns and beliefs that keep you stuck. In this relaxed state, the mind becomes open and receptive, making it easier to release what no longer serves you and invite in what does.",
-    ["Release limiting patterns and old stories",
-     "Soften anxiety, overwhelm, and self doubt",
-     "Reconnect with your intuition and inner wisdom",
-     "Support meaningful, lasting change",
-     "Bring clarity to a decision or a season of transition"],
-    "You remain relaxed, aware, and fully in control throughout. Stanislava guides you into a calm, focused state and, with intuitive care, helps you gently work with what surfaces. Sessions are collaborative and always paced to your comfort.",
-    "Hypnotherapy and Intuitive Guidance")
+{cta_band()}"""
+about_ld = '{"@context":"https://schema.org","@type":"AboutPage","name":"About Maison Claire","about":{"@type":"Person","name":"Stanislava","jobTitle":"Healing Practitioner and Medium","worksFor":{"@type":"Organization","name":"Maison Claire Healing"}}}'
+page("about", "About Stanislava | Maison Claire Healing",
+     "Meet Stanislava, founder of Maison Claire Healing on Bowen Island. A whole-person healing practitioner and medium working with intuition, energy, and spirit.",
+     about_body, "/about", about_ld)
 
-service_page(
-    "liver-cleanse-detox", "lotus", "Liver Cleanse &amp; Detox", "Liver Cleanse & Detox",
-    "Liver Cleanse & Detox | Maison Claire",
-    "Liver cleanse and detox support at Maison Claire helps your body&rsquo;s natural detoxification, resets your energy, and restores balance.",
-    "Support your body&rsquo;s natural detoxification, reset your energy, and restore balance.",
-    "Your body is designed to cleanse itself. This gentle, guided support helps that natural process along, easing the load on your system so you can feel lighter, clearer, and more energised. It is a nourishing reset rather than a harsh regime.",
-    ["Support the body&rsquo;s natural detoxification",
-     "Reset and lift your everyday energy",
-     "Ease bloating and heaviness",
-     "Encourage clearer skin and brighter mornings",
-     "Restore a sense of overall balance"],
-    "We begin by understanding how you feel day to day, then create a supportive, realistic plan for your cleanse. You receive gentle guidance throughout, so the process feels steady and doable rather than overwhelming.",
-    "Liver Cleanse and Detox")
-
-service_page(
-    "root-cause-healing", "spiral", "Root Cause Healing", "Root Cause Healing",
-    "Root Cause Healing | Maison Claire",
-    "Root cause healing at Maison Claire looks beneath the symptoms, so your body, mind, and spirit can return to their natural state of healing.",
-    "Uncover the root cause, so your body, mind, and spirit can return to their natural state of healing.",
-    "Symptoms are messengers. Root cause healing is the thread that runs through all of our work: rather than only quieting the surface, we look gently beneath it for what is truly asking to be addressed. When the root is cared for, the whole system can find its way back to balance.",
-    ["Understand what lies beneath recurring symptoms",
-     "Address the cause, not only the signs",
-     "Bring body, mind, and spirit back into alignment",
-     "Create change that lasts",
-     "Feel truly heard and cared for as a whole person"],
-    "Root cause healing weaves through your sessions. We take time to listen, notice patterns, and follow what your body and story reveal, then choose the supportive practices that fit you best.",
-    "Root Cause Healing")
-
-# ---- FAQ
-faqs = [
-    ("What happens in a first session?",
-     "We start with a relaxed conversation about how you feel and what you hope for. From there, Stanislava tailors the session to you. There is nothing to prepare in advance."),
-    ("Is Reiki or energy healing safe?",
-     "Yes. Reiki is gentle and non invasive. You remain fully clothed and comfortable throughout. It is designed to complement, not replace, medical care."),
-    ("Do I need to believe in it for it to work?",
-     "No. You are welcome to arrive curious, unsure, or simply open. Many people feel calmer and lighter regardless of what they expected."),
-    ("How many sessions will I need?",
-     "That depends on you and what you are working with. Some people come for a single reset, others enjoy ongoing support. We will find a rhythm that suits you."),
-    ("Is this a replacement for medical treatment?",
-     "No. Maison Claire offers natural, complementary wellbeing support. Please continue to work with your doctor and follow their advice for medical concerns."),
-    ("How do I book?",
-     "Reach out by email at %s or call %s. We will find a time that works and answer any questions before you begin." % (EMAIL, PHONE_DISPLAY)),
+# ================================================================ CONTACT
+CONTACT_STEPS = [
+    ("Reach Out", "Send a message or call to book your free consultation."),
+    ("Connect", "We have a relaxed, private conversation about where you are."),
+    ("Create", "Together we shape the journey that is right for you."),
 ]
-faq_items = "".join(f"<details><summary>{q}</summary><p>{a}</p></details>" for q, a in faqs)
-faq_body = f"""<section class="page-hero">
-  <div class="container">
-    <p class="eyebrow">Questions &amp; Answers</p>
-    <h1>Frequently asked questions.</h1>
-    <p>A few things people often ask before their first visit. If your question is not here, we would love to hear from you.</p>
-  </div>
-</section>
+contact_steps_html = "".join(
+    f'<div class="step"><span class="step-num">0{i+1}</span><h3>{n}</h3><p>{d}</p></div>'
+    for i, (n, d) in enumerate(CONTACT_STEPS))
 
-<section class="pad">
-  <div class="container">
-    <div class="faq">{faq_items}</div>
-  </div>
-</section>
-
-{cta_band("Still have a question?", "Reach out to Stanislava and we will be glad to help.")}"""
-faq_ld = "{" + '"@context":"https://schema.org","@type":"FAQPage","mainEntity":[' + ",".join(
-    '{"@type":"Question","name":"%s","acceptedAnswer":{"@type":"Answer","text":"%s"}}' % (q, a.replace('"',''))
-    for q, a in faqs) + "]}"
-page("faq", "FAQ | Maison Claire Natural Healing",
-     "Answers to common questions about Reiki, hypnotherapy, detox, and root cause healing at Maison Claire, and how to book with Stanislava.",
-     faq_body, "/faq", faq_ld)
-
-# ---- Contact
 contact_body = f"""<section class="page-hero">
   <div class="container">
-    <p class="eyebrow">Book Your Session</p>
-    <h1>Begin your natural path.</h1>
-    <p>Book a session with Stanislava or ask a question. We would love to hear from you and help you take the first gentle step.</p>
+    <p class="eyebrow">Private Consultation</p>
+    <h1>A conversation that<br/>can change everything.</h1>
+    <p>Your first step is a free 15-minute conversation. No pressure, no need to have all the answers before reaching out.</p>
+    <div class="hero-cta" style="justify-content:center;margin-top:26px">
+      <a href="tel:{PHONE_TEL}" class="btn btn-primary">Call or Text {PHONE_DISPLAY}</a>
+      <a href="mailto:{EMAIL}" class="btn btn-ghost">Email Stanislava</a>
+    </div>
   </div>
 </section>
 
 <section class="pad">
+  <div class="container narrow prose center-prose">
+    <h2>Your first step</h2>
+    <p>You do not need to arrive knowing exactly what you need. Your first private consultation is a confidential conversation about where you are, what has brought you here, and what you would like to change. From there, we can find the approach and journey that feel right for you.</p>
+  </div>
+  <div class="container center" style="margin-top:34px">
+    <div class="steps">{contact_steps_html}</div>
+  </div>
+</section>
+
+<section class="pad tint">
   <div class="container">
-    <div class="contact-grid">
+    <div class="contact-grid three">
+      <a class="contact-card" href="tel:{PHONE_TEL}">
+        <span class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 4h3l2 5-2.5 1.5a12 12 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></span>
+        <span class="contact-label">Call or Text Stanislava</span>
+        <span class="contact-value">{PHONE_DISPLAY}</span>
+      </a>
       <a class="contact-card" href="mailto:{EMAIL}">
         <span class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 7l9 6 9-6"/></svg></span>
         <span class="contact-label">Email</span>
         <span class="contact-value">{EMAIL}</span>
       </a>
-      <a class="contact-card" href="tel:{PHONE_TEL}">
-        <span class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 4h3l2 5-2.5 1.5a12 12 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></span>
-        <span class="contact-label">Phone</span>
-        <span class="contact-value">{PHONE_DISPLAY}</span>
-      </a>
+      <div class="contact-card">
+        <span class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21s-7-6.4-7-11a7 7 0 0 1 14 0c0 4.6-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+        <span class="contact-label">Where</span>
+        <span class="contact-value">Bowen Island, BC<br/>In-person &amp; online</span>
+      </div>
     </div>
-    <p class="contact-note">Book your session with Stanislava. Every enquiry is welcome, whether you are ready to begin or simply exploring.</p>
-  </div>
-</section>
-
-<section class="pad-sm quote">
-  <div class="container">
-    <blockquote><span class="mark" aria-hidden="true">&ldquo;</span>Your Health. Your Power. Your Natural Path.<cite>Maison Claire</cite></blockquote>
+    <p class="contact-note">A more luminous you begins with a single conversation.</p>
   </div>
 </section>"""
-contact_ld = """{"@context":"https://schema.org","@type":"ContactPage","name":"Contact Maison Claire","mainEntity":{"@type":"HealthAndBeautyBusiness","name":"Maison Claire","email":"%s","telephone":"%s","url":"%s"}}""" % (EMAIL, PHONE_DISPLAY, BASE)
-page("contact", "Contact & Booking | Maison Claire",
-     "Book a Reiki, hypnotherapy, detox, or root cause healing session with Stanislava at Maison Claire. Email booking@MaisonClaireHealing.com or call 604-841-4833.",
+contact_ld = '{"@context":"https://schema.org","@type":"ContactPage","name":"Contact Maison Claire Healing","mainEntity":{"@type":"HealthAndBeautyBusiness","name":"Maison Claire Healing","email":"%s","telephone":"%s","areaServed":"Bowen Island, British Columbia","url":"%s"}}' % (EMAIL, PHONE_DISPLAY, BASE)
+page("contact", "Contact & Free Consultation | Maison Claire Healing",
+     "Book a free 15-minute consultation with Stanislava at Maison Claire Healing. Call or text 604-841-4833, email booking@MaisonClaireHealing.com. Bowen Island, in-person and online.",
      contact_body, "/contact", contact_ld)
 
 # ---------------------------------------------------------------- sitemap + robots
-urls = ["/", "/about", "/services", "/reiki-healing", "/hypnotherapy-intuitive-guidance",
-        "/liver-cleanse-detox", "/root-cause-healing", "/faq", "/contact"]
+urls = ["/", "/journeys", "/the-reset", "/the-shift", "/the-reconnection",
+        "/the-next-chapter", "/the-deep-dive", "/approach", "/about", "/contact"]
 sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 for u in urls:
     pr = "1.0" if u == "/" else "0.8"
@@ -519,9 +580,15 @@ for u in urls:
 sm += "</urlset>\n"
 with open(os.path.join(HERE, "sitemap.xml"), "w") as f:
     f.write(sm)
-
 with open(os.path.join(HERE, "robots.txt"), "w") as f:
     f.write(f"User-agent: *\nAllow: /\n\nSitemap: {BASE}/sitemap.xml\n")
 
+# remove stale pages from the previous structure
+for old in ["services", "reiki-healing", "hypnotherapy-intuitive-guidance",
+            "liver-cleanse-detox", "root-cause-healing", "faq"]:
+    p = os.path.join(HERE, old + ".html")
+    if os.path.exists(p):
+        os.remove(p)
+
 print("Built:", ", ".join(urls))
-print("Wrote sitemap.xml and robots.txt")
+print("Wrote sitemap.xml and robots.txt; removed stale pages")
