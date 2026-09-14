@@ -59,7 +59,7 @@ FOOTER = f"""<footer class="foot">
       <div class="foot-brand-block">
         <img src="/logo-navy-light.png" alt="Maison Claire Healing" />
         <p class="foot-tag">A Clearer You &nbsp;&bull;&nbsp; A Brighter Tomorrow</p>
-        <p class="foot-desc">A private space for deeper change with Stani, a whole-person healing practice on Bowen Island, British Columbia. In-person &amp; online.</p>
+        <p class="foot-desc">A private space for deeper change with Stanislava, a whole-person healing practice on Bowen Island, British Columbia. In-person &amp; online.</p>
       </div>
       <div class="foot-col">
         <h4>Explore</h4>
