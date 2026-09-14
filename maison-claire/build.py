@@ -46,9 +46,9 @@ def nav(active):
     items = "".join(parts)
     return f"""<header class="nav">
   <div class="nav-inner">
-    <a href="/" class="nav-brand" aria-label="Maison Claire home"><img src="/crest.png" alt="Maison Claire" width="620" height="306" /></a>
+    <a href="/" class="nav-brand" aria-label="Maison Claire Healing home"><img src="/logo-navy.png" alt="Maison Claire Healing" width="432" height="186" /></a>
     <nav class="nav-links" aria-label="Primary">{items}</nav>
-    <a href="/contact" class="nav-cta">Book a Session</a>
+    <a href="/contact" class="nav-cta">Request a Consultation</a>
     <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </header>"""
@@ -57,7 +57,7 @@ FOOTER = f"""<footer class="foot">
   <div class="container">
     <div class="foot-top">
       <div class="foot-brand-block">
-        <img src="/logo-foot.png" alt="Maison Claire Healing" />
+        <img src="/logo-navy-light.png" alt="Maison Claire Healing" />
         <p class="foot-tag">A Clearer You &nbsp;&bull;&nbsp; A Brighter Tomorrow</p>
         <p class="foot-desc">A private space for deeper change with Stani, a whole-person healing practice on Bowen Island, British Columbia. In-person &amp; online.</p>
       </div>
@@ -133,7 +133,10 @@ def page(path, title, desc, body, active, jsonld=""):
 """
     # Cache-busting: version every local asset so redeploys always refresh
     for asset in ["/styles.css", "/logo.png", "/logo-sm.png", "/logo-foot.png",
-                  "/crest.png", "/crest-mark.png", "/favicon.png", "/og.jpg"]:
+                  "/logo-navy.png", "/logo-navy-light.png", "/crest.png", "/crest-navy.png",
+                  "/crest-mark.png", "/favicon.png", "/og.jpg",
+                  "/hero.jpg", "/portrait.jpg", "/lighthouse-warm.jpg", "/lighthouse-blue.jpg",
+                  "/mountains.jpg", "/grassland.jpg", "/horses.jpg"]:
         html = html.replace(asset, asset + "?v=" + VER)
     fn = os.path.join(HERE, ("index" if path == "index" else path) + ".html")
     with open(fn, "w", encoding="utf-8") as f:
@@ -183,42 +186,80 @@ def services_diamond(items, center=""):
 # ================================================================ PAGES
 
 # ---- Home
-home_body = f"""<section class="hero">
-  <div class="hero-inner">
-    <div class="hero-logo"><img src="/logo.png" alt="Maison Claire Healing &ndash; A clearer you, a brighter tomorrow" width="900" height="349" /></div>
-    <div class="divider" aria-hidden="true"><span></span><i>&#10022;</i><span></span></div>
-    <h1 class="hero-title">Come back to yourself.</h1>
-    <p class="hero-text">A private space for deeper change. Sometimes we know something isn&rsquo;t working, but we don&rsquo;t know why. Maison Claire offers a whole-person approach to exploring the physical, emotional, and inner patterns that may be keeping you from feeling fully yourself.</p>
+PROMPTS = [
+    ("star", "You&rsquo;re moving through a major life transition."),
+    ("waves", "You feel disconnected from yourself."),
+    ("rings", "You&rsquo;re repeating a pattern you can&rsquo;t seem to shift."),
+    ("lotus2", "You carry emotional weight that no longer serves you."),
+    ("eye", "You&rsquo;re searching for greater clarity and direction."),
+    ("sun2", "You want a deeper understanding of yourself."),
+]
+PIC = {
+"star": '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="15" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M24 9 L26 22 L39 24 L26 26 L24 39 L22 26 L9 24 L22 22 Z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>',
+"waves": '<svg viewBox="0 0 48 48"><path d="M8 20 Q16 14 24 20 T40 20 M8 28 Q16 22 24 28 T40 28" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
+"rings": '<svg viewBox="0 0 48 48"><circle cx="19" cy="24" r="11" fill="none" stroke="currentColor" stroke-width="1.1"/><circle cx="29" cy="24" r="11" fill="none" stroke="currentColor" stroke-width="1.1"/></svg>',
+"lotus2": '<svg viewBox="0 0 48 48"><path d="M24 36 C16 31 13 25 16 20 C20 17 23 21 24 25 C25 21 28 17 32 20 C35 25 32 31 24 36 Z" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M24 36 C20 31 19 26 20 22 M24 36 C28 31 29 26 28 22" fill="none" stroke="currentColor" stroke-width="0.9"/></svg>',
+"eye": '<svg viewBox="0 0 48 48"><path d="M9 24 Q24 12 39 24 Q24 36 9 24 Z" fill="none" stroke="currentColor" stroke-width="1.1"/><circle cx="24" cy="24" r="4.5" fill="none" stroke="currentColor" stroke-width="1.1"/></svg>',
+"sun2": '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><g stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><line x1="24" y1="8" x2="24" y2="13"/><line x1="24" y1="35" x2="24" y2="40"/><line x1="8" y1="24" x2="13" y2="24"/><line x1="35" y1="24" x2="40" y2="24"/><line x1="13" y1="13" x2="16.5" y2="16.5"/><line x1="31.5" y1="31.5" x2="35" y2="35"/><line x1="35" y1="13" x2="31.5" y2="16.5"/><line x1="16.5" y1="31.5" x2="13" y2="35"/></g></svg>',
+}
+prompts_html = "".join(f'<div class="prompt"><span class="prompt-ic">{PIC[i]}</span><p>{t}</p></div>' for i, t in PROMPTS)
+
+MODALITIES = [
+    ("rays", "Intuitive Guidance"),
+    ("caduceus", "Hypnotherapy"),
+    ("spiral", "Reiki &amp; Energy Work"),
+    ("lotus", "Personalized Practices"),
+]
+modalities_html = "".join(f'<div class="modality"><span class="modality-ic">{IC[i]}</span><span>{n}</span></div>' for i, n in MODALITIES)
+
+home_body = f"""<section class="photo-hero" style="background-image:linear-gradient(90deg, rgba(22,38,58,0.78) 0%, rgba(22,38,58,0.42) 42%, rgba(22,38,58,0.10) 70%, rgba(22,38,58,0) 100%), url('/hero.jpg');">
+  <div class="container photo-hero-inner">
+    <p class="ph-eyebrow">A private space for deeper change</p>
+    <h1 class="ph-title">Come back<br/>to yourself.</h1>
+    <p class="ph-lead">Sometimes we know something isn&rsquo;t working, but we don&rsquo;t know why. Maison Claire offers a personalized approach to exploring the physical, emotional, and inner patterns that may be keeping you from feeling fully yourself.</p>
     <div class="hero-cta">
       <a href="/contact" class="btn btn-primary">Request a Private Consultation</a>
-      <a href="/services" class="btn btn-ghost">Explore Your Journey</a>
     </div>
   </div>
-  {MOUNTAINS}
 </section>
 
 <section class="pad">
   <div class="container">
-    <div class="section-head"><div class="rule"></div><p class="eyebrow">Our Services</p><div class="rule"></div></div>
-    {services_diamond(SERVICES, center='<em>Your Health.<br/>Your Power.<br/>Your Natural Path.</em>')}
+    <div class="section-head"><div class="rule"></div><p class="eyebrow">Is something asking to change?</p><div class="rule"></div></div>
+    <div class="prompts">{prompts_html}</div>
+    <div class="center" style="margin-top:34px"><a href="/contact" class="btn btn-ghost">Explore the Journey</a></div>
   </div>
 </section>
 
-<section class="pad tint">
-  <div class="container">
-    <div class="section-head"><div class="rule"></div><p class="eyebrow">A Gentle Approach</p><div class="rule"></div></div>
-    <p class="approach-lead">Healing here is never rushed. Every session follows the same unhurried rhythm, so you always feel safe, heard, and cared for as a whole person.</p>
-    <div class="steps">
-      <div class="step"><span class="step-num">01</span><h3>Listen</h3><p>We begin with a warm, unhurried conversation about how you feel, what you carry, and what you long to release.</p></div>
-      <div class="step"><span class="step-num">02</span><h3>Uncover</h3><p>Through energy work, intuitive guidance, and gentle inquiry, we look beneath the symptoms for the root that is asking for care.</p></div>
-      <div class="step"><span class="step-num">03</span><h3>Restore</h3><p>You leave lighter, your body supported, your mind quieter, your spirit reconnected to its own natural knowing.</p></div>
+<section class="feature-band" style="background-image:linear-gradient(90deg, rgba(22,38,58,0.72), rgba(22,38,58,0.30)), url('/lighthouse-blue.jpg');">
+  <div class="container feature-inner">
+    <div class="feature-card">
+      <p class="eyebrow" style="color:var(--gold-soft)">Healing from the inside out</p>
+      <h2>We look deeper.<br/>Beyond the surface.</h2>
+      <p>Because true healing is not just about what you can see. It is about what lies beneath, in the physical, emotional, and energetic patterns that shape how you feel and live.</p>
+      <a href="/services" class="btn btn-ghost light">The Maison Claire Approach</a>
     </div>
   </div>
 </section>
 
-<section class="pad quote">
-  <div class="container">
-    <blockquote><span class="mark" aria-hidden="true">&ldquo;</span>Healing is a return, not a destination. It is a gentle remembering of who you have always been.</blockquote>
+<section class="pad tint">
+  <div class="container split-approach">
+    <div>
+      <p class="eyebrow">A personalized approach</p>
+      <h2 class="approach-title">You are more than the patterns you have lived through.</h2>
+      <p>Through intuitive guidance, hypnosis, Reiki, and complementary practices, each journey is shaped around the individual, not a predetermined formula.</p>
+      <p>This is not about fixing you. It is about helping you explore what may already be within you, and giving you the space, perspective, and support to move forward with greater clarity, balance, and ease.</p>
+      <p class="signature">Stanislava</p>
+    </div>
+    <div class="modalities">{modalities_html}</div>
+  </div>
+</section>
+
+<section class="pad testimonial-sec">
+  <div class="container narrow center">
+    <span class="mark" aria-hidden="true">&ldquo;</span>
+    <blockquote class="testimonial">Stani is a natural intuitive. Her ability to connect to the Spirit World, to hear the clear messages from our passed ancestors and to relay them in a healing way is truly beautiful. If you are seeking to connect to your spirit guides, your family on the &lsquo;other side&rsquo; (human and animal), or just to get some clarity, I recommend a session with Stani.</blockquote>
+    <cite>Andrea &middot; @nectaryoga</cite>
   </div>
 </section>
 

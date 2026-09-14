@@ -88,7 +88,7 @@ h1, h2, h3, h4 { margin: 0; }
   display: flex; align-items: center; gap: 22px;
 }
 .nav-brand { display: flex; align-items: center; flex: 0 0 auto; }
-.nav-brand img { height: 42px; width: auto; }
+.nav-brand img { height: 54px; width: auto; }
 .nav-links {
   display: flex; gap: 26px; align-items: center;
   margin-left: auto;
@@ -277,8 +277,59 @@ section { position: relative; }
 .foot-bottom p { font-family: var(--sans); font-size: 11.5px; letter-spacing: 0.06em; color: #a89771; margin: 0; }
 .foot-bottom .heal { letter-spacing: 0.2em; text-transform: uppercase; color: #cbb98a; }
 
+/* ---------- Photo hero ---------- */
+.photo-hero {
+  background-size: cover; background-position: center right;
+  min-height: min(88vh, 760px);
+  display: flex; align-items: center;
+  border-bottom: 3px solid var(--gold-soft);
+}
+.photo-hero-inner { width: 100%; }
+.ph-eyebrow { font-family: var(--sans); letter-spacing: 0.34em; text-transform: uppercase; font-size: 12px; color: #e9d9b3; margin: 0 0 14px; }
+.ph-title { font-family: var(--serif); font-weight: 500; color: #fdfaf3; font-size: clamp(42px, 7vw, 82px); line-height: 1.02; letter-spacing: 0.01em; margin: 0 0 22px; }
+.ph-lead { color: #eef2f6; font-size: clamp(17px, 2vw, 21px); max-width: 500px; margin: 0 0 30px; line-height: 1.6; text-shadow: 0 1px 12px rgba(16,28,42,0.4); }
+.photo-hero .btn-primary { background: var(--gold); border-color: var(--gold); color: #23364d; font-weight: 600; }
+.photo-hero .btn-primary:hover { background: #c9a86a; border-color: #c9a86a; }
+
+/* ---------- Prompts row ---------- */
+.prompts { display: grid; grid-template-columns: repeat(6, 1fr); gap: clamp(16px, 2.4vw, 30px); }
+.prompt { text-align: center; }
+.prompt-ic { color: var(--gold); display: block; width: 52px; height: 52px; margin: 0 auto 14px; }
+.prompt-ic svg { width: 100%; height: 100%; }
+.prompt p { font-family: var(--serif); font-size: clamp(15px, 1.5vw, 17px); color: var(--navy-ink); margin: 0; line-height: 1.4; }
+
+/* ---------- Feature band (photo + card) ---------- */
+.feature-band { background-size: cover; background-position: center; padding: clamp(70px, 11vw, 140px) 0; }
+.feature-inner { display: flex; }
+.feature-card { max-width: 480px; }
+.feature-card h2 { font-family: var(--serif); font-weight: 500; color: #fff; font-size: clamp(28px, 4.4vw, 44px); line-height: 1.12; margin: 8px 0 18px; }
+.feature-card p { color: #e8eef4; font-size: clamp(16px, 1.9vw, 19px); margin: 0 0 26px; }
+.btn-ghost.light { color: #f0e6cf; border-color: rgba(233,217,179,0.6); }
+.btn-ghost.light:hover { background: rgba(233,217,179,0.14); }
+
+/* ---------- Split approach ---------- */
+.split-approach { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: clamp(36px, 6vw, 84px); align-items: center; }
+.split-approach .eyebrow { margin-bottom: 12px; }
+.approach-title { font-family: var(--serif); font-weight: 500; color: var(--navy-ink); font-size: clamp(26px, 3.6vw, 40px); line-height: 1.15; margin: 0 0 20px; }
+.split-approach p { color: var(--ink-soft); font-size: clamp(16px, 1.9vw, 19px); margin: 0 0 16px; }
+.signature { font-family: var(--serif); font-style: italic; font-size: 26px; color: var(--gold-deep) !important; margin-top: 8px !important; }
+.modalities { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.modality { background: var(--paper); border: 1px solid var(--line-soft); border-radius: var(--radius); padding: 26px 18px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.modality-ic { width: 58px; height: 58px; border-radius: 999px; background: linear-gradient(160deg, var(--navy-soft), var(--navy)); color: #fff; display: grid; place-items: center; }
+.modality-ic svg { width: 55%; height: 55%; }
+.modality span { font-family: var(--serif); font-weight: 600; font-size: 16px; color: var(--navy-ink); letter-spacing: 0.02em; }
+
+/* ---------- Testimonial ---------- */
+.testimonial-sec { background: var(--cream); }
+.testimonial-sec .mark { font-family: var(--display); color: var(--gold); font-size: clamp(56px, 9vw, 82px); line-height: 0.2; display: block; margin-bottom: 10px; }
+.testimonial { font-family: var(--serif); font-style: italic; font-size: clamp(20px, 2.7vw, 28px); line-height: 1.45; color: var(--navy-ink); margin: 0 auto; max-width: 760px; }
+.testimonial-sec cite { display: block; margin-top: 24px; font-family: var(--sans); font-style: normal; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-deep); }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
+  .prompts { grid-template-columns: repeat(3, 1fr); row-gap: 34px; }
+  .split-approach { grid-template-columns: 1fr; }
+  .photo-hero { background-position: center; }
   .service-grid { grid-template-columns: 1fr; gap: 46px; }
   .service-diamond { grid-template-columns: 1fr; grid-template-rows: none; row-gap: 46px; }
   .service-diamond .service, .service-diamond .diamond-center { grid-column: 1 !important; grid-row: auto !important; }
