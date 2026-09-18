@@ -48,7 +48,7 @@ def nav(active):
     items = "".join(parts)
     return f"""<header class="nav">
   <div class="nav-inner">
-    <a href="/" class="nav-brand" aria-label="Maison Claire Healing home"><img src="/logo-navy.png" alt="Maison Claire Healing" width="432" height="186" /></a>
+    <a href="/" class="nav-brand" aria-label="Maison Claire Healing home"><img src="/maison-claire-logo.svg" alt="Maison Claire Healing" width="1200" height="520" /></a>
     <nav class="nav-links" aria-label="Primary">{items}</nav>
     <a href="/consultation" class="nav-cta">Request a Consultation</a>
     <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
@@ -59,7 +59,7 @@ FOOTER = f"""<footer class="foot">
   <div class="container">
     <div class="foot-top">
       <div class="foot-brand-block">
-        <img src="/logo-navy-light.png" alt="Maison Claire Healing" />
+        <img src="/maison-claire-logo-light.svg" alt="Maison Claire Healing" />
         <p class="foot-tag">A Clearer You &nbsp;&bull;&nbsp; A Brighter Tomorrow</p>
         <p class="foot-desc">A private space for deeper change with Stanislava, a whole-person healing practice on Bowen Island, British Columbia. In-person &amp; online.</p>
       </div>
@@ -141,7 +141,8 @@ def page(path, title, desc, body, active, jsonld=""):
                   "/mountains.jpg", "/grassland.jpg", "/horses.jpg",
                   "/banner-waterfall.jpg", "/banner-village.jpg", "/banner-seatree.jpg",
                   "/banner-mistlake.jpg", "/banner-greenhills.jpg", "/portrait-bw.jpg",
-                  "/window.jpg", "/nature-shore.jpg", "/nature-lake.jpg", "/nature-icecap.jpg"]:
+                  "/window.jpg", "/nature-shore.jpg", "/nature-lake.jpg", "/nature-icecap.jpg",
+                  "/maison-claire-logo.svg", "/maison-claire-logo-light.svg"]:
         html = html.replace(asset, asset + "?v=" + VER)
     fn = os.path.join(HERE, ("index" if path == "index" else path) + ".html")
     with open(fn, "w", encoding="utf-8") as f:
@@ -541,41 +542,75 @@ kind_words_html = '<div class="kind-words">' + "".join(
 
 about_body = f"""<section class="page-hero">
   <div class="container">
-    <p class="eyebrow">About</p>
-    <h1>My path led me here.<br/>And yours can too.</h1>
-    <p>Real healing is not about becoming someone new. It is about remembering who you already are.</p>
+    <p class="eyebrow">About Me</p>
+    <h1>A guide, a practitioner,<br/>and a fellow traveller.</h1>
+    <p>My name is Stanislava Oben.</p>
   </div>
 </section>
 
 <section class="pad">
   <div class="container split-about">
-    <div class="about-photo"><img src="/portrait.jpg" alt="Stanislava, founder of Maison Claire Healing" width="1500" height="1000" /></div>
+    <div class="about-photo"><img src="/portrait.jpg" alt="Stanislava Oben, founder of Maison Claire Healing" width="1500" height="1000" /></div>
     <div class="prose">
-      <p class="eyebrow">I&rsquo;m Stanislava</p>
-      <h2 class="approach-title">A guide, and a fellow traveller.</h2>
-      <p>For many years, I have been drawn to the healing power of nature, the wisdom of the body, and the invisible energies that shape our lives. My path has led me to bring together a range of complementary practices, not as a formula, but as a personalized approach to support each person who comes here.</p>
-      <p>As a Certified Natural Health Coach, my work brings together health education, nutrition and lifestyle practices with complementary approaches to wellbeing.</p>
-      <p>Maison Claire was born from a deep belief in the incredible capacity we all have to heal, to grow, and to come back to ourselves.</p>
+      <p>For much of my life, I have been curious about what lies beneath the surface of our health, our emotions, our patterns, and even our understanding of who we are.</p>
+      <p>That curiosity has taken me in many directions.</p>
+      <p>I have studied the physical body and natural approaches to health. I have explored hypnosis and the subconscious mind. I have worked with Reiki, intuition, energy and mediumship, and through all of it, I have become increasingly interested in one fundamental question:</p>
+      <p class="statement" style="text-align:left">What is really asking for our attention?</p>
+      <p>Maison Claire grew from that question.</p>
     </div>
   </div>
 </section>
 
 <section class="pad tint">
+  <div class="container narrow prose center-prose">
+    <div class="section-head"><div class="rule"></div><p class="eyebrow">A whole-person approach</p><div class="rule"></div></div>
+    <p class="lead">I believe that we have an extraordinary capacity to heal, grow and come back into relationship with ourselves.</p>
+    <p>But&hellip; I don&rsquo;t believe there is one formula for getting there.</p>
+    <p>Sometimes we need to begin with the body: looking at nutrition, digestion, lifestyle, liver support, cleansing practices, our environment and the things we are exposed to every day.</p>
+    <p>Sometimes we need to look at stress, emotions, beliefs or patterns we have carried for years.</p>
+    <p>And sometimes the work takes us somewhere less tangible: into intuition, energy, consciousness and our connection to something beyond ourselves.</p>
+    <p>My role is not to decide the answer before you arrive. My role is to listen, ask questions, look deeper and help you explore the different pieces of your own story.</p>
+    <p>My training as a Certified Natural Health Coach, Certified Hypnotherapist and Reiki Practitioner, together with years of intuitive and mediumship work, allows me to draw from different approaches depending on the person sitting in front of me.</p>
+    <p class="statement">Not everything is for everyone.</p>
+    <p class="statement-sub">That is precisely the point.</p>
+  </div>
+</section>
+
+<section class="pad">
   <div class="container split-about med">
     <div class="prose">
-      <p class="eyebrow">Mediumship</p>
-      <h2 class="approach-title">A bridge between two worlds.</h2>
-      <p>The emphasis of my work is mediumship: making connections with, and delivering messages from, people who are no longer living to those who still are. I receive information primarily and directly from spirit guides, angels, and from those who have passed.</p>
-      <p>While there are a number of forms of mediumship, I work as a mental medium, meaning I communicate with spirits through telepathy. Spirits impress my mind and body with thoughts and feelings that come in through the clairs. Mentally I hear (clairaudience), see (clairvoyance), know (claircognizance), and feel (clairsentience) messages from spirit.</p>
-      <p>I act as the bridge between the spiritual and the physical world, with the intention of healing both.</p>
+      <p class="eyebrow">Why Maison Claire?</p>
+      <h2 class="approach-title">Where the different parts of my life finally came together.</h2>
+      <div class="not-only">
+        <span>The body and the mind.</span>
+        <span>Science and intuition.</span>
+        <span>Nature and energy.</span>
+        <span>The practical and the unseen.</span>
+      </div>
+      <p>I don&rsquo;t ask anyone who comes through my door to believe what I believe. I simply ask that we remain curious.</p>
+      <p>We begin with where you are, look at what may be contributing to the way you feel, and choose the practices that make sense for you.</p>
+      <p>Sometimes that means making very practical changes. Sometimes it means going much deeper.</p>
+      <p>And sometimes healing begins simply because, for the first time in a long time, we have given ourselves enough space to truly listen.</p>
+      <p class="signature">Stanislava Oben</p>
+      <p class="credentials">Certified Natural Health Coach &middot; Certified Hypnotherapist &middot; Reiki Practitioner<br/>Founder, Maison Claire Healing</p>
     </div>
-    <div class="about-photo"><img src="/portrait-bw.jpg" alt="Stanislava in the wind on the coast" width="1600" height="1089" /></div>
+    <div class="about-photo"><img src="/portrait-bw.jpg" alt="Stanislava Oben on the coast" width="1600" height="1089" /></div>
   </div>
 </section>
 
 <section class="pad quote">
   <div class="container">
     <blockquote><span class="mark" aria-hidden="true">&ldquo;</span>Healing is not about becoming someone different, but about removing what has obscured who you already are.</blockquote>
+  </div>
+</section>
+
+<section class="pad-sm tint">
+  <div class="container narrow prose">
+    <p class="eyebrow">Mediumship</p>
+    <h2>A bridge between two worlds.</h2>
+    <p>The emphasis of my intuitive work is mediumship: making connections with, and delivering messages from, people who are no longer living to those who still are. I receive information primarily and directly from spirit guides, angels, and from those who have passed.</p>
+    <p>While there are a number of forms of mediumship, I work as a mental medium, meaning I communicate with spirits through telepathy. Spirits impress my mind and body with thoughts and feelings that come in through the clairs. Mentally I hear (clairaudience), see (clairvoyance), know (claircognizance), and feel (clairsentience) messages from spirit.</p>
+    <p>I act as the bridge between the spiritual and the physical world, with the intention of healing both.</p>
   </div>
 </section>
 
@@ -589,7 +624,7 @@ about_body = f"""<section class="page-hero">
   </div>
 </section>
 
-<section class="photo-band" style="background-image:linear-gradient(rgba(22,38,58,0.30), rgba(22,38,58,0.30)), url('/banner-mistlake.jpg');">
+<section class="photo-band" style="background-image:linear-gradient(rgba(22,38,58,0.30), rgba(22,38,58,0.30)), url(\'/banner-mistlake.jpg\');">
   <div class="container center"><p class="band-line">Kind words</p></div>
 </section>
 
@@ -600,9 +635,9 @@ about_body = f"""<section class="page-hero">
 </section>
 
 {cta_band()}"""
-about_ld = '{"@context":"https://schema.org","@type":"AboutPage","name":"About Maison Claire","about":{"@type":"Person","name":"Stanislava","jobTitle":"Certified Natural Health Coach and Medium","worksFor":{"@type":"Organization","name":"Maison Claire Healing"}}}'
-page("about", "About Stanislava | Maison Claire Healing",
-     "Meet Stanislava, founder of Maison Claire Healing on Bowen Island. A Certified Natural Health Coach and medium working with nutrition, lifestyle, energy and intuition.",
+about_ld = '{"@context":"https://schema.org","@type":"AboutPage","name":"About Stanislava Oben","about":{"@type":"Person","name":"Stanislava Oben","jobTitle":"Certified Natural Health Coach, Certified Hypnotherapist, Reiki Practitioner","worksFor":{"@type":"Organization","name":"Maison Claire Healing"}}}'
+page("about", "About Stanislava Oben | Maison Claire Healing",
+     "Meet Stanislava Oben, founder of Maison Claire Healing on Bowen Island: Certified Natural Health Coach, Certified Hypnotherapist and Reiki Practitioner, with years of intuitive and mediumship work.",
      about_body, "/about", about_ld)
 
 # ================================================================ FORMS
