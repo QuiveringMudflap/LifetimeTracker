@@ -2,12 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://maisonclaire-mauve.vercel.app/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
   <url><loc>https://maisonclaire-mauve.vercel.app/journeys</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maisonclaire-mauve.vercel.app/the-first-step</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maisonclaire-mauve.vercel.app/the-reset</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://maisonclaire-mauve.vercel.app/the-shift</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://maisonclaire-mauve.vercel.app/the-reconnection</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://maisonclaire-mauve.vercel.app/the-next-chapter</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://maisonclaire-mauve.vercel.app/the-deep-dive</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maisonclaire-mauve.vercel.app/the-root</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maisonclaire-mauve.vercel.app/restore</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maisonclaire-mauve.vercel.app/the-private-journey</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maisonclaire-mauve.vercel.app/approach</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maisonclaire-mauve.vercel.app/about</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maisonclaire-mauve.vercel.app/consultation</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maisonclaire-mauve.vercel.app/apply</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maisonclaire-mauve.vercel.app/contact</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>

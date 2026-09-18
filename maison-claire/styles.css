@@ -325,26 +325,78 @@ section { position: relative; }
 .testimonial { font-family: var(--serif); font-style: italic; font-size: clamp(20px, 2.7vw, 28px); line-height: 1.45; color: var(--navy-ink); margin: 0 auto; max-width: 760px; }
 .testimonial-sec cite { display: block; margin-top: 24px; font-family: var(--sans); font-style: normal; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-deep); }
 
+/* ---------- Intro lede / statements ---------- */
+.intro-lede { text-align: center; }
+.intro-lede p { color: var(--ink-soft); font-size: clamp(17px, 2vw, 20px); margin: 0 0 18px; }
+.intro-lede .lead { color: var(--navy-ink) !important; font-size: clamp(19px, 2.3vw, 23px) !important; }
+.statement { font-family: var(--serif); font-style: italic; color: var(--gold-deep) !important;
+  font-size: clamp(21px, 2.8vw, 28px) !important; margin: 30px 0 10px !important; text-align: center; }
+.statement-sub { font-family: var(--serif); color: var(--navy-ink) !important;
+  font-size: clamp(18px, 2.1vw, 21px) !important; margin: 0 !important; }
+.not-only { display: flex; flex-direction: column; gap: 8px; margin: 26px 0; }
+.not-only span { color: var(--ink-soft); font-size: clamp(16.5px, 1.9vw, 19px); }
+.disclaimer-note { margin: 34px auto 0; max-width: 620px; text-align: center;
+  font-family: var(--sans); font-size: 12px; line-height: 1.7; color: var(--ink-mute); letter-spacing: 0.02em; }
+
 /* ---------- Journeys list ---------- */
 .journey-list { display: flex; flex-direction: column; gap: 18px; }
 .journey-row { display: flex; align-items: center; gap: 24px; padding: 16px 22px 16px 16px; background: var(--paper); border: 1px solid var(--line-soft); border-radius: var(--radius); transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease; }
 .journey-row:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--gold); }
-.jr-img { flex: 0 0 128px; height: 84px; border-radius: 10px; background-size: cover; background-position: center; }
+.jr-img { flex: 0 0 132px; height: 96px; border-radius: 10px; background-size: cover; background-position: center; }
 .jr-text { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.jr-num { font-family: var(--sans); font-size: 11px; letter-spacing: 0.26em; color: var(--gold-deep); }
 .jr-name { font-family: var(--serif); font-weight: 600; font-size: clamp(20px, 2.4vw, 25px); color: var(--navy-ink); letter-spacing: 0.03em; }
-.jr-tag { color: var(--ink-soft); font-size: 16px; }
+.jr-meta { font-family: var(--sans); font-size: 12px; letter-spacing: 0.1em; color: var(--navy-soft); text-transform: uppercase; }
+.jr-tag { color: var(--ink-soft); font-size: 16px; font-style: italic; }
 .jr-arrow { color: var(--gold); font-size: 24px; flex: 0 0 auto; transition: transform .3s ease; }
 .journey-row:hover .jr-arrow { transform: translateX(5px); }
 
-/* journey detail: includes + for-you */
-.journey-include .eyebrow { margin-bottom: 16px; }
-.journey-include ul { list-style: none; padding: 0; margin: 0 0 18px; }
-.journey-include li { position: relative; padding-left: 26px; margin-bottom: 12px; color: var(--ink-soft); font-size: 17px; }
-.journey-include li::before { content: "\2726"; position: absolute; left: 0; color: var(--gold); font-size: 12px; top: 3px; }
-.include-note { font-style: italic; color: var(--ink-mute); font-size: 15.5px; }
-.foryou { list-style: none; padding: 0; max-width: 640px; margin: 0 auto; }
-.foryou li { position: relative; padding-left: 30px; margin-bottom: 14px; color: var(--navy-ink); font-size: clamp(16px, 1.9vw, 19px); }
-.foryou li::before { content: ""; position: absolute; left: 6px; top: 10px; width: 8px; height: 8px; border-radius: 999px; background: var(--gold); }
+/* ---------- Journey detail ---------- */
+.ph-meta { font-family: var(--sans); font-size: 12.5px; letter-spacing: 0.2em; text-transform: uppercase; color: #ecd9a8; margin: 0 0 16px; }
+.journey-prose { text-align: center; }
+.journey-prose p { text-align: center; }
+.word-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 14px; margin: 26px auto 30px; max-width: 620px; }
+.word-list span { font-family: var(--serif); font-size: 17px; color: var(--navy-ink); background: var(--cream-2); border: 1px solid var(--line-soft); border-radius: 999px; padding: 7px 16px; }
+.price-panel { max-width: 560px; margin: 0 auto; padding: 38px 30px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+.price-meta { font-family: var(--sans); font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--navy); margin: 0 0 22px; }
+.price-panel .disclaimer-note { margin-top: 26px; }
+
+/* ---------- Approach tags + flow ---------- */
+.tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 12px; max-width: 760px; margin: 0 auto; }
+.tag { font-family: var(--serif); font-size: 16.5px; color: var(--navy-ink); background: var(--paper); border: 1px solid var(--line-soft); border-radius: 999px; padding: 8px 18px; }
+.tags-note { margin: 34px auto 0; max-width: 560px; color: var(--ink-soft); font-size: clamp(16.5px, 1.9vw, 19px); }
+.tags-note em { color: var(--gold-deep); }
+.flow { list-style: none; counter-reset: f; padding: 0; max-width: 620px; margin: 30px auto 0; text-align: left; }
+.flow li { counter-increment: f; position: relative; padding: 14px 0 14px 54px; border-bottom: 1px solid var(--line-soft); color: var(--navy-ink); font-size: clamp(16.5px, 1.9vw, 19px); }
+.flow li:last-child { border-bottom: 0; }
+.flow li::before { content: counter(f, decimal-leading-zero); position: absolute; left: 0; top: 16px; font-family: var(--sans); font-size: 12px; letter-spacing: 0.16em; color: var(--gold); }
+
+/* ---------- Forms ---------- */
+.mc-form { max-width: 720px; margin: 0 auto; }
+.trap { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; opacity: 0; }
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; }
+.fgroup { margin-bottom: 26px; }
+.flabel { display: block; font-family: var(--serif); font-weight: 600; font-size: 17.5px; color: var(--navy-ink); margin-bottom: 8px; }
+.fhint { display: block; font-family: var(--serif); font-style: italic; font-size: 15.5px; color: var(--ink-mute); margin: -4px 0 10px; }
+.mc-form input[type=text], .mc-form input[type=email], .mc-form input[type=tel], .mc-form textarea {
+  width: 100%; font-family: var(--serif); font-size: 17px; color: var(--ink);
+  background: var(--paper); border: 1px solid var(--line-soft); border-radius: 10px;
+  padding: 13px 15px; transition: border-color .2s ease, box-shadow .2s ease;
+}
+.mc-form input:focus, .mc-form textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-wash); }
+.mc-form textarea { resize: vertical; line-height: 1.6; }
+.checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; }
+.check { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; padding: 6px 0; }
+.check input { margin: 4px 0 0; accent-color: var(--navy); flex: 0 0 auto; width: 16px; height: 16px; }
+.check span { font-family: var(--serif); font-size: 16.5px; color: var(--ink-soft); }
+.check:hover span { color: var(--navy-ink); }
+.fsubmit { text-align: center; margin-top: 34px; }
+.fsubmit .btn { cursor: pointer; font-size: 12.5px; }
+.form-status { display: none; margin: 26px auto 0; max-width: 620px; padding: 20px 22px;
+  background: var(--cream-2); border: 1px solid var(--gold-soft); border-radius: var(--radius);
+  font-family: var(--serif); font-size: 17px; color: var(--navy-ink); text-align: center; }
+.form-status.show { display: block; }
+.fallback-box { width: 100%; margin-top: 14px; min-height: 180px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; border: 1px solid var(--line-soft); border-radius: 8px; padding: 12px; background: #fff; }
 
 /* ---------- Approach modalities ---------- */
 .apmods { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
@@ -354,13 +406,11 @@ section { position: relative; }
 .apmod span:last-child { font-family: var(--serif); font-weight: 600; font-size: 15.5px; color: var(--navy-ink); }
 .center-prose { text-align: center; }
 .center-prose h2 { text-align: center; }
-
-/* 5-up steps */
 .steps.five { grid-template-columns: repeat(5, 1fr); }
 
 /* ---------- Body Mind Spirit band ---------- */
 .bms { background: linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%); padding: clamp(40px, 6vw, 66px) 0; }
-.bms-line { font-family: var(--display); letter-spacing: 0.3em; text-transform: uppercase; color: #ecd9a8; font-size: clamp(15px, 2.4vw, 22px); margin: 0; text-align: center; }
+.bms-line { font-family: var(--display); letter-spacing: 0.26em; text-transform: uppercase; color: #ecd9a8; font-size: clamp(13px, 2.2vw, 21px); margin: 0; text-align: center; }
 
 /* ---------- About split ---------- */
 .split-about { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: clamp(32px, 5vw, 64px); align-items: center; }
@@ -372,6 +422,14 @@ section { position: relative; }
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .prompts { grid-template-columns: repeat(3, 1fr); row-gap: 34px; }
+  .apmods { grid-template-columns: repeat(2, 1fr); }
+  .steps.five { grid-template-columns: 1fr 1fr; }
+  .split-about { grid-template-columns: 1fr; }
+  .about-photo { max-width: 440px; margin: 0 auto; }
+  .contact-grid.three { grid-template-columns: 1fr; }
+  .frow { grid-template-columns: 1fr; }
+  .checks { grid-template-columns: 1fr; }
+  .jr-img { flex: 0 0 96px; height: 76px; }
   .apmods { grid-template-columns: repeat(2, 1fr); }
   .steps.five { grid-template-columns: 1fr 1fr; }
   .split-about { grid-template-columns: 1fr; }

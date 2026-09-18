@@ -14,6 +14,9 @@ VER = str(int(time.time()))  # cache-buster, bumped every build
 BASE = "https://maisonclaire-mauve.vercel.app"
 OG = BASE + "/og.jpg"
 EMAIL = "booking@MaisonClaireHealing.com"
+# Web3Forms access key registered to EMAIL. Empty -> forms fall back to a
+# pre-filled email draft. Paste the free key here to enable automatic sending.
+FORM_ACCESS_KEY = ""
 PHONE_DISPLAY = "604-841-4833"
 PHONE_TEL = "+16048414833"
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -47,7 +50,7 @@ def nav(active):
   <div class="nav-inner">
     <a href="/" class="nav-brand" aria-label="Maison Claire Healing home"><img src="/logo-navy.png" alt="Maison Claire Healing" width="432" height="186" /></a>
     <nav class="nav-links" aria-label="Primary">{items}</nav>
-    <a href="/contact" class="nav-cta">Request a Consultation</a>
+    <a href="/consultation" class="nav-cta">Request a Consultation</a>
     <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </header>"""
@@ -70,11 +73,11 @@ FOOTER = f"""<footer class="foot">
       </div>
       <div class="foot-col">
         <h4>Journeys</h4>
+        <a href="/the-first-step">The First Step</a>
         <a href="/the-reset">The Reset</a>
-        <a href="/the-shift">The Shift</a>
-        <a href="/the-reconnection">The Reconnection</a>
-        <a href="/the-next-chapter">The Next Chapter</a>
-        <a href="/the-deep-dive">The Deep Dive</a>
+        <a href="/the-root">The Root</a>
+        <a href="/restore">Restore</a>
+        <a href="/the-private-journey">The Private Journey</a>
         <a href="mailto:{EMAIL}">{EMAIL}</a>
       </div>
     </div>
@@ -148,7 +151,7 @@ def cta_band(heading="Your first step is a conversation", text="A free 15-minute
     <h2>{heading}</h2>
     <p>{text}</p>
     <div class="hero-cta" style="justify-content:center">
-      <a href="/contact" class="btn btn-primary">Request a Consultation</a>
+      <a href="/consultation" class="btn btn-primary">Request a Consultation</a>
       <a href="tel:{PHONE_TEL}" class="btn btn-ghost">Call {PHONE_DISPLAY}</a>
     </div>
   </div></section>"""
@@ -213,16 +216,25 @@ modalities_html = "".join(f'<div class="modality"><span class="modality-ic">{IC[
 
 home_body = f"""<section class="photo-hero" style="background-image:linear-gradient(90deg, rgba(22,38,58,0.78) 0%, rgba(22,38,58,0.42) 42%, rgba(22,38,58,0.10) 70%, rgba(22,38,58,0) 100%), url('/hero.jpg');">
   <div class="container photo-hero-inner">
-    <p class="ph-eyebrow">A private space for deeper change</p>
+    <p class="ph-eyebrow">A whole-person approach to healing</p>
     <h1 class="ph-title">Come back<br/>to yourself.</h1>
-    <p class="ph-lead">Sometimes we know something isn&rsquo;t working, but we don&rsquo;t know why. Maison Claire offers a personalized approach to exploring the physical, emotional, and inner patterns that may be keeping you from feeling fully yourself.</p>
+    <p class="ph-lead">When something doesn&rsquo;t feel right, there is often more to the story than what we see on the surface.</p>
     <div class="hero-cta">
-      <a href="/contact" class="btn btn-primary">Request a Private Consultation</a>
+      <a href="/consultation" class="btn btn-primary">Request a Consultation</a>
     </div>
   </div>
 </section>
 
 <section class="pad">
+  <div class="container narrow intro-lede">
+    <p class="lead">At Maison Claire, we take the time to look at the whole picture: body, mind, lifestyle and environment, and explore what may be contributing to the way you feel.</p>
+    <p>My approach combines natural health coaching, nutrition, cleansing and detox support, hypnotherapy, Reiki and complementary healing practices.</p>
+    <p class="statement">There is no standard protocol.</p>
+    <p class="statement-sub">We begin with you. We look deeper. And we start where it makes sense.</p>
+  </div>
+</section>
+
+<section class="pad tint">
   <div class="container">
     <div class="section-head"><div class="rule"></div><p class="eyebrow">Is something asking to change?</p><div class="rule"></div></div>
     <div class="prompts">{prompts_html}</div>
@@ -274,33 +286,47 @@ page("index", "Maison Claire | Reiki Healing & Natural Wellness with Stanislava"
 # ---- extra icons for approach
 IC["leaf"] = '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M20 44 C20 28 34 18 46 18 C46 34 36 46 20 44 Z" fill="none" stroke="#fff" stroke-width="1.4"/><path d="M20 44 C26 38 34 32 44 26" fill="none" stroke="#fff" stroke-width="1.1"/></svg>'
 
+DISCLAIMER = ("Maison Claire provides complementary health and wellness support and does not "
+              "replace medical diagnosis or treatment.")
+
 # ================================================================ JOURNEYS
 JOURNEYS = [
-    ("the-reset", "The Reset", "Return to balance.", "lighthouse-warm.jpg"),
-    ("the-shift", "The Shift", "Change what keeps repeating.", "mountains.jpg"),
-    ("the-reconnection", "The Reconnection", "Come back to yourself.", "hero.jpg"),
-    ("the-next-chapter", "The Next Chapter", "Move consciously into what comes next.", "horses.jpg"),
-    ("the-deep-dive", "The Deep Dive", "Go beneath the surface.", "lighthouse-blue.jpg"),
+    ("the-first-step", "01", "The First Step", "2 hours &middot; $250",
+     "Where every Maison Claire journey begins.", "lighthouse-warm.jpg"),
+    ("the-reset", "02", "The Reset", "3 weeks &middot; From $750",
+     "Sometimes the body needs less, not more.", "mountains.jpg"),
+    ("the-root", "03", "The Root", "6 weeks &middot; From $1,500",
+     "When you are ready to look deeper.", "lighthouse-blue.jpg"),
+    ("restore", "04", "Restore", "8-10 weeks &middot; From $2,500",
+     "From understanding to rebuilding.", "horses.jpg"),
+    ("the-private-journey", "05", "The Private Journey", "3-6 months &middot; By application &middot; From $4,500",
+     "Maison Claire&rsquo;s most personal level of work.", "hero.jpg"),
 ]
 
-def journey_row(slug, name, tagline, img):
+def journey_row(slug, num, name, meta, tagline, img):
     return f"""<a class="journey-row" href="/{slug}">
       <span class="jr-img" style="background-image:url('/{img}')"></span>
-      <span class="jr-text"><span class="jr-name">{name}</span><span class="jr-tag">{tagline}</span></span>
+      <span class="jr-text">
+        <span class="jr-num">{num}</span>
+        <span class="jr-name">{name}</span>
+        <span class="jr-meta">{meta}</span>
+        <span class="jr-tag">{tagline}</span>
+      </span>
       <span class="jr-arrow" aria-hidden="true">&rarr;</span>
     </a>"""
 
 journeys_body = f"""<section class="page-hero">
   <div class="container">
     <p class="eyebrow">Journeys</p>
-    <h1>Different places.<br/>The same destination: you.</h1>
-    <p>Every journey at Maison Claire is private and personal. Explore the paths below, or begin with a conversation and we will find the one that fits.</p>
+    <h1>Start where it<br/>makes sense.</h1>
+    <p>Every journey at Maison Claire is private and personal. Begin with a single conversation, or go as deep as you wish.</p>
   </div>
 </section>
 
 <section class="pad">
   <div class="container narrow">
     <div class="journey-list">{''.join(journey_row(*j) for j in JOURNEYS)}</div>
+    <p class="disclaimer-note">{DISCLAIMER}</p>
   </div>
 </section>
 
@@ -308,156 +334,181 @@ journeys_body = f"""<section class="page-hero">
   <div class="container center">
     <h2 class="approach-title" style="max-width:640px;margin:0 auto 14px">Not sure which journey is yours?</h2>
     <p class="approach-lead">You do not have to decide before you arrive. We begin with a conversation.</p>
-    <a href="/contact" class="btn btn-primary">Request a Private Consultation</a>
+    <a href="/consultation" class="btn btn-primary">Request a Consultation</a>
   </div>
 </section>"""
 journeys_ld = ('{"@context":"https://schema.org","@type":"ItemList","name":"Maison Claire Journeys","itemListElement":['
-    + ",".join('{"@type":"ListItem","position":%d,"name":"%s","url":"%s/%s"}' % (i+1, j[1], BASE, j[0]) for i, j in enumerate(JOURNEYS))
+    + ",".join('{"@type":"ListItem","position":%d,"name":"%s","url":"%s/%s"}' % (i+1, j[2], BASE, j[0]) for i, j in enumerate(JOURNEYS))
     + "]}")
-page("journeys", "Journeys | Maison Claire Healing with Stanislava",
-     "Private, personal healing journeys with Stanislava at Maison Claire: The Reset, The Shift, The Reconnection, The Next Chapter, and The Deep Dive.",
+page("journeys", "Journeys & Pricing | Maison Claire Healing",
+     "Maison Claire healing journeys with Stanislava: The First Step, The Reset, The Root, Restore, and The Private Journey. Durations, pricing, and what each involves.",
      journeys_body, "/journeys", journeys_ld)
 
-def journey_page(slug, name, tagline, img, whatis, includes, foryou, mtitle, mdesc):
-    wp = "".join(f"<p>{p}</p>" for p in whatis)
-    inc = "".join(f"<li>{x}</li>" for x in includes)
-    fyi = "".join(f"<li>{x}</li>" for x in foryou)
-    body = f"""<section class="photo-hero journey-hero" style="background-image:linear-gradient(90deg, rgba(22,38,58,0.82) 0%, rgba(22,38,58,0.40) 55%, rgba(22,38,58,0.08) 100%), url('/{img}');">
+def _blocks(items):
+    out = []
+    for kind, val in items:
+        if kind == "p":
+            out.append(f"<p>{val}</p>")
+        elif kind == "s":
+            out.append(f'<p class="statement">{val}</p>')
+        elif kind == "list":
+            out.append('<div class="word-list">' + "".join(f"<span>{v}</span>" for v in val) + "</div>")
+    return "".join(out)
+
+def journey_page(slug, num, name, meta, tagline, img, blocks, cta_label, cta_href, mtitle, mdesc):
+    body = f"""<section class="photo-hero journey-hero" style="background-image:linear-gradient(90deg, rgba(22,38,58,0.84) 0%, rgba(22,38,58,0.44) 55%, rgba(22,38,58,0.10) 100%), url('/{img}');">
   <div class="container photo-hero-inner">
-    <p class="ph-eyebrow">A Maison Claire Journey</p>
+    <p class="ph-eyebrow">{num} &nbsp;&middot;&nbsp; A Maison Claire Journey</p>
     <h1 class="ph-title">{name}</h1>
+    <p class="ph-meta">{meta}</p>
     <p class="ph-lead">{tagline}</p>
-    <div class="hero-cta"><a href="/contact" class="btn btn-primary">Request a Private Consultation</a></div>
+    <div class="hero-cta"><a href="{cta_href}" class="btn btn-primary">{cta_label}</a></div>
   </div>
 </section>
 
 <section class="pad">
-  <div class="container split-approach">
-    <div class="prose">{wp}</div>
-    <div class="journey-include">
-      <p class="eyebrow">Your journey may include</p>
-      <ul>{inc}</ul>
-      <p class="include-note">Every journey is individual. There is no predetermined formula, only what is right for you.</p>
-    </div>
-  </div>
+  <div class="container narrow prose journey-prose">{_blocks(blocks)}</div>
 </section>
 
 <section class="pad tint">
-  <div class="container narrow">
-    <div class="section-head"><div class="rule"></div><p class="eyebrow">This journey is for you if</p><div class="rule"></div></div>
-    <ul class="foryou">{fyi}</ul>
+  <div class="container center">
+    <div class="price-panel">
+      <p class="price-meta">{meta}</p>
+      <a href="{cta_href}" class="btn btn-primary">{cta_label}</a>
+      <p class="disclaimer-note">{DISCLAIMER}</p>
+    </div>
   </div>
-</section>
-
-{cta_band()}"""
-    ld = '{"@context":"https://schema.org","@type":"Service","serviceType":"%s","provider":{"@type":"HealthAndBeautyBusiness","name":"Maison Claire"},"areaServed":"Bowen Island, British Columbia","description":"%s","url":"%s/%s"}' % (name, mdesc.replace('"', ''), BASE, slug)
+</section>"""
+    ld = '{"@context":"https://schema.org","@type":"Service","serviceType":"%s","provider":{"@type":"HealthAndBeautyBusiness","name":"Maison Claire Healing"},"areaServed":"Bowen Island, British Columbia","description":"%s","url":"%s/%s"}' % (name, mdesc.replace('"', ''), BASE, slug)
     page(slug, mtitle, mdesc, body, "/journeys", ld)
 
-journey_page("the-reset", "The Reset", "A return to balance, from the inside out.", "lighthouse-warm.jpg",
-    ["Sometimes the body asks us to slow down before the mind is ready to listen. You may feel depleted, foggy, disconnected, or simply not quite like yourself.",
-     "The Reset is a private, whole-person healing journey designed to support you from the inside out. Together we gently clear what has accumulated, physically, emotionally, and energetically, and create a healthier foundation for the next chapter."],
-    ["Supportive cleansing and nutrition", "Sound and light", "Intuitive guidance", "Hypnotherapy", "Reiki and energy work", "Personalized practices"],
-    ["You feel your energy and vitality have changed", "You feel physically or emotionally weighed down", "You want to make meaningful changes to the way you care for yourself", "You are curious about supporting your body through cleansing and healthier practices", "You feel disconnected from yourself and want to come back into balance"],
+journey_page("the-first-step", "01", "The First Step", "2 hours &middot; $250",
+    "Two unhurried hours dedicated to understanding you.", "lighthouse-warm.jpg",
+    [("p", "This is where every Maison Claire journey begins."),
+     ("p", "Before recommending a cleanse, supplement, healing practice or longer program, I want to understand what is actually happening in your life."),
+     ("p", "We will talk about your health history, nutrition, digestion, sleep, energy, stress, environment, emotional wellbeing, medications and supplements, previous approaches you have tried, and what you would most like to change."),
+     ("s", "We begin connecting the dots."),
+     ("p", "There may be obvious areas to work on. There may be questions that require further investigation or a conversation with your physician or another qualified practitioner."),
+     ("p", "You leave with a clearer picture and practical first steps.")],
+    "Begin with The First Step", "/consultation",
+    "The First Step | Maison Claire Healing",
+    "The First Step is a two hour consultation with Stanislava at Maison Claire. $250. Understand your health history, nutrition, sleep, stress and environment, and leave with practical first steps.")
+
+journey_page("the-reset", "02", "The Reset", "3 weeks &middot; From $750",
+    "A cleaner, simpler foundation for wellbeing.", "mountains.jpg",
+    [("p", "Sometimes the first thing the body needs is not more."),
+     ("s", "It is less."),
+     ("p", "The Reset focuses on creating a cleaner, simpler foundation for wellbeing."),
+     ("p", "Depending on your individual situation, we may look at food, hydration, digestion, sleep, household and environmental exposures, stress, movement and daily habits."),
+     ("p", "This is also where we can discuss whether a structured gut, liver or general body-cleansing approach is appropriate for you."),
+     ("p", "Nothing is automatically prescribed simply because it is part of a program."),
+     ("p", "We choose what makes sense for your body, your circumstances and your goals, and identify situations where medical guidance or testing should come first."),
+     ("s", "Reduce unnecessary burden. Support healthy habits. Give the body a better environment in which to function.")],
+    "Explore The Reset", "/consultation",
     "The Reset | Maison Claire Healing",
-    "The Reset is a private, whole-person healing journey with Stanislava: a gentle return to balance through cleansing, energy work, and personalized care on Bowen Island.")
+    "The Reset is a three week journey with Stanislava from $750: food, hydration, digestion, sleep, environment and stress, with cleansing support where appropriate.")
 
-journey_page("the-shift", "The Shift", "Change what keeps repeating.", "mountains.jpg",
-    ["Some patterns follow us for years: the same reactions, the same stories, the same quiet limits on what feels possible.",
-     "The Shift works gently with hypnotherapy and intuitive guidance to loosen those patterns at the root, so you can meet life from a freer, clearer place."],
-    ["Hypnotherapy", "Intuitive guidance", "Reiki and energy work", "Gentle inquiry and reflection", "Personalized practices"],
-    ["You keep repeating a pattern you cannot seem to shift", "You feel held back by old beliefs or stories", "You are ready to respond to life differently", "You want lasting change, not a quick fix", "You are curious about what lies beneath the surface"],
-    "The Shift | Maison Claire Healing",
-    "The Shift uses hypnotherapy and intuitive guidance with Stanislava to release old patterns and beliefs at the root, for lasting, gentle change.")
+journey_page("the-root", "03", "The Root", "6 weeks &middot; From $1,500",
+    "When you are ready to look deeper.", "lighthouse-blue.jpg",
+    [("p", "Sometimes changing food or completing a cleanse is not the whole answer."),
+     ("p", "This journey asks a different question:"),
+     ("s", "What else could be contributing to the way you feel?"),
+     ("p", "Together we look more closely at the different layers of your wellbeing: nutrition, digestion, lifestyle, environment, stress, emotional patterns and personal history."),
+     ("p", "Where appropriate, our work may include education around gut and liver support, environmental and heavy-metal exposure, parasite concerns, nutrition and cleansing practices."),
+     ("p", "When something requires diagnosis, laboratory investigation or medical treatment, that belongs with an appropriately licensed healthcare professional."),
+     ("p", "Maison Claire&rsquo;s role is to help you see the whole picture, ask better questions and create practical changes around the factors within your control."),
+     ("p", "We may also incorporate hypnotherapy, Reiki, sound, light, breath, meditation or intuitive work when these complement the physical work and resonate with you."),
+     ("p", "Not everything has to be physical. Not everything has to be emotional. Often, several parts of our lives are speaking at once.")],
+    "Explore The Root", "/consultation",
+    "The Root | Maison Claire Healing",
+    "The Root is a six week journey with Stanislava from $1,500, exploring the deeper layers of wellbeing: nutrition, digestion, environment, stress and emotional patterns.")
 
-journey_page("the-reconnection", "The Reconnection", "Come back to yourself.", "hero.jpg",
-    ["Life can pull us far from our own centre. The Reconnection is a gentle way home: to your body, your intuition, and your sense of who you are.",
-     "Through energy work, intuitive guidance, and time in stillness, we rebuild the quiet trust between you and yourself."],
-    ["Reiki and energy work", "Intuitive guidance", "Grounding and nature-based practices", "Breath and stillness", "Personalized practices"],
-    ["You feel disconnected from yourself", "You have been living in your head more than your body", "You long for more calm, clarity, and presence", "You want to hear your own inner voice again", "You are ready to feel at home in yourself"],
-    "The Reconnection | Maison Claire Healing",
-    "The Reconnection is a gentle journey back to yourself with Stanislava, rebuilding trust with your body and intuition through energy work and stillness.")
+journey_page("restore", "04", "Restore", "8-10 weeks &middot; From $2,500",
+    "From understanding to rebuilding.", "horses.jpg",
+    [("p", "Once we have begun identifying the areas that need attention, the work becomes less about searching and more about creating a healthier way forward."),
+     ("p", "Restore is a longer, highly personalized journey."),
+     ("p", "We continue supporting the physical foundations (nutrition, gut and liver health, sleep, movement, environmental awareness and appropriate cleansing practices) while also addressing the patterns that influence how you live."),
+     ("list", ["Stress", "Relationships", "Boundaries", "Beliefs", "Habits", "The way you speak to yourself", "The things you know you need to change but have not yet been able to"]),
+     ("p", "Depending on your needs, sessions may incorporate health coaching, hypnotherapy, intuitive guidance, Reiki, sound, light and other complementary practices."),
+     ("p", "The objective is not perfection. It is helping you create a way of living that supports your wellbeing long after our sessions end.")],
+    "Explore Restore", "/consultation",
+    "Restore | Maison Claire Healing",
+    "Restore is an 8 to 10 week journey with Stanislava from $2,500, rebuilding physical foundations while addressing stress, boundaries, beliefs and daily patterns.")
 
-journey_page("the-next-chapter", "The Next Chapter", "Move consciously into what comes next.", "horses.jpg",
-    ["Every threshold, a move, a loss, a new season, asks something of us. The Next Chapter offers steady, compassionate support as you move through change with intention.",
-     "Rather than rushing forward, we make space to honour what is ending and to step consciously into what is beginning."],
-    ["Intuitive guidance", "Hypnotherapy", "Reiki and energy work", "Reflection and ritual", "Personalized practices"],
-    ["You are moving through a major life transition", "You feel between chapters and unsure of the way forward", "You want to move forward with clarity and intention", "You are ready to release what is complete", "You want support as you begin again"],
-    "The Next Chapter | Maison Claire Healing",
-    "The Next Chapter supports you through life transitions with Stanislava, moving consciously into what comes next with clarity, intention, and care.")
-
-journey_page("the-deep-dive", "The Deep Dive", "Go beneath the surface.", "lighthouse-blue.jpg",
-    ["For those who feel called to explore further, The Deep Dive opens into the spiritual dimension of healing, including mediumship and connection with spirit.",
-     "The emphasis of this work is mediumship: making connections with, and delivering messages from, those who are no longer living to those who still are. Working as a mental medium, Stanislava receives messages through the clairs, hearing, seeing, knowing, and feeling, acting as a bridge between the spiritual and physical worlds, with the intention of healing both."],
-    ["Mediumship and spirit connection", "Intuitive and spiritual guidance", "Reiki and energy work", "Connection with guides and ancestors", "Personalized practices"],
-    ["You are seeking to connect with your spirit guides or loved ones on the other side", "You feel drawn to the spiritual side of healing", "You are looking for clarity, meaning, or closure", "You are open to messages that arrive with love", "You want to explore what lies beneath the surface"],
-    "The Deep Dive | Maison Claire Healing",
-    "The Deep Dive opens into the spiritual side of healing with Stanislava, including mediumship and connection with spirit guides, ancestors, and loved ones.")
+journey_page("the-private-journey", "05", "The Private Journey", "3-6 months &middot; By application &middot; From $4,500",
+    "Maison Claire&rsquo;s most personal level of work.", "hero.jpg",
+    [("p", "This is not a predetermined program."),
+     ("p", "It is an ongoing private relationship for someone who wants the time and space to explore their wellbeing more deeply."),
+     ("p", "We begin with the physical foundations and follow what emerges."),
+     ("list", ["Nutrition and lifestyle", "Gut and liver support", "Environmental exposures", "Cleansing when appropriate", "Stress and emotional wellbeing", "Patterns and beliefs", "Hypnotherapy", "Energy work", "Sound and light", "Intuition", "Nature"]),
+     ("p", "And sometimes simply having a quiet, confidential place to stop and listen to what your body and your life have been trying to tell you."),
+     ("p", "Some weeks may focus primarily on physical wellbeing. Others may have very little to do with it."),
+     ("s", "The work follows the person rather than forcing the person into a program."),
+     ("p", "When something falls outside my scope as a health coach or complementary practitioner, I will encourage you to involve the appropriate physician or healthcare professional."),
+     ("p", "The goal is not dependency on Maison Claire. The goal is greater understanding of yourself, greater ownership of your wellbeing and a way forward that you can carry into the rest of your life.")],
+    "By Application", "/apply",
+    "The Private Journey | Maison Claire Healing",
+    "The Private Journey is Maison Claire&rsquo;s most personal work with Stanislava: 3 to 6 months, by application, from $4,500. An ongoing private relationship that follows the person.")
 
 # ================================================================ APPROACH
-APPROACH_MOD = [
-    ("spiral", "Root-Cause Exploration"),
-    ("lotus", "Cleansing &amp; Nutrition"),
-    ("sun2b", "Sound &amp; Light"),
-    ("caduceus", "Hypnotherapy"),
-    ("rays", "Reiki &amp; Energy Work"),
-    ("eyeb", "Intuitive Guidance"),
-    ("leaf", "Nature &amp; Environment"),
-]
-_AP_INLINE = {
- "sun2b": '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="9" fill="none" stroke="#fff" stroke-width="1.5"/><g stroke="#fff" stroke-width="1.4" stroke-linecap="round"><line x1="32" y1="10" x2="32" y2="17"/><line x1="32" y1="47" x2="32" y2="54"/><line x1="10" y1="32" x2="17" y2="32"/><line x1="47" y1="32" x2="54" y2="32"/><line x1="16" y1="16" x2="21" y2="21"/><line x1="43" y1="43" x2="48" y2="48"/><line x1="48" y1="16" x2="43" y2="21"/><line x1="21" y1="43" x2="16" y2="48"/></g></svg>',
- "eyeb": '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M12 32 Q32 16 52 32 Q32 48 12 32 Z" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="32" cy="32" r="6" fill="none" stroke="#fff" stroke-width="1.5"/></svg>',
-}
-def _apicon(key):
-    return _AP_INLINE.get(key) or IC.get(key) or ""
-approach_mods_html = "".join(
-    f'<div class="apmod"><span class="apmod-ic">{_apicon(k)}</span><span>{n}</span></div>' for k, n in APPROACH_MOD)
+EXPLORE_TAGS = ["Gut &amp; digestive health", "Liver support", "Nutrition", "Cleansing practices",
+    "Environmental exposures", "Heavy-metal exposure awareness", "Parasite concerns", "Sleep",
+    "Stress", "Emotional patterns", "Hypnotherapy", "Reiki", "Sound", "Light", "Breath",
+    "Nature", "Intuitive guidance"]
+tags_html = "".join(f"<span class='tag'>{t}</span>" for t in EXPLORE_TAGS)
 
-APPROACH_STEPS = [
-    ("Discover", "Look beneath the surface."),
-    ("Clear", "Support the body&rsquo;s natural processes."),
-    ("Rebalance", "Bring body, mind, and emotions into harmony."),
-    ("Reconnect", "Work with intuition, light, and energy."),
-    ("Restore", "Feel more whole, calm, and connected."),
-]
-approach_steps_html = "".join(
-    f'<div class="step"><span class="step-num">0{i+1}</span><h3>{n}</h3><p>{d}</p></div>'
-    for i, (n, d) in enumerate(APPROACH_STEPS))
+FLOW = ["We start with where you are.", "We listen.", "We investigate what is within our scope.",
+        "We make changes.", "We observe.",
+        "And when necessary, we bring other qualified healthcare professionals into the picture.",
+        "Then we take the next step."]
+flow_html = "".join(f"<li>{f}</li>" for f in FLOW)
 
 approach_body = f"""<section class="page-hero">
   <div class="container">
     <p class="eyebrow">The Maison Claire Approach</p>
-    <h1>Healing begins beneath the surface.</h1>
-    <p>We look at the whole person, body, mind, and spirit, and the many influences that shape how you feel and live.</p>
+    <h1>Look deeper.<br/>Keep it human.</h1>
+    <p>Maison Claire is built around a simple idea.</p>
   </div>
 </section>
 
 <section class="pad">
   <div class="container narrow prose center-prose">
-    <p class="lead">Rather than focusing only on what is showing up on the surface, we explore what may be contributing to it at a deeper level.</p>
-    <p>Our approach may draw from root-cause exploration, supportive cleansing and nutrition, sound and light, hypnotherapy, Reiki and energy work, intuitive guidance, and connection with nature. Each is simply a different doorway.</p>
+    <p class="lead">What we experience on the surface deserves attention, but so does what may be contributing underneath it.</p>
+    <div class="not-only">
+      <span>That means we don&rsquo;t look only at food.</span>
+      <span>Or only at stress.</span>
+      <span>Or only at the physical body.</span>
+      <span>Or only at emotional and spiritual wellbeing.</span>
+    </div>
+    <p class="statement">We look at the person.</p>
+    <p>My work as a Certified Natural Health Coach brings together health education, nutrition and lifestyle practices with complementary approaches to wellbeing.</p>
   </div>
-  <div class="container" style="margin-top:40px">
-    <div class="apmods">{approach_mods_html}</div>
-  </div>
-</section>
-
-<section class="pad tint">
-  <div class="container center">
-    <div class="section-head"><div class="rule"></div><p class="eyebrow">How healing unfolds</p><div class="rule"></div></div>
-    <div class="steps five">{approach_steps_html}</div>
+  <div class="container narrow center" style="margin-top:clamp(46px,6vw,70px)">
+    <div class="section-head"><div class="rule"></div><p class="eyebrow">Our work may explore</p><div class="rule"></div></div>
+    <div class="tags">{tags_html}</div>
+    <p class="tags-note">Not everyone needs everything. In fact, most people don&rsquo;t.<br/><em>The art is discovering what deserves attention now.</em></p>
   </div>
 </section>
 
 <section class="bms">
   <div class="container center">
-    <p class="bms-line">Body &nbsp;&middot;&nbsp; Mind &nbsp;&middot;&nbsp; Spirit</p>
+    <p class="bms-line">Body &nbsp;&middot;&nbsp; Mind &nbsp;&middot;&nbsp; Environment &nbsp;&middot;&nbsp; Self</p>
+  </div>
+</section>
+
+<section class="pad tint">
+  <div class="container narrow center">
+    <h2 class="approach-title" style="text-align:center">Healing is not a straight line.</h2>
+    <ol class="flow">{flow_html}</ol>
+    <p class="statement" style="margin-top:34px">That is the Maison Claire journey.</p>
+    <p class="disclaimer-note">{DISCLAIMER}</p>
   </div>
 </section>
 
 {cta_band()}"""
-approach_ld = '{"@context":"https://schema.org","@type":"MedicalWebPage","name":"The Maison Claire Approach","about":"Whole-person natural healing: root-cause exploration, cleansing and nutrition, sound and light, hypnotherapy, Reiki and energy work, intuitive guidance, and nature."}'
-page("approach", "The Approach | Whole-Person Healing at Maison Claire",
-     "The Maison Claire approach to whole-person healing with Stanislava: root-cause exploration, cleansing, sound and light, hypnotherapy, Reiki, intuitive guidance, and nature.",
+approach_ld = '{"@context":"https://schema.org","@type":"MedicalWebPage","name":"The Maison Claire Approach","about":"Whole-person natural health coaching: gut and liver support, nutrition, cleansing practices, environmental exposures, sleep, stress, emotional patterns, hypnotherapy, Reiki, sound, light, breath, nature and intuitive guidance."}'
+page("approach", "The Approach | Whole-Person Health Coaching at Maison Claire",
+     "The Maison Claire approach with Stanislava, a Certified Natural Health Coach: look at the whole person, body, mind, environment and self, and discover what deserves attention now.",
      approach_body, "/approach", approach_ld)
 
 # ================================================================ ABOUT
@@ -476,6 +527,7 @@ about_body = f"""<section class="page-hero">
       <p class="eyebrow">I&rsquo;m Stanislava</p>
       <h2 class="approach-title">A guide, and a fellow traveller.</h2>
       <p>For many years, I have been drawn to the healing power of nature, the wisdom of the body, and the invisible energies that shape our lives. My path has led me to bring together a range of complementary practices, not as a formula, but as a personalized approach to support each person who comes here.</p>
+      <p>As a Certified Natural Health Coach, my work brings together health education, nutrition and lifestyle practices with complementary approaches to wellbeing.</p>
       <p>Maison Claire was born from a deep belief in the incredible capacity we all have to heal, to grow, and to come back to ourselves.</p>
     </div>
   </div>
@@ -506,44 +558,213 @@ about_body = f"""<section class="page-hero">
 </section>
 
 {cta_band()}"""
-about_ld = '{"@context":"https://schema.org","@type":"AboutPage","name":"About Maison Claire","about":{"@type":"Person","name":"Stanislava","jobTitle":"Healing Practitioner and Medium","worksFor":{"@type":"Organization","name":"Maison Claire Healing"}}}'
+about_ld = '{"@context":"https://schema.org","@type":"AboutPage","name":"About Maison Claire","about":{"@type":"Person","name":"Stanislava","jobTitle":"Certified Natural Health Coach and Medium","worksFor":{"@type":"Organization","name":"Maison Claire Healing"}}}'
 page("about", "About Stanislava | Maison Claire Healing",
-     "Meet Stanislava, founder of Maison Claire Healing on Bowen Island. A whole-person healing practitioner and medium working with intuition, energy, and spirit.",
+     "Meet Stanislava, founder of Maison Claire Healing on Bowen Island. A Certified Natural Health Coach and medium working with nutrition, lifestyle, energy and intuition.",
      about_body, "/about", about_ld)
 
-# ================================================================ CONTACT
-CONTACT_STEPS = [
-    ("Reach Out", "Send a message or call to book your free consultation."),
-    ("Connect", "We have a relaxed, private conversation about where you are."),
-    ("Create", "Together we shape the journey that is right for you."),
-]
-contact_steps_html = "".join(
-    f'<div class="step"><span class="step-num">0{i+1}</span><h3>{n}</h3><p>{d}</p></div>'
-    for i, (n, d) in enumerate(CONTACT_STEPS))
+# ================================================================ FORMS
+AREA_OPTIONS = ["Energy &amp; overall wellbeing", "Digestion &amp; gut health", "Liver &amp; body cleansing",
+    "Nutrition &amp; lifestyle", "Environmental exposures", "Stress &amp; emotional wellbeing",
+    "Hypnotherapy &amp; patterns", "Reiki &amp; energy work", "Intuitive guidance", "I&rsquo;m not sure yet"]
+SUPPORT_OPTIONS = ["I would like to begin with one session", "I am interested in a deeper healing journey",
+    "I would like to understand my options first", "I&rsquo;m not sure, I would like your guidance"]
 
+def checks(name, opts):
+    return "".join(
+        f'<label class="check"><input type="checkbox" name="{name}" value="{o}"/><span>{o}</span></label>'
+        for o in opts)
+
+def radios(name, opts):
+    return "".join(
+        f'<label class="check"><input type="radio" name="{name}" value="{o}"/><span>{o}</span></label>'
+        for o in opts)
+
+def field(label, name, kind="text", req=False, ph="", rows=4, hint=""):
+    r = " required" if req else ""
+    h = f'<span class="fhint">{hint}</span>' if hint else ""
+    if kind == "textarea":
+        inp = f'<textarea name="{name}" rows="{rows}" placeholder="{ph}"{r}></textarea>'
+    else:
+        inp = f'<input type="{kind}" name="{name}" placeholder="{ph}"{r}/>'
+    return f'<div class="fgroup"><label class="flabel" for="{name}">{label}</label>{h}{inp}</div>'
+
+FORM_JS = """<script>
+(function(){
+  var TO = "%s", KEY = "%s";
+  document.querySelectorAll('form.mc-form').forEach(function(form){
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      if (form.querySelector('[name=_trap]') && form.querySelector('[name=_trap]').value) return;
+      var fd = new FormData(form), groups = {}, order = [];
+      fd.forEach(function(v, k){
+        if (k.charAt(0) === '_') return;
+        if (!(k in groups)) { groups[k] = []; order.push(k); }
+        if (String(v).trim() !== '') groups[k].push(v);
+      });
+      var title = form.getAttribute('data-title') || 'Website enquiry';
+      var lines = [title, '----------------------------------------', ''];
+      order.forEach(function(k){
+        var vals = groups[k];
+        if (!vals.length) return;
+        var el = form.querySelector('[data-label-for="' + k + '"]')
+              || form.querySelector('label[for="' + k + '"]');
+        var label = el ? el.textContent.trim()
+                       : k.replace(/_/g, ' ').replace(/\\b\\w/g, function(c){ return c.toUpperCase(); });
+        lines.push(/[?:]$/.test(label) ? label : label + ':');
+        vals.forEach(function(v){ lines.push('  ' + String(v).trim()); });
+        lines.push('');
+      });
+      lines.push('Sent from maisonclairehealing website');
+      var body = lines.join('\\n');
+      var status = form.querySelector('.form-status');
+      function done(msg){
+        form.querySelectorAll('input,textarea,button').forEach(function(e){e.disabled=true;});
+        if (status) { status.textContent = msg; status.classList.add('show'); status.scrollIntoView({block:'center',behavior:'smooth'}); }
+      }
+      function fallback(){
+        var href = 'mailto:' + TO + '?subject=' + encodeURIComponent(title)
+                 + '&body=' + encodeURIComponent(body);
+        window.location.href = href;
+        if (status) {
+          status.innerHTML = 'Your email app should open with your answers ready to send. '
+            + 'If it does not, copy the text below and email it to <strong>' + TO + '</strong>.'
+            + '<textarea class="fallback-box" readonly></textarea>';
+          status.classList.add('show');
+          status.querySelector('.fallback-box').value = body;
+        }
+      }
+      if (KEY) {
+        var payload = { access_key: KEY, subject: title, from_name: 'Maison Claire Website',
+                        replyto: (groups.email && groups.email[0]) || '', message: body };
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST', headers: {'Content-Type':'application/json','Accept':'application/json'},
+          body: JSON.stringify(payload)
+        }).then(function(r){ return r.json(); })
+          .then(function(d){ if (d && d.success) { done('Thank you. Your message has been sent to Stanislava. She will personally review it and be in touch soon.'); } else { fallback(); } })
+          .catch(fallback);
+      } else { fallback(); }
+    });
+  });
+})();
+</script>""" % (EMAIL, FORM_ACCESS_KEY)
+
+WHAT_NEXT = f"""<section class="pad tint">
+  <div class="container narrow center">
+    <div class="section-head"><div class="rule"></div><p class="eyebrow">What happens next</p><div class="rule"></div></div>
+    <p class="approach-lead">I will personally review what you have shared before we speak.</p>
+    <p class="approach-lead">Our consultation is simply a conversation to understand where you are, answer your questions and determine whether Maison Claire feels like the right place to begin.</p>
+    <p class="disclaimer-note">{DISCLAIMER}</p>
+  </div>
+</section>"""
+
+# ---- Consultation form (standard)
+consult_body = f"""<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow">Request a Consultation</p>
+    <h1>Let&rsquo;s begin with<br/>a conversation.</h1>
+    <p>Tell me a little about what is bringing you to Maison Claire. You don&rsquo;t need to know exactly. That is something we can explore together.</p>
+  </div>
+</section>
+
+<section class="pad">
+  <div class="container narrow">
+    <form class="mc-form" data-title="Consultation request (Maison Claire website)">
+      <input type="text" name="_trap" class="trap" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <div class="frow">
+        {field("Name", "name", req=True)}
+        {field("Email", "email", kind="email", req=True)}
+      </div>
+      {field("Phone", "phone", kind="tel")}
+      {field("What brings you to Maison Claire at this time?", "what_brings_you", kind="textarea", req=True)}
+      {field("What would you most like to change or improve?", "what_to_change", kind="textarea")}
+      <div class="fgroup">
+        <span class="flabel" data-label-for="areas">Which areas would you most like to explore?</span>
+        <div class="checks">{checks("areas", AREA_OPTIONS)}</div>
+      </div>
+      <div class="fgroup">
+        <span class="flabel" data-label-for="support">What kind of support are you looking for right now?</span>
+        <div class="checks">{radios("support", SUPPORT_OPTIONS)}</div>
+      </div>
+      {field("Anything else you&rsquo;d like me to know?", "anything_else", kind="textarea")}
+      <div class="fsubmit">
+        <button type="submit" class="btn btn-primary">Request My Consultation</button>
+      </div>
+      <div class="form-status" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</section>
+
+{WHAT_NEXT}
+{FORM_JS}"""
+page("consultation", "Request a Consultation | Maison Claire Healing",
+     "Request a consultation with Stanislava at Maison Claire Healing. Tell her what is bringing you here and she will personally review it before you speak.",
+     consult_body, "/consultation",
+     '{"@context":"https://schema.org","@type":"ContactPage","name":"Request a Consultation"}')
+
+# ---- Private Journey application form
+apply_body = f"""<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow">The Private Journey &middot; By Application</p>
+    <h1>Request a private<br/>consultation.</h1>
+    <p>Tell me a little about what is bringing you to Maison Claire. You don&rsquo;t need to know exactly. That is something we can explore together.</p>
+  </div>
+</section>
+
+<section class="pad">
+  <div class="container narrow">
+    <form class="mc-form" data-title="Private Journey application (Maison Claire website)">
+      <input type="text" name="_trap" class="trap" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <div class="frow">
+        {field("Name", "name", req=True)}
+        {field("Email", "email", kind="email", req=True)}
+      </div>
+      {field("Phone", "phone", kind="tel")}
+      {field("1. What brings you to Maison Claire at this time?", "q1_what_brings_you", kind="textarea", req=True, rows=4)}
+      {field("2. What would you most like to change or improve?", "q2_what_to_change", kind="textarea", rows=4)}
+      {field("3. How long have you been experiencing this?", "q3_how_long")}
+      <div class="fgroup">
+        <span class="flabel" data-label-for="q4_areas">4. Which areas would you most like to explore?</span>
+        <div class="checks">{checks("q4_areas", AREA_OPTIONS)}</div>
+        {field("Other", "q4_other")}
+      </div>
+      {field("5. What have you already tried?", "q5_already_tried", kind="textarea", rows=4, hint="What helped? What did not?")}
+      {field("6. What do you feel may be contributing to the way you feel?", "q6_contributing", kind="textarea", rows=4, hint="Don&rsquo;t worry if you don&rsquo;t know. Your intuition is welcome here.")}
+      {field("7. If our work together were successful, what would you hope would be different in your life?", "q7_hopes", kind="textarea", rows=4)}
+      <div class="fgroup">
+        <span class="flabel" data-label-for="q8_support">8. What kind of support are you looking for right now?</span>
+        <div class="checks">{radios("q8_support", SUPPORT_OPTIONS)}</div>
+      </div>
+      {field("Anything else you&rsquo;d like me to know?", "anything_else", kind="textarea", rows=4)}
+      <div class="fsubmit">
+        <button type="submit" class="btn btn-primary">Request My Consultation</button>
+      </div>
+      <div class="form-status" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</section>
+
+{WHAT_NEXT}
+{FORM_JS}"""
+page("apply", "Private Journey Application | Maison Claire Healing",
+     "Apply for The Private Journey with Stanislava at Maison Claire Healing. Share what is bringing you here and she will personally review your application.",
+     apply_body, "/journeys",
+     '{"@context":"https://schema.org","@type":"ContactPage","name":"Private Journey Application"}')
+
+# ================================================================ CONTACT
 contact_body = f"""<section class="page-hero">
   <div class="container">
-    <p class="eyebrow">Private Consultation</p>
+    <p class="eyebrow">Contact</p>
     <h1>A conversation that<br/>can change everything.</h1>
-    <p>Your first step is a free 15-minute conversation. No pressure, no need to have all the answers before reaching out.</p>
+    <p>Your first step is a conversation. No pressure, no need to have all the answers before reaching out.</p>
     <div class="hero-cta" style="justify-content:center;margin-top:26px">
-      <a href="tel:{PHONE_TEL}" class="btn btn-primary">Call or Text {PHONE_DISPLAY}</a>
-      <a href="mailto:{EMAIL}" class="btn btn-ghost">Email Stanislava</a>
+      <a href="/consultation" class="btn btn-primary">Request a Consultation</a>
+      <a href="tel:{PHONE_TEL}" class="btn btn-ghost">Call or Text {PHONE_DISPLAY}</a>
     </div>
   </div>
 </section>
 
 <section class="pad">
-  <div class="container narrow prose center-prose">
-    <h2>Your first step</h2>
-    <p>You do not need to arrive knowing exactly what you need. Your first private consultation is a confidential conversation about where you are, what has brought you here, and what you would like to change. From there, we can find the approach and journey that feel right for you.</p>
-  </div>
-  <div class="container center" style="margin-top:34px">
-    <div class="steps">{contact_steps_html}</div>
-  </div>
-</section>
-
-<section class="pad tint">
   <div class="container">
     <div class="contact-grid three">
       <a class="contact-card" href="tel:{PHONE_TEL}">
@@ -563,16 +784,17 @@ contact_body = f"""<section class="page-hero">
       </div>
     </div>
     <p class="contact-note">A more luminous you begins with a single conversation.</p>
+    <p class="disclaimer-note">{DISCLAIMER}</p>
   </div>
 </section>"""
 contact_ld = '{"@context":"https://schema.org","@type":"ContactPage","name":"Contact Maison Claire Healing","mainEntity":{"@type":"HealthAndBeautyBusiness","name":"Maison Claire Healing","email":"%s","telephone":"%s","areaServed":"Bowen Island, British Columbia","url":"%s"}}' % (EMAIL, PHONE_DISPLAY, BASE)
-page("contact", "Contact & Free Consultation | Maison Claire Healing",
-     "Book a free 15-minute consultation with Stanislava at Maison Claire Healing. Call or text 604-841-4833, email booking@MaisonClaireHealing.com. Bowen Island, in-person and online.",
+page("contact", "Contact | Maison Claire Healing, Bowen Island",
+     "Contact Stanislava at Maison Claire Healing. Call or text 604-841-4833, email booking@MaisonClaireHealing.com. Bowen Island, in-person and online.",
      contact_body, "/contact", contact_ld)
 
 # ---------------------------------------------------------------- sitemap + robots
-urls = ["/", "/journeys", "/the-reset", "/the-shift", "/the-reconnection",
-        "/the-next-chapter", "/the-deep-dive", "/approach", "/about", "/contact"]
+urls = ["/", "/journeys", "/the-first-step", "/the-reset", "/the-root", "/restore",
+        "/the-private-journey", "/approach", "/about", "/consultation", "/apply", "/contact"]
 sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 for u in urls:
     pr = "1.0" if u == "/" else "0.8"
@@ -583,9 +805,10 @@ with open(os.path.join(HERE, "sitemap.xml"), "w") as f:
 with open(os.path.join(HERE, "robots.txt"), "w") as f:
     f.write(f"User-agent: *\nAllow: /\n\nSitemap: {BASE}/sitemap.xml\n")
 
-# remove stale pages from the previous structure
-for old in ["services", "reiki-healing", "hypnotherapy-intuitive-guidance",
-            "liver-cleanse-detox", "root-cause-healing", "faq"]:
+# remove stale pages from previous structures
+for old in ["services", "reiki-healing", "hypnotherapy-intuitive-guidance", "liver-cleanse-detox",
+            "root-cause-healing", "faq", "the-shift", "the-reconnection", "the-next-chapter",
+            "the-deep-dive"]:
     p = os.path.join(HERE, old + ".html")
     if os.path.exists(p):
         os.remove(p)
