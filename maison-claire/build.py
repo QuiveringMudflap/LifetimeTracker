@@ -16,7 +16,7 @@ OG = BASE + "/og.jpg"
 EMAIL = "booking@MaisonClaireHealing.com"
 # Web3Forms access key registered to EMAIL. Empty -> forms fall back to a
 # pre-filled email draft. Paste the free key here to enable automatic sending.
-FORM_ACCESS_KEY = ""
+FORM_ACCESS_KEY = "9aeb12de-1e7e-406d-a737-f719e657739d"
 PHONE_DISPLAY = "604-841-4833"
 PHONE_TEL = "+16048414833"
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -138,7 +138,10 @@ def page(path, title, desc, body, active, jsonld=""):
                   "/logo-navy.png", "/logo-navy-light.png", "/crest.png", "/crest-navy.png",
                   "/crest-mark.png", "/favicon.png", "/og.jpg",
                   "/hero.jpg", "/portrait.jpg", "/lighthouse-warm.jpg", "/lighthouse-blue.jpg",
-                  "/mountains.jpg", "/grassland.jpg", "/horses.jpg"]:
+                  "/mountains.jpg", "/grassland.jpg", "/horses.jpg",
+                  "/banner-waterfall.jpg", "/banner-village.jpg", "/banner-seatree.jpg",
+                  "/banner-mistlake.jpg", "/banner-greenhills.jpg", "/portrait-bw.jpg",
+                  "/window.jpg", "/nature-shore.jpg", "/nature-lake.jpg", "/nature-icecap.jpg"]:
         html = html.replace(asset, asset + "?v=" + VER)
     fn = os.path.join(HERE, ("index" if path == "index" else path) + ".html")
     with open(fn, "w", encoding="utf-8") as f:
@@ -266,6 +269,10 @@ home_body = f"""<section class="photo-hero" style="background-image:linear-gradi
   </div>
 </section>
 
+<section class="photo-band" style="background-image:linear-gradient(rgba(22,38,58,0.38), rgba(22,38,58,0.38)), url('/banner-waterfall.jpg');">
+  <div class="container center"><p class="band-line">A more luminous you.</p></div>
+</section>
+
 <section class="pad testimonial-sec">
   <div class="container narrow center">
     <span class="mark" aria-hidden="true">&ldquo;</span>
@@ -323,6 +330,8 @@ journeys_body = f"""<section class="page-hero">
   </div>
 </section>
 
+<section class="photo-band tall" style="background-image:linear-gradient(rgba(22,38,58,0.16), rgba(22,38,58,0.16)), url('/banner-seatree.jpg');"></section>
+
 <section class="pad">
   <div class="container narrow">
     <div class="journey-list">{''.join(journey_row(*j) for j in JOURNEYS)}</div>
@@ -355,7 +364,7 @@ def _blocks(items):
             out.append('<div class="word-list">' + "".join(f"<span>{v}</span>" for v in val) + "</div>")
     return "".join(out)
 
-def journey_page(slug, num, name, meta, tagline, img, blocks, cta_label, cta_href, mtitle, mdesc):
+def journey_page(slug, num, name, meta, tagline, img, blocks, cta_label, cta_href, mtitle, mdesc, extra=""):
     body = f"""<section class="photo-hero journey-hero" style="background-image:linear-gradient(90deg, rgba(22,38,58,0.84) 0%, rgba(22,38,58,0.44) 55%, rgba(22,38,58,0.10) 100%), url('/{img}');">
   <div class="container photo-hero-inner">
     <p class="ph-eyebrow">{num} &nbsp;&middot;&nbsp; A Maison Claire Journey</p>
@@ -369,7 +378,7 @@ def journey_page(slug, num, name, meta, tagline, img, blocks, cta_label, cta_hre
 <section class="pad">
   <div class="container narrow prose journey-prose">{_blocks(blocks)}</div>
 </section>
-
+{extra}
 <section class="pad tint">
   <div class="container center">
     <div class="price-panel">
@@ -448,7 +457,10 @@ journey_page("the-private-journey", "05", "The Private Journey", "3-6 months &mi
      ("p", "The goal is not dependency on Maison Claire. The goal is greater understanding of yourself, greater ownership of your wellbeing and a way forward that you can carry into the rest of your life.")],
     "By Application", "/apply",
     "The Private Journey | Maison Claire Healing",
-    "The Private Journey is Maison Claire&rsquo;s most personal work with Stanislava: 3 to 6 months, by application, from $4,500. An ongoing private relationship that follows the person.")
+    "The Private Journey is Maison Claire&rsquo;s most personal work with Stanislava: 3 to 6 months, by application, from $4,500. An ongoing private relationship that follows the person.",
+    extra="""<section class="photo-band tall" style="background-image:linear-gradient(rgba(22,38,58,0.32), rgba(22,38,58,0.32)), url('/window.jpg');">
+  <div class="container center"><p class="band-line">A quiet, confidential place to stop and listen.</p></div>
+</section>""")
 
 # ================================================================ APPROACH
 EXPLORE_TAGS = ["Gut &amp; digestive health", "Liver support", "Nutrition", "Cleansing practices",
@@ -490,7 +502,7 @@ approach_body = f"""<section class="page-hero">
   </div>
 </section>
 
-<section class="bms">
+<section class="bms" style="background-image:linear-gradient(rgba(22,48,74,0.62), rgba(22,48,74,0.62)), url('/banner-greenhills.jpg'); background-size:cover; background-position:center;">
   <div class="container center">
     <p class="bms-line">Body &nbsp;&middot;&nbsp; Mind &nbsp;&middot;&nbsp; Environment &nbsp;&middot;&nbsp; Self</p>
   </div>
@@ -512,6 +524,21 @@ page("approach", "The Approach | Whole-Person Health Coaching at Maison Claire",
      approach_body, "/approach", approach_ld)
 
 # ================================================================ ABOUT
+TESTIMONIALS = [
+    ("Stanka is incredible at Mediumship! During our first session, she connected with a dear family member of mine who has long passed and channeled through loving and caring messages from my spirit team. I was able to gain clarity of thoughts in major areas of my life in the present moment all in one session. Stanka is straight forward and she also shares her own interpretations and wisdom to help me process the information at hand. I truly enjoyed my first session with her, and would definitely see her again.",
+     "Shengyin &middot; Vancouver, BC"),
+    ("Stani is a bright and clear channel through which the vibration of love emanates. She holds space for you in a crystalline manner, there is no static or noise when you are held in her field, just a familiar and grounded reassurance. In this way she helps you access the ancient wisdom and &lsquo;knowing&rsquo; that is always and has always been within you. To sit in session with Stani is to receive the affirmation of the divine soul being that you are, whether it be through mediumship or her own voice, that is where she will take you. Back to Love, back home to your Self.",
+     "Rebecca &middot; @kashmikashmi"),
+    ("My daughter thought I may benefit from a reading so I decided after a bit of thinking about it to make an appointment. Much to my pleasant surprise and ultimately to my greater ease in current life, the reading brought me to ask questions and get answers via Stani&rsquo;s ability to connect with spirit. All I can say is the reading was amazing. You helped me conclude so much that really had incompletion. Truly, for anyone who&rsquo;s wanting closure from those that have left this earthly planet, the spirit reading that Stani does will be one of the most amazing experiences of your life. Thank you Stani.",
+     "K.T. &middot; Vancouver"),
+    ("Stani is a natural intuitive. Her ability to connect to the Spirit World, to hear the clear messages from our passed ancestors and to relay them in a healing way is truly beautiful. If you are seeking to connect to your spirit guides, your family on the &lsquo;other side&rsquo; (human and animal), or just to get some clarity, I recommend a session with Stani.",
+     "Andrea &middot; @nectaryoga"),
+]
+kind_words_html = '<div class="kind-words">' + "".join(
+    f'<figure class="kw-card"><span class="mark" aria-hidden="true">&ldquo;</span>'
+    f'<blockquote>{q}</blockquote><figcaption>{c}</figcaption></figure>'
+    for q, c in TESTIMONIALS) + '</div>'
+
 about_body = f"""<section class="page-hero">
   <div class="container">
     <p class="eyebrow">About</p>
@@ -534,12 +561,15 @@ about_body = f"""<section class="page-hero">
 </section>
 
 <section class="pad tint">
-  <div class="container narrow prose">
-    <p class="eyebrow">Mediumship</p>
-    <h2>A bridge between two worlds.</h2>
-    <p>The emphasis of my work is mediumship: making connections with, and delivering messages from, people who are no longer living to those who still are. I receive information primarily and directly from spirit guides, angels, and from those who have passed.</p>
-    <p>While there are a number of forms of mediumship, I work as a mental medium, meaning I communicate with spirits through telepathy. Spirits impress my mind and body with thoughts and feelings that come in through the clairs. Mentally I hear (clairaudience), see (clairvoyance), know (claircognizance), and feel (clairsentience) messages from spirit.</p>
-    <p>I act as the bridge between the spiritual and the physical world, with the intention of healing both.</p>
+  <div class="container split-about med">
+    <div class="prose">
+      <p class="eyebrow">Mediumship</p>
+      <h2 class="approach-title">A bridge between two worlds.</h2>
+      <p>The emphasis of my work is mediumship: making connections with, and delivering messages from, people who are no longer living to those who still are. I receive information primarily and directly from spirit guides, angels, and from those who have passed.</p>
+      <p>While there are a number of forms of mediumship, I work as a mental medium, meaning I communicate with spirits through telepathy. Spirits impress my mind and body with thoughts and feelings that come in through the clairs. Mentally I hear (clairaudience), see (clairvoyance), know (claircognizance), and feel (clairsentience) messages from spirit.</p>
+      <p>I act as the bridge between the spiritual and the physical world, with the intention of healing both.</p>
+    </div>
+    <div class="about-photo"><img src="/portrait-bw.jpg" alt="Stanislava in the wind on the coast" width="1600" height="1089" /></div>
   </div>
 </section>
 
@@ -549,11 +579,23 @@ about_body = f"""<section class="page-hero">
   </div>
 </section>
 
-<section class="pad testimonial-sec">
-  <div class="container narrow center">
-    <span class="mark" aria-hidden="true">&ldquo;</span>
-    <blockquote class="testimonial">Stani is a natural intuitive. Her ability to connect to the Spirit World, to hear the clear messages from our passed ancestors and to relay them in a healing way is truly beautiful. If you are seeking to connect to your spirit guides, your family on the &lsquo;other side&rsquo; (human and animal), or just to get some clarity, I recommend a session with Stani.</blockquote>
-    <cite>Andrea &middot; @nectaryoga</cite>
+<section class="pad-sm">
+  <div class="container">
+    <div class="gallery3">
+      <img src="/nature-shore.jpg" alt="Golden light on a rocky shoreline" loading="lazy" />
+      <img src="/nature-lake.jpg" alt="Still lake at sunset" loading="lazy" />
+      <img src="/nature-icecap.jpg" alt="Arms raised at a glacier lagoon" loading="lazy" />
+    </div>
+  </div>
+</section>
+
+<section class="photo-band" style="background-image:linear-gradient(rgba(22,38,58,0.30), rgba(22,38,58,0.30)), url('/banner-mistlake.jpg');">
+  <div class="container center"><p class="band-line">Kind words</p></div>
+</section>
+
+<section class="pad kind-words-sec">
+  <div class="container">
+    {kind_words_html}
   </div>
 </section>
 
@@ -783,9 +825,12 @@ contact_body = f"""<section class="page-hero">
         <span class="contact-value">Bowen Island, BC<br/>In-person &amp; online</span>
       </div>
     </div>
-    <p class="contact-note">A more luminous you begins with a single conversation.</p>
     <p class="disclaimer-note">{DISCLAIMER}</p>
   </div>
+</section>
+
+<section class="photo-band tall" style="background-image:linear-gradient(rgba(22,38,58,0.34), rgba(22,38,58,0.34)), url('/banner-village.jpg');">
+  <div class="container center"><p class="band-line">A more luminous you begins with a single conversation.</p></div>
 </section>"""
 contact_ld = '{"@context":"https://schema.org","@type":"ContactPage","name":"Contact Maison Claire Healing","mainEntity":{"@type":"HealthAndBeautyBusiness","name":"Maison Claire Healing","email":"%s","telephone":"%s","areaServed":"Bowen Island, British Columbia","url":"%s"}}' % (EMAIL, PHONE_DISPLAY, BASE)
 page("contact", "Contact | Maison Claire Healing, Bowen Island",
