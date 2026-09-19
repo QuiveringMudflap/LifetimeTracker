@@ -391,6 +391,14 @@ section { position: relative; }
 .check input { margin: 4px 0 0; accent-color: var(--navy); flex: 0 0 auto; width: 16px; height: 16px; }
 .check span { font-family: var(--serif); font-size: 16.5px; color: var(--ink-soft); }
 .check:hover span { color: var(--navy-ink); }
+.form-section { display: flex; align-items: center; gap: 16px; margin: 44px 0 24px; }
+.form-section::before, .form-section::after { content: ""; height: 1px; background: var(--line-soft); flex: 1; }
+.form-section span { font-family: var(--sans); font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold-deep); white-space: nowrap; }
+.mc-form > .form-section:first-of-type { margin-top: 8px; }
+.form-note { font-family: var(--serif); font-style: italic; font-size: clamp(16.5px, 1.9vw, 18.5px); color: var(--navy-ink); background: var(--cream-2); border-left: 3px solid var(--gold-soft); border-radius: 8px; padding: 16px 20px; margin: 0 0 26px; }
+.checks.tight { grid-template-columns: repeat(3, auto); justify-content: start; gap: 8px 28px; }
+.apply-meta { font-family: var(--sans) !important; font-size: 13px !important; letter-spacing: 0.2em; text-transform: uppercase; color: var(--navy) !important; margin: 14px auto 0 !important; }
+.apply-reassure { margin-top: 16px !important; color: var(--ink-mute) !important; }
 .fsubmit { text-align: center; margin-top: 34px; }
 .fsubmit .btn { cursor: pointer; font-size: 12.5px; }
 .form-status { display: none; margin: 26px auto 0; max-width: 620px; padding: 20px 22px;
@@ -454,6 +462,7 @@ section { position: relative; }
   .contact-grid.three { grid-template-columns: 1fr; }
   .frow { grid-template-columns: 1fr; }
   .checks { grid-template-columns: 1fr; }
+  .checks.tight { grid-template-columns: 1fr; }
   .jr-img { flex: 0 0 96px; height: 76px; }
   .kind-words { grid-template-columns: 1fr; }
   .gallery3 { grid-template-columns: 1fr; }

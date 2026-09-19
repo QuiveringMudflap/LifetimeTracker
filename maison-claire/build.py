@@ -780,11 +780,21 @@ page("consultation", "Request a Consultation | Maison Claire Healing",
      '{"@context":"https://schema.org","@type":"ContactPage","name":"Request a Consultation"}')
 
 # ---- Private Journey application form
+def form_section(title):
+    return f'<div class="form-section"><span>{title}</span></div>'
+
+APPLY_AREAS = ["Energy &amp; vitality", "Digestion &amp; gut health", "Liver &amp; body cleansing",
+    "Nutrition", "Environmental exposures", "Heavy-metal exposure concerns", "Parasite concerns",
+    "Sleep", "Stress &amp; overwhelm", "Emotional patterns", "Life transition", "Hypnotherapy",
+    "Reiki &amp; energy work", "Intuitive guidance"]
+
 apply_body = f"""<section class="page-hero">
   <div class="container">
-    <p class="eyebrow">The Private Journey &middot; By Application</p>
-    <h1>Request a private<br/>consultation.</h1>
-    <p>Tell me a little about what is bringing you to Maison Claire. You don&rsquo;t need to know exactly. That is something we can explore together.</p>
+    <p class="eyebrow">The Private Journey</p>
+    <h1>A private 3 to 6<br/>month experience.</h1>
+    <p class="apply-meta">From $4,500 &nbsp;&middot;&nbsp; By application</p>
+    <p>The Private Journey is Maison Claire&rsquo;s most individualized offering. Before we begin, I would like to understand a little about you, what has brought you here, and what you are hoping to change.</p>
+    <p class="apply-reassure"><em>There are no perfect answers. Simply tell me where you are right now.</em></p>
   </div>
 </section>
 
@@ -792,39 +802,80 @@ apply_body = f"""<section class="page-hero">
   <div class="container narrow">
     <form class="mc-form" data-title="Private Journey application (Maison Claire website)">
       <input type="text" name="_trap" class="trap" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+      {form_section("About You")}
       <div class="frow">
         {field("Name", "name", req=True)}
         {field("Email", "email", kind="email", req=True)}
       </div>
-      {field("Phone", "phone", kind="tel")}
-      {field("1. What brings you to Maison Claire at this time?", "q1_what_brings_you", kind="textarea", req=True, rows=4)}
-      {field("2. What would you most like to change or improve?", "q2_what_to_change", kind="textarea", rows=4)}
+      <div class="frow">
+        {field("Phone", "phone", kind="tel")}
+        {field("Where are you located?", "location")}
+      </div>
+      {field("How did you hear about Maison Claire?", "referral")}
+
+      {form_section("What Brings You Here?")}
+      {field("1. What is happening in your life or wellbeing that has brought you to Maison Claire now?", "q1_bring_you", kind="textarea", req=True, rows=4)}
+      {field("2. What would you most like help with?", "q2_help_with", kind="textarea", rows=4)}
       {field("3. How long have you been experiencing this?", "q3_how_long")}
+      {field("4. What have you already tried?", "q4_tried", kind="textarea", rows=4, hint="What helped, and what did not?")}
+      {field("5. Do you feel that your physical health, emotional wellbeing, lifestyle or environment may be connected?", "q5_connected", kind="textarea", rows=4, hint="If so, tell me a little about what you have noticed.")}
+
+      {form_section("Your Health &amp; Wellbeing")}
       <div class="fgroup">
-        <span class="flabel" data-label-for="q4_areas">4. Which areas would you most like to explore?</span>
-        <div class="checks">{checks("q4_areas", AREA_OPTIONS)}</div>
-        {field("Other", "q4_other")}
+        <span class="flabel" data-label-for="q6_areas">6. Are there particular areas you would like to explore?</span>
+        <div class="checks">{checks("q6_areas", APPLY_AREAS)}</div>
+        {field("Other", "q6_other")}
       </div>
-      {field("5. What have you already tried?", "q5_already_tried", kind="textarea", rows=4, hint="What helped? What did not?")}
-      {field("6. What do you feel may be contributing to the way you feel?", "q6_contributing", kind="textarea", rows=4, hint="Don&rsquo;t worry if you don&rsquo;t know. Your intuition is welcome here.")}
-      {field("7. If our work together were successful, what would you hope would be different in your life?", "q7_hopes", kind="textarea", rows=4)}
       <div class="fgroup">
-        <span class="flabel" data-label-for="q8_support">8. What kind of support are you looking for right now?</span>
-        <div class="checks">{radios("q8_support", SUPPORT_OPTIONS)}</div>
+        <span class="flabel" data-label-for="q7_care">7. Are you currently under the care of a physician or other healthcare practitioner for anything relevant to the reason you are applying?</span>
+        <div class="checks tight">{radios("q7_care", ["Yes", "No"])}</div>
       </div>
-      {field("Anything else you&rsquo;d like me to know?", "anything_else", kind="textarea", rows=4)}
+      {field("If yes, you may briefly explain if you feel it is relevant.", "q7_care_detail", kind="textarea", rows=3)}
+
+      {form_section("Going Deeper")}
+      {field("8. If we looked beyond the immediate problem, what do you feel may be underneath it?", "q8_underneath", kind="textarea", rows=4, hint="It is completely fine if you don&rsquo;t know.")}
+      {field("9. What would meaningful change look like for you six months from now?", "q9_change", kind="textarea", rows=4)}
+      {field("10. What do you feel has been getting in the way of that change?", "q10_in_the_way", kind="textarea", rows=4)}
+      <div class="fgroup">
+        <span class="flabel" data-label-for="q11_open">11. Are you open to making changes to your daily habits, nutrition, lifestyle or environment when appropriate?</span>
+        <div class="checks tight">{radios("q11_open", ["Yes", "Maybe", "Not at this time"])}</div>
+      </div>
+
+      {form_section("The Commitment")}
+      <p class="form-note">The Private Journey is not a quick fix. It is intended for someone who is ready to participate actively in their own wellbeing.</p>
+      {field("12. Why does this feel like the right time to do this work?", "q12_why_now", kind="textarea", rows=4)}
+      <div class="fgroup">
+        <span class="flabel" data-label-for="q13_dedicate">13. Are you able and willing to dedicate time between sessions to the practices or changes we agree upon?</span>
+        <div class="checks tight">{radios("q13_dedicate", ["Yes", "I&rsquo;m not sure yet"])}</div>
+      </div>
+      <div class="fgroup">
+        <span class="flabel" data-label-for="q14_investment">14. The Private Journey begins at $4,500 for 3 to 6 months, depending on the level of support we design together. If we both feel this is the right fit, are you comfortable with that level of investment?</span>
+        <div class="checks tight">{radios("q14_investment", ["Yes", "I would like to discuss it", "Not at this time"])}</div>
+      </div>
+
+      {form_section("One Last Question")}
+      {field("If you could ask your body, mind or deeper self one question right now, and receive a completely honest answer, what would you ask?", "q15_one_question", kind="textarea", rows=4)}
+
       <div class="fsubmit">
-        <button type="submit" class="btn btn-primary">Request My Consultation</button>
+        <button type="submit" class="btn btn-primary">Apply for the Private Journey</button>
       </div>
       <div class="form-status" role="status" aria-live="polite"></div>
     </form>
   </div>
 </section>
 
-{WHAT_NEXT}
+<section class="pad tint">
+  <div class="container narrow center">
+    <div class="section-head"><div class="rule"></div><p class="eyebrow">What happens next</p><div class="rule"></div></div>
+    <p class="approach-lead">After I personally review your application, I will contact you if I believe the Private Journey may be a good fit.</p>
+    <p class="approach-lead">We will begin with a private conversation before deciding whether to work together. Submitting an application does not commit you to the program.</p>
+    <p class="disclaimer-note">Maison Claire provides complementary health and wellness support. It does not diagnose or treat medical conditions and is not a replacement for care from a licensed healthcare professional.</p>
+  </div>
+</section>
 {FORM_JS}"""
-page("apply", "Private Journey Application | Maison Claire Healing",
-     "Apply for The Private Journey with Stanislava at Maison Claire Healing. Share what is bringing you here and she will personally review your application.",
+page("apply", "Apply for the Private Journey | Maison Claire Healing",
+     "Apply for The Private Journey with Stanislava at Maison Claire Healing: a private 3 to 6 month experience from $4,500, by application. She personally reviews every application.",
      apply_body, "/journeys",
      '{"@context":"https://schema.org","@type":"ContactPage","name":"Private Journey Application"}')
 
