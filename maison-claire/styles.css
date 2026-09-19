@@ -307,11 +307,11 @@ section { position: relative; }
   z-index: 1; pointer-events: none; mix-blend-mode: screen;
   opacity: 0; transition: opacity 1.3s ease; display: block;
 }
-.fluid-behind .fluid-canvas { opacity: 0.5; }
+.fluid-behind .fluid-canvas { opacity: 0.3; }
 .fluid-intro { overflow: hidden; }
 .fluid-intro .fluid-canvas {
   position: fixed; inset: 0; width: 100vw; height: 100vh;
-  z-index: 9995; opacity: 0.95; transition: none;
+  z-index: 9995; opacity: 0.62; transition: none;
 }
 .fluid-splash {
   position: fixed; inset: 0; z-index: 9990; pointer-events: none;

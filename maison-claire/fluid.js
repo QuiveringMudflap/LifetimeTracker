@@ -16,12 +16,12 @@
   var config = {
     SIM_RESOLUTION: 128,
     DYE_RESOLUTION: 640,
-    DENSITY_DISSIPATION: 1.4,
-    VELOCITY_DISSIPATION: 0.3,
+    DENSITY_DISSIPATION: 1.75,
+    VELOCITY_DISSIPATION: 0.35,
     PRESSURE: 0.8,
     PRESSURE_ITERATIONS: 20,
-    CURL: 22,
-    SPLAT_RADIUS: 0.28,
+    CURL: 18,
+    SPLAT_RADIUS: 0.18,
     SPLAT_FORCE: 6000
   };
 
@@ -278,13 +278,27 @@
   }
   function splatPointer(p, boost) {
     var dx = p.deltaX * config.SPLAT_FORCE, dy = p.deltaY * config.SPLAT_FORCE;
-    splat(p.texcoordX, p.texcoordY, dx, dy, colorScaled(p.color, 0.22 * (boost || 1)));
+    splat(p.texcoordX, p.texcoordY, dx, dy, colorScaled(p.color, 0.13 * (boost || 1)));
   }
   function randomSplat(intensity) {
     var c = pick();
     var x = Math.random(), y = Math.random();
-    var dx = 1000 * (Math.random() - 0.5), dy = 1000 * (Math.random() - 0.5);
+    var dx = 900 * (Math.random() - 0.5), dy = 900 * (Math.random() - 0.5);
     splat(x, y, dx, dy, colorScaled(c, intensity));
+  }
+  // A single cohesive bloom from the centre - reads as one burst, not scattered dots.
+  function centerBurst() {
+    var aspect = canvas.width / canvas.height;
+    var n = 9;
+    for (var i = 0; i < n; i++) {
+      var ang = (i / n) * Math.PI * 2 + Math.random() * 0.25;
+      var r = 0.03 + Math.random() * 0.04;
+      var x = 0.5 + Math.cos(ang) * r / (aspect > 1 ? aspect : 1);
+      var y = 0.5 + Math.sin(ang) * r;
+      var speed = 620 + Math.random() * 420;
+      splat(x, y, Math.cos(ang) * speed, Math.sin(ang) * speed, colorScaled(pick(), 0.24));
+    }
+    splat(0.5, 0.5, 0, 0, colorScaled([0.92, 0.86, 0.72], 0.18));  // soft warm core
   }
 
   var lastTime = Date.now();
@@ -392,11 +406,11 @@
     var dt = Math.min((now - lastTime) / 1000, 0.0166);
     lastTime = now;
     if (resizeCanvas()) initFramebuffers();
-    autoTimer += dt;
-    var interval = introRunning ? 0.18 : 5.5;
-    if (autoTimer >= interval) {
-      autoTimer = 0;
-      randomSplat(introRunning ? 0.5 : 0.18);
+    // No trickle during the intro - it is a single burst that fades in.
+    // Once settled, a rare, faint ambient splat keeps it quietly alive.
+    if (!introRunning) {
+      autoTimer += dt;
+      if (autoTimer >= 7.0) { autoTimer = 0; randomSplat(0.09); }
     }
     step(dt);
     render();
@@ -405,13 +419,13 @@
   initFramebuffers();
   resizeCanvas();
   initFramebuffers();
-  // opening burst
-  for (var i = 0; i < 14; i++) randomSplat(0.45 + Math.random() * 0.25);
+  // opening burst - one bloom, then it fades in with the page
+  centerBurst();
   document.body.classList.add('fluid-intro');
   requestAnimationFrame(frame);
 
   // Settle: fade the full-screen splash away and confine fluid behind the hero.
-  var SPLASH_MS = 3200;
+  var SPLASH_MS = 2200;
   setTimeout(function () {
     if (splash) splash.classList.add('fade');
     document.body.classList.remove('fluid-intro');
