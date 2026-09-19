@@ -297,8 +297,29 @@ section { position: relative; }
   min-height: min(94vh, 880px);
   display: flex; align-items: center;
   border-bottom: 3px solid var(--gold-soft);
+  position: relative; overflow: hidden;
 }
-.photo-hero-inner { width: 100%; }
+.photo-hero-inner { width: 100%; position: relative; z-index: 2; }
+
+/* Interactive fluid: subtle glow behind the hero, promoted full-screen for the intro */
+.fluid-canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 1; pointer-events: none; mix-blend-mode: screen;
+  opacity: 0; transition: opacity 1.3s ease; display: block;
+}
+.fluid-behind .fluid-canvas { opacity: 0.5; }
+.fluid-intro { overflow: hidden; }
+.fluid-intro .fluid-canvas {
+  position: fixed; inset: 0; width: 100vw; height: 100vh;
+  z-index: 9995; opacity: 0.95; transition: none;
+}
+.fluid-splash {
+  position: fixed; inset: 0; z-index: 9990; pointer-events: none;
+  background: radial-gradient(120% 120% at 50% 42%, #1b3654 0%, #12233a 68%, #0c1728 100%);
+  opacity: 1; transition: opacity 1.35s ease;
+}
+.fluid-splash.fade { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .fluid-canvas, .fluid-splash { display: none !important; } }
 .ph-eyebrow { font-family: var(--sans); letter-spacing: 0.34em; text-transform: uppercase; font-size: 12px; color: #e9d9b3; margin: 0 0 14px; }
 .ph-title { font-family: var(--serif); font-weight: 500; color: #fdfaf3; font-size: clamp(42px, 7vw, 82px); line-height: 1.02; letter-spacing: 0.01em; margin: 0 0 22px; }
 .ph-lead { color: #eef2f6; font-size: clamp(17px, 2vw, 21px); max-width: 500px; margin: 0 0 30px; line-height: 1.6; text-shadow: 0 1px 12px rgba(16,28,42,0.4); }

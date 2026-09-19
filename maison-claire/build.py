@@ -144,7 +144,7 @@ def page(path, title, desc, body, active, jsonld=""):
                   "/window.jpg", "/nature-shore.jpg", "/nature-lake.jpg", "/nature-icecap.jpg",
                   "/maison-claire-logo.svg", "/maison-claire-logo-light.svg",
                   "/first-step.jpg", "/private-journey.jpg",
-                  "/contact-hero.jpg", "/about-hero.jpg"]:
+                  "/contact-hero.jpg", "/about-hero.jpg", "/fluid.js"]:
         html = html.replace(asset, asset + "?v=" + VER)
     fn = os.path.join(HERE, ("index" if path == "index" else path) + ".html")
     with open(fn, "w", encoding="utf-8") as f:
@@ -229,6 +229,7 @@ MODALITIES = [
 modalities_html = "".join(f'<div class="modality"><span class="modality-ic">{IC[i]}</span><span>{n}</span></div>' for i, n in MODALITIES)
 
 home_body = f"""<section class="photo-hero" style="background-image:linear-gradient(90deg, rgba(22,38,58,0.78) 0%, rgba(22,38,58,0.42) 42%, rgba(22,38,58,0.10) 70%, rgba(22,38,58,0) 100%), url('/hero.jpg');">
+  <canvas id="fluidCanvas" class="fluid-canvas" aria-hidden="true"></canvas>
   <div class="container photo-hero-inner">
     <p class="ph-eyebrow">A whole-person approach to healing</p>
     <h1 class="ph-title">Come back<br/>to yourself.</h1>
@@ -292,7 +293,9 @@ home_body = f"""<section class="photo-hero" style="background-image:linear-gradi
   </div>
 </section>
 
-{cta_band()}"""
+{cta_band()}
+<div id="fluidSplash" class="fluid-splash" aria-hidden="true"></div>
+<script src="/fluid.js" defer></script>"""
 
 home_ld = """{"@context":"https://schema.org","@type":"HealthAndBeautyBusiness","name":"Maison Claire","description":"Reiki healing, hypnotherapy, intuitive guidance, liver cleanse and detox, and root cause healing with Stanislava.","image":"%s","email":"%s","url":"%s","slogan":"Natural Healing, Higher Wellbeing, A Brighter You","priceRange":"$$","areaServed":"Greater Vancouver","founder":{"@type":"Person","name":"Stanislava"}}""" % (OG, EMAIL, BASE)
 
