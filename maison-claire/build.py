@@ -142,7 +142,8 @@ def page(path, title, desc, body, active, jsonld=""):
                   "/banner-waterfall.jpg", "/banner-village.jpg", "/banner-seatree.jpg",
                   "/banner-mistlake.jpg", "/banner-greenhills.jpg", "/portrait-bw.jpg",
                   "/window.jpg", "/nature-shore.jpg", "/nature-lake.jpg", "/nature-icecap.jpg",
-                  "/maison-claire-logo.svg", "/maison-claire-logo-light.svg"]:
+                  "/maison-claire-logo.svg", "/maison-claire-logo-light.svg",
+                  "/first-step.jpg", "/private-journey.jpg"]:
         html = html.replace(asset, asset + "?v=" + VER)
     fn = os.path.join(HERE, ("index" if path == "index" else path) + ".html")
     with open(fn, "w", encoding="utf-8") as f:
@@ -150,6 +151,15 @@ def page(path, title, desc, body, active, jsonld=""):
     return path
 
 # ---------------------------------------------------------------- shared blocks
+def photo_hero(eyebrow, h1, sub, img, pos="center"):
+    return f"""<section class="page-photo-hero" style="background-image:linear-gradient(180deg, rgba(18,32,50,0.58) 0%, rgba(18,32,50,0.40) 50%, rgba(18,32,50,0.66) 100%), url('/{img}'); background-position:{pos};">
+  <div class="container center">
+    <p class="pph-eyebrow">{eyebrow}</p>
+    <h1 class="pph-title">{h1}</h1>
+    <p class="pph-lead">{sub}</p>
+  </div>
+</section>"""
+
 def cta_band(heading="Your first step is a conversation", text="A free 15-minute introductory consultation. A simple, no-pressure conversation to share what&rsquo;s happening, ask questions, and discover whether working together feels right for you."):
     return f"""<section class="pad cta-band"><div class="container center">
     <h2>{heading}</h2>
@@ -300,7 +310,7 @@ DISCLAIMER = ("Maison Claire provides complementary health and wellness support 
 # ================================================================ JOURNEYS
 JOURNEYS = [
     ("the-first-step", "01", "The First Step", "2 hours &middot; $250",
-     "Where every Maison Claire journey begins.", "lighthouse-warm.jpg"),
+     "Where every Maison Claire journey begins.", "first-step.jpg"),
     ("the-reset", "02", "The Reset", "3 weeks &middot; From $750",
      "Sometimes the body needs less, not more.", "mountains.jpg"),
     ("the-root", "03", "The Root", "6 weeks &middot; From $1,500",
@@ -308,7 +318,7 @@ JOURNEYS = [
     ("restore", "04", "Restore", "8-10 weeks &middot; From $2,500",
      "From understanding to rebuilding.", "horses.jpg"),
     ("the-private-journey", "05", "The Private Journey", "3-6 months &middot; By application &middot; From $4,500",
-     "Maison Claire&rsquo;s most personal level of work.", "hero.jpg"),
+     "Maison Claire&rsquo;s most personal level of work.", "private-journey.jpg"),
 ]
 
 def journey_row(slug, num, name, meta, tagline, img):
@@ -323,15 +333,7 @@ def journey_row(slug, num, name, meta, tagline, img):
       <span class="jr-arrow" aria-hidden="true">&rarr;</span>
     </a>"""
 
-journeys_body = f"""<section class="page-hero">
-  <div class="container">
-    <p class="eyebrow">Journeys</p>
-    <h1>Start where it<br/>makes sense.</h1>
-    <p>Every journey at Maison Claire is private and personal. Begin with a single conversation, or go as deep as you wish.</p>
-  </div>
-</section>
-
-<section class="photo-band tall" style="background-image:linear-gradient(rgba(22,38,58,0.16), rgba(22,38,58,0.16)), url('/banner-seatree.jpg');"></section>
+journeys_body = f"""{photo_hero("Journeys", "Start where it makes sense.", "Every journey at Maison Claire is private and personal. Begin with a single conversation, or go as deep as you wish.", "banner-seatree.jpg", pos="center 38%")}
 
 <section class="pad">
   <div class="container narrow">
@@ -393,7 +395,7 @@ def journey_page(slug, num, name, meta, tagline, img, blocks, cta_label, cta_hre
     page(slug, mtitle, mdesc, body, "/journeys", ld)
 
 journey_page("the-first-step", "01", "The First Step", "2 hours &middot; $250",
-    "Two unhurried hours dedicated to understanding you.", "lighthouse-warm.jpg",
+    "Two unhurried hours dedicated to understanding you.", "first-step.jpg",
     [("p", "This is where every Maison Claire journey begins."),
      ("p", "Before recommending a cleanse, supplement, healing practice or longer program, I want to understand what is actually happening in your life."),
      ("p", "We will talk about your health history, nutrition, digestion, sleep, energy, stress, environment, emotional wellbeing, medications and supplements, previous approaches you have tried, and what you would most like to change."),
@@ -446,7 +448,7 @@ journey_page("restore", "04", "Restore", "8-10 weeks &middot; From $2,500",
     "Restore is an 8 to 10 week journey with Stanislava from $2,500, rebuilding physical foundations while addressing stress, boundaries, beliefs and daily patterns.")
 
 journey_page("the-private-journey", "05", "The Private Journey", "3-6 months &middot; By application &middot; From $4,500",
-    "Maison Claire&rsquo;s most personal level of work.", "hero.jpg",
+    "Maison Claire&rsquo;s most personal level of work.", "private-journey.jpg",
     [("p", "This is not a predetermined program."),
      ("p", "It is an ongoing private relationship for someone who wants the time and space to explore their wellbeing more deeply."),
      ("p", "We begin with the physical foundations and follow what emerges."),
@@ -476,13 +478,7 @@ FLOW = ["We start with where you are.", "We listen.", "We investigate what is wi
         "Then we take the next step."]
 flow_html = "".join(f"<li>{f}</li>" for f in FLOW)
 
-approach_body = f"""<section class="page-hero">
-  <div class="container">
-    <p class="eyebrow">The Maison Claire Approach</p>
-    <h1>Look deeper.<br/>Keep it human.</h1>
-    <p>Maison Claire is built around a simple idea.</p>
-  </div>
-</section>
+approach_body = f"""{photo_hero("The Maison Claire Approach", "Look deeper. Keep it human.", "Maison Claire is built around a simple idea.", "banner-greenhills.jpg", pos="center 60%")}
 
 <section class="pad">
   <div class="container narrow prose center-prose">
@@ -503,7 +499,7 @@ approach_body = f"""<section class="page-hero">
   </div>
 </section>
 
-<section class="bms" style="background-image:linear-gradient(rgba(22,48,74,0.62), rgba(22,48,74,0.62)), url('/banner-greenhills.jpg'); background-size:cover; background-position:center;">
+<section class="bms">
   <div class="container center">
     <p class="bms-line">Body &nbsp;&middot;&nbsp; Mind &nbsp;&middot;&nbsp; Environment &nbsp;&middot;&nbsp; Self</p>
   </div>
@@ -540,13 +536,7 @@ kind_words_html = '<div class="kind-words">' + "".join(
     f'<blockquote>{q}</blockquote><figcaption>{c}</figcaption></figure>'
     for q, c in TESTIMONIALS) + '</div>'
 
-about_body = f"""<section class="page-hero">
-  <div class="container">
-    <p class="eyebrow">About Me</p>
-    <h1>A guide, a practitioner,<br/>and a fellow traveller.</h1>
-    <p>My name is Stanislava Oben.</p>
-  </div>
-</section>
+about_body = f"""{photo_hero("About Me", "A guide, a practitioner, and a fellow traveller.", "My name is Stanislava Oben.", "portrait-bw.jpg", pos="center 32%")}
 
 <section class="pad">
   <div class="container split-about">
@@ -594,23 +584,13 @@ about_body = f"""<section class="page-hero">
       <p class="signature">Stanislava Oben</p>
       <p class="credentials">Certified Natural Health Coach &middot; Certified Hypnotherapist &middot; Reiki Practitioner<br/>Founder, Maison Claire Healing</p>
     </div>
-    <div class="about-photo"><img src="/portrait-bw.jpg" alt="Stanislava Oben on the coast" width="1600" height="1089" /></div>
+    <div class="about-photo"><img src="/grassland.jpg" alt="Dusk over the grasslands" width="1600" height="2037" loading="lazy" /></div>
   </div>
 </section>
 
 <section class="pad quote">
   <div class="container">
     <blockquote><span class="mark" aria-hidden="true">&ldquo;</span>Healing is not about becoming someone different, but about removing what has obscured who you already are.</blockquote>
-  </div>
-</section>
-
-<section class="pad-sm tint">
-  <div class="container narrow prose">
-    <p class="eyebrow">Mediumship</p>
-    <h2>A bridge between two worlds.</h2>
-    <p>The emphasis of my intuitive work is mediumship: making connections with, and delivering messages from, people who are no longer living to those who still are. I receive information primarily and directly from spirit guides, angels, and from those who have passed.</p>
-    <p>While there are a number of forms of mediumship, I work as a mental medium, meaning I communicate with spirits through telepathy. Spirits impress my mind and body with thoughts and feelings that come in through the clairs. Mentally I hear (clairaudience), see (clairvoyance), know (claircognizance), and feel (clairsentience) messages from spirit.</p>
-    <p>I act as the bridge between the spiritual and the physical world, with the intention of healing both.</p>
   </div>
 </section>
 
@@ -880,14 +860,14 @@ page("apply", "Apply for the Private Journey | Maison Claire Healing",
      '{"@context":"https://schema.org","@type":"ContactPage","name":"Private Journey Application"}')
 
 # ================================================================ CONTACT
-contact_body = f"""<section class="page-hero">
-  <div class="container">
-    <p class="eyebrow">Contact</p>
-    <h1>A conversation that<br/>can change everything.</h1>
-    <p>Your first step is a conversation. No pressure, no need to have all the answers before reaching out.</p>
+contact_body = f"""<section class="page-photo-hero" style="background-image:linear-gradient(180deg, rgba(18,32,50,0.58) 0%, rgba(18,32,50,0.40) 50%, rgba(18,32,50,0.66) 100%), url('/banner-village.jpg'); background-position:center;">
+  <div class="container center">
+    <p class="pph-eyebrow">Contact</p>
+    <h1 class="pph-title">A conversation that can change everything.</h1>
+    <p class="pph-lead">Your first step is a conversation. No pressure, no need to have all the answers before reaching out.</p>
     <div class="hero-cta" style="justify-content:center;margin-top:26px">
       <a href="/consultation" class="btn btn-primary">Request a Consultation</a>
-      <a href="tel:{PHONE_TEL}" class="btn btn-ghost">Call or Text {PHONE_DISPLAY}</a>
+      <a href="tel:{PHONE_TEL}" class="btn btn-ghost light">Call or Text {PHONE_DISPLAY}</a>
     </div>
   </div>
 </section>
@@ -911,12 +891,9 @@ contact_body = f"""<section class="page-hero">
         <span class="contact-value">Bowen Island, BC<br/>In-person &amp; online</span>
       </div>
     </div>
+    <p class="contact-note">A more luminous you begins with a single conversation.</p>
     <p class="disclaimer-note">{DISCLAIMER}</p>
   </div>
-</section>
-
-<section class="photo-band tall" style="background-image:linear-gradient(rgba(22,38,58,0.34), rgba(22,38,58,0.34)), url('/banner-village.jpg');">
-  <div class="container center"><p class="band-line">A more luminous you begins with a single conversation.</p></div>
 </section>"""
 contact_ld = '{"@context":"https://schema.org","@type":"ContactPage","name":"Contact Maison Claire Healing","mainEntity":{"@type":"HealthAndBeautyBusiness","name":"Maison Claire Healing","email":"%s","telephone":"%s","areaServed":"Bowen Island, British Columbia","url":"%s"}}' % (EMAIL, PHONE_DISPLAY, BASE)
 page("contact", "Contact | Maison Claire Healing, Bowen Island",
