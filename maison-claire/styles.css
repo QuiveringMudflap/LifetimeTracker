@@ -143,7 +143,9 @@ h1, h2, h3, h4 { margin: 0; }
   display: flex; align-items: center; text-align: center;
   border-bottom: 3px solid var(--gold-soft);
   padding: clamp(80px, 12vw, 130px) 0;
+  position: relative; overflow: hidden;
 }
+.page-photo-hero > .container { position: relative; z-index: 2; }
 .pph-eyebrow { font-family: var(--sans); letter-spacing: 0.36em; text-transform: uppercase; font-size: 12px; color: #ecd9b3; margin: 0 0 16px; }
 .pph-title { font-family: var(--serif); font-weight: 500; color: #fdfaf3; font-size: clamp(34px, 5.6vw, 62px); line-height: 1.1; letter-spacing: 0.01em; margin: 0 auto; max-width: 15ch; text-shadow: 0 2px 22px rgba(14,24,38,0.4); }
 .pph-lead { color: #eef2f6; font-size: clamp(17px, 2vw, 21px); max-width: 620px; margin: 20px auto 0; line-height: 1.6; text-shadow: 0 1px 14px rgba(14,24,38,0.45); }
@@ -540,4 +542,26 @@ section { position: relative; }
 
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition: none !important; }
+}
+
+/* ---- Subtle motion (all gated by body.motion; MOTION flag in build.py) ---- */
+.motion .will-reveal { opacity: 0; transform: translateY(20px); transition: opacity .8s ease, transform .8s cubic-bezier(.22,.7,.28,1); }
+.motion .will-reveal.revealed { opacity: 1; transform: none; }
+
+/* gentle hover lifts on cards + photos */
+.motion .prompt, .motion .journey-row, .motion .modality, .motion .contact-card {
+  transition: transform .5s cubic-bezier(.22,.7,.28,1), box-shadow .5s ease;
+}
+.motion .prompt:hover, .motion .journey-row:hover, .motion .modality:hover, .motion .contact-card:hover {
+  transform: translateY(-4px);
+}
+.motion .about-photo img, .motion .gallery3 img { transition: transform .7s cubic-bezier(.22,.7,.28,1); }
+.motion .about-photo img:hover, .motion .gallery3 img:hover { transform: scale(1.035); }
+
+/* buttons: a touch of lift */
+.motion .btn { transition: transform .25s ease, background .25s ease, border-color .25s ease, color .25s ease, box-shadow .25s ease; }
+.motion .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(30,54,82,0.26); }
+
+@media (prefers-reduced-motion: reduce) {
+  .motion .will-reveal { opacity: 1 !important; transform: none !important; }
 }

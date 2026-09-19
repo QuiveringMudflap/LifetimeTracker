@@ -2,7 +2,7 @@
    Trimmed adaptation of Pavel Dobryakov's WebGL-Fluid-Simulation (MIT).
    Full-screen intro burst that settles into a subtle layer behind the hero. */
 (function () {
-  var canvas = document.getElementById('fluidCanvas');
+  var canvas = document.querySelector('.fluid-canvas');
   if (!canvas) return;
 
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -287,7 +287,8 @@
     splat(x, y, dx, dy, colorScaled(c, intensity));
   }
   // A single cohesive bloom from the centre - reads as one burst, not scattered dots.
-  function centerBurst() {
+  function centerBurst(strength) {
+    strength = strength || 1;
     var aspect = canvas.width / canvas.height;
     var n = 9;
     for (var i = 0; i < n; i++) {
@@ -295,10 +296,10 @@
       var r = 0.03 + Math.random() * 0.04;
       var x = 0.5 + Math.cos(ang) * r / (aspect > 1 ? aspect : 1);
       var y = 0.5 + Math.sin(ang) * r;
-      var speed = 620 + Math.random() * 420;
-      splat(x, y, Math.cos(ang) * speed, Math.sin(ang) * speed, colorScaled(pick(), 0.24));
+      var speed = (620 + Math.random() * 420) * strength;
+      splat(x, y, Math.cos(ang) * speed, Math.sin(ang) * speed, colorScaled(pick(), 0.24 * strength));
     }
-    splat(0.5, 0.5, 0, 0, colorScaled([0.92, 0.86, 0.72], 0.18));  // soft warm core
+    splat(0.5, 0.5, 0, 0, colorScaled([0.92, 0.86, 0.72], 0.18 * strength));  // soft warm core
   }
 
   var lastTime = Date.now();
@@ -419,20 +420,26 @@
   initFramebuffers();
   resizeCanvas();
   initFramebuffers();
-  // opening burst - one bloom, then it fades in with the page
-  centerBurst();
-  document.body.classList.add('fluid-intro');
-  requestAnimationFrame(frame);
-
-  // Settle: fade the full-screen splash away and confine fluid behind the hero.
-  var SPLASH_MS = 2200;
-  setTimeout(function () {
-    if (splash) splash.classList.add('fade');
-    document.body.classList.remove('fluid-intro');
-    document.body.classList.add('fluid-behind');
+  if (splash) {
+    // Home: full-screen intro bloom that fades into the hero.
+    centerBurst(1);
+    document.body.classList.add('fluid-intro');
+    requestAnimationFrame(frame);
+    var SPLASH_MS = 2200;
+    setTimeout(function () {
+      splash.classList.add('fade');
+      document.body.classList.remove('fluid-intro');
+      document.body.classList.add('fluid-behind');
+      introRunning = false;
+    }, SPLASH_MS);
+    setTimeout(function () {
+      if (splash.parentNode) splash.parentNode.removeChild(splash);
+    }, SPLASH_MS + 1500);
+  } else {
+    // Any other page hero: no splash, just a gentle bloom into the subtle layer.
     introRunning = false;
-  }, SPLASH_MS);
-  setTimeout(function () {
-    if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
-  }, SPLASH_MS + 1500);
+    document.body.classList.add('fluid-behind');
+    centerBurst(0.6);
+    requestAnimationFrame(frame);
+  }
 })();

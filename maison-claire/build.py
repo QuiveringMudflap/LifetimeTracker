@@ -21,6 +21,10 @@ PHONE_DISPLAY = "604-841-4833"
 PHONE_TEL = "+16048414833"
 HERE = os.path.dirname(os.path.abspath(__file__))
 
+# ---- Optional flourishes. Set either to False and rerun build.py to remove. ----
+FLUID = True    # interactive fluid glow behind every page hero (+ home intro)
+MOTION = True   # subtle scroll-reveal + gentle hover lifts across the site
+
 # ---------------------------------------------------------------- icons
 IC = {
 "lotus": """<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 47 C22 41 18 33 22 27 C26 23 30 27 32 31 C34 27 38 23 42 27 C46 33 42 41 32 47 Z" fill="none" stroke="#fff" stroke-width="1.7"/><path d="M32 47 C28 41 26 35 28 29" fill="none" stroke="#fff" stroke-width="1"/><path d="M32 47 C36 41 38 35 36 29" fill="none" stroke="#fff" stroke-width="1"/><path d="M32 47 C24 43 17 43 13 39 C18 34 25 37 32 44" fill="none" stroke="#fff" stroke-width="1"/><path d="M32 47 C40 43 47 43 51 39 C46 34 39 37 32 44" fill="none" stroke="#fff" stroke-width="1"/></svg>""",
@@ -97,6 +101,12 @@ FOOTER = f"""<footer class="foot">
 def page(path, title, desc, body, active, jsonld=""):
     canonical = BASE + ("/" if path == "index" else "/" + path)
     ld = f'\n<script type="application/ld+json">{jsonld}</script>' if jsonld else ""
+    bodyclass = "motion" if MOTION else ""
+    scripts = ""
+    if FLUID:
+        scripts += '<script src="/fluid.js" defer></script>\n'
+    if MOTION:
+        scripts += '<script src="/motion.js" defer></script>\n'
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -123,13 +133,14 @@ def page(path, title, desc, body, active, jsonld=""):
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/crest.png" />{ld}
 </head>
-<body>
+<body class="{bodyclass}">
 <a class="skip-link" href="#main">Skip to content</a>
 {nav(active)}
 <main id="main">
 {body}
 </main>
 {FOOTER}
+{scripts}
 </body>
 </html>
 """
@@ -144,7 +155,7 @@ def page(path, title, desc, body, active, jsonld=""):
                   "/window.jpg", "/nature-shore.jpg", "/nature-lake.jpg", "/nature-icecap.jpg",
                   "/maison-claire-logo.svg", "/maison-claire-logo-light.svg",
                   "/first-step.jpg", "/private-journey.jpg",
-                  "/contact-hero.jpg", "/about-hero.jpg", "/fluid.js"]:
+                  "/contact-hero.jpg", "/about-hero.jpg", "/fluid.js", "/motion.js"]:
         html = html.replace(asset, asset + "?v=" + VER)
     fn = os.path.join(HERE, ("index" if path == "index" else path) + ".html")
     with open(fn, "w", encoding="utf-8") as f:
@@ -153,7 +164,8 @@ def page(path, title, desc, body, active, jsonld=""):
 
 # ---------------------------------------------------------------- shared blocks
 def photo_hero(eyebrow, h1, sub, img, pos="center"):
-    return f"""<section class="page-photo-hero" style="background-image:linear-gradient(180deg, rgba(18,32,50,0.58) 0%, rgba(18,32,50,0.40) 50%, rgba(18,32,50,0.66) 100%), url('/{img}'); background-position:{pos};">
+    canvas = '\n  <canvas class="fluid-canvas" aria-hidden="true"></canvas>' if FLUID else ""
+    return f"""<section class="page-photo-hero" style="background-image:linear-gradient(180deg, rgba(18,32,50,0.58) 0%, rgba(18,32,50,0.40) 50%, rgba(18,32,50,0.66) 100%), url('/{img}'); background-position:{pos};">{canvas}
   <div class="container center">
     <p class="pph-eyebrow">{eyebrow}</p>
     <h1 class="pph-title">{h1}</h1>
@@ -228,9 +240,10 @@ MODALITIES = [
 ]
 modalities_html = "".join(f'<div class="modality"><span class="modality-ic">{IC[i]}</span><span>{n}</span></div>' for i, n in MODALITIES)
 
+_hero_canvas = '<canvas id="fluidCanvas" class="fluid-canvas" aria-hidden="true"></canvas>\n  ' if FLUID else ''
+_home_splash = '\n<div id="fluidSplash" class="fluid-splash" aria-hidden="true"></div>' if FLUID else ''
 home_body = f"""<section class="photo-hero" style="background-image:linear-gradient(90deg, rgba(22,38,58,0.78) 0%, rgba(22,38,58,0.42) 42%, rgba(22,38,58,0.10) 70%, rgba(22,38,58,0) 100%), url('/hero.jpg');">
-  <canvas id="fluidCanvas" class="fluid-canvas" aria-hidden="true"></canvas>
-  <div class="container photo-hero-inner">
+  {_hero_canvas}<div class="container photo-hero-inner">
     <p class="ph-eyebrow">A whole-person approach to healing</p>
     <h1 class="ph-title">Come back<br/>to yourself.</h1>
     <p class="ph-lead">When something doesn&rsquo;t feel right, there is often more to the story than what we see on the surface.</p>
@@ -293,9 +306,7 @@ home_body = f"""<section class="photo-hero" style="background-image:linear-gradi
   </div>
 </section>
 
-{cta_band()}
-<div id="fluidSplash" class="fluid-splash" aria-hidden="true"></div>
-<script src="/fluid.js" defer></script>"""
+{cta_band()}{_home_splash}"""
 
 home_ld = """{"@context":"https://schema.org","@type":"HealthAndBeautyBusiness","name":"Maison Claire","description":"Reiki healing, hypnotherapy, intuitive guidance, liver cleanse and detox, and root cause healing with Stanislava.","image":"%s","email":"%s","url":"%s","slogan":"Natural Healing, Higher Wellbeing, A Brighter You","priceRange":"$$","areaServed":"Greater Vancouver","founder":{"@type":"Person","name":"Stanislava"}}""" % (OG, EMAIL, BASE)
 
@@ -371,7 +382,8 @@ def _blocks(items):
     return "".join(out)
 
 def journey_page(slug, num, name, meta, tagline, img, blocks, cta_label, cta_href, mtitle, mdesc, extra=""):
-    body = f"""<section class="photo-hero journey-hero" style="background-image:linear-gradient(90deg, rgba(22,38,58,0.84) 0%, rgba(22,38,58,0.44) 55%, rgba(22,38,58,0.10) 100%), url('/{img}');">
+    jcanvas = '\n  <canvas class="fluid-canvas" aria-hidden="true"></canvas>' if FLUID else ""
+    body = f"""<section class="photo-hero journey-hero" style="background-image:linear-gradient(90deg, rgba(22,38,58,0.84) 0%, rgba(22,38,58,0.44) 55%, rgba(22,38,58,0.10) 100%), url('/{img}');">{jcanvas}
   <div class="container photo-hero-inner">
     <p class="ph-eyebrow">{num} &nbsp;&middot;&nbsp; A Maison Claire Journey</p>
     <h1 class="ph-title">{name}</h1>
@@ -863,7 +875,7 @@ page("apply", "Apply for the Private Journey | Maison Claire Healing",
      '{"@context":"https://schema.org","@type":"ContactPage","name":"Private Journey Application"}')
 
 # ================================================================ CONTACT
-contact_body = f"""<section class="page-photo-hero" style="background-image:linear-gradient(180deg, rgba(18,32,50,0.58) 0%, rgba(18,32,50,0.40) 50%, rgba(18,32,50,0.66) 100%), url('/contact-hero.jpg'); background-position:center;">
+contact_body = f"""<section class="page-photo-hero" style="background-image:linear-gradient(180deg, rgba(18,32,50,0.58) 0%, rgba(18,32,50,0.40) 50%, rgba(18,32,50,0.66) 100%), url('/contact-hero.jpg'); background-position:center;">{'<canvas class="fluid-canvas" aria-hidden="true"></canvas>' if FLUID else ''}
   <div class="container center">
     <p class="pph-eyebrow">Contact</p>
     <h1 class="pph-title">A conversation that can change everything.</h1>
