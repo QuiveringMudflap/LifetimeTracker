@@ -9,6 +9,8 @@
   var splash = document.getElementById('fluidSplash');
   if (reduce) {                       // accessibility: no motion, no splash
     if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+    var ld = document.getElementById('splashLoader');
+    if (ld && ld.parentNode) ld.parentNode.removeChild(ld);
     canvas.style.display = 'none';
     return;
   }
@@ -421,19 +423,23 @@
   resizeCanvas();
   initFramebuffers();
   if (splash) {
-    // Home: full-screen intro bloom that fades into the hero.
+    // Home: full-screen intro bloom + minimal wave loader that fades into the hero.
+    var loader = document.getElementById('splashLoader');
     centerBurst(1);
     document.body.classList.add('fluid-intro');
+    if (loader) requestAnimationFrame(function () { loader.classList.add('in'); });
     requestAnimationFrame(frame);
     var SPLASH_MS = 2200;
     setTimeout(function () {
       splash.classList.add('fade');
+      if (loader) loader.classList.add('fade');
       document.body.classList.remove('fluid-intro');
       document.body.classList.add('fluid-behind');
       introRunning = false;
     }, SPLASH_MS);
     setTimeout(function () {
       if (splash.parentNode) splash.parentNode.removeChild(splash);
+      if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
     }, SPLASH_MS + 1500);
   } else {
     // Any other page hero: no splash, just a gentle bloom into the subtle layer.

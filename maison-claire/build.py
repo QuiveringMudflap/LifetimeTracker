@@ -241,7 +241,18 @@ MODALITIES = [
 modalities_html = "".join(f'<div class="modality"><span class="modality-ic">{IC[i]}</span><span>{n}</span></div>' for i, n in MODALITIES)
 
 _hero_canvas = '<canvas id="fluidCanvas" class="fluid-canvas" aria-hidden="true"></canvas>\n  ' if FLUID else ''
-_home_splash = '\n<div id="fluidSplash" class="fluid-splash" aria-hidden="true"></div>' if FLUID else ''
+_wave_d = "M0 20 Q10 12 20 20 " + " ".join(f"T{x} 20" for x in range(40, 521, 20))
+_loader = (
+    '<div id="splashLoader" class="splash-load" aria-hidden="true">'
+    '<span class="splash-word">Maison Claire</span>'
+    f'<svg class="splash-wave" viewBox="0 0 260 40" preserveAspectRatio="none">'
+    '<defs><linearGradient id="wg" x1="0" y1="0" x2="1" y2="0">'
+    '<stop offset="0" stop-color="#c9a86a" stop-opacity="0.2"/>'
+    '<stop offset="0.5" stop-color="#e6cf97"/>'
+    '<stop offset="1" stop-color="#c9a86a" stop-opacity="0.2"/></linearGradient></defs>'
+    f'<g class="wave-move"><path d="{_wave_d}" fill="none" stroke="url(#wg)" stroke-width="2" stroke-linecap="round"/></g>'
+    '</svg></div>')
+_home_splash = ('\n<div id="fluidSplash" class="fluid-splash" aria-hidden="true"></div>\n' + _loader) if FLUID else ''
 home_body = f"""<section class="photo-hero" style="background-image:linear-gradient(90deg, rgba(22,38,58,0.78) 0%, rgba(22,38,58,0.42) 42%, rgba(22,38,58,0.10) 70%, rgba(22,38,58,0) 100%), url('/hero.jpg');">
   {_hero_canvas}<div class="container photo-hero-inner">
     <p class="ph-eyebrow">A whole-person approach to healing</p>

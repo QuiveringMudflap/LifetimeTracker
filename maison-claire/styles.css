@@ -321,6 +321,23 @@ section { position: relative; }
   opacity: 1; transition: opacity 1.35s ease;
 }
 .fluid-splash.fade { opacity: 0; }
+
+/* Minimal wave loader shown during the home intro (above the fluid glow) */
+.splash-load {
+  position: fixed; inset: 0; z-index: 10000; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+  opacity: 0; transition: opacity 0.9s ease;
+}
+.splash-load.in { opacity: 1; }
+.splash-load.fade { opacity: 0; }
+.splash-word {
+  font-family: var(--display); text-transform: uppercase; letter-spacing: 0.42em;
+  font-size: 15px; color: #efe4c9; padding-left: 0.42em;
+}
+.splash-wave { width: 200px; height: 30px; overflow: hidden; opacity: 0.95; }
+.splash-wave .wave-move { animation: waveShift 2.6s linear infinite; }
+@keyframes waveShift { from { transform: translateX(0); } to { transform: translateX(-240px); } }
+@media (prefers-reduced-motion: reduce) { .splash-wave .wave-move { animation: none !important; } }
 @media (prefers-reduced-motion: reduce) { .fluid-canvas, .fluid-splash { display: none !important; } }
 .ph-eyebrow { font-family: var(--sans); letter-spacing: 0.34em; text-transform: uppercase; font-size: 12px; color: #e9d9b3; margin: 0 0 14px; }
 .ph-title { font-family: var(--serif); font-weight: 500; color: #fdfaf3; font-size: clamp(42px, 7vw, 82px); line-height: 1.02; letter-spacing: 0.01em; margin: 0 0 22px; }
