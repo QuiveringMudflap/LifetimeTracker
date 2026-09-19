@@ -88,7 +88,7 @@ h1, h2, h3, h4 { margin: 0; }
   display: flex; align-items: center; gap: 22px;
 }
 .nav-brand { display: flex; align-items: center; flex: 0 0 auto; }
-.nav-brand img { height: 54px; width: auto; }
+.nav-brand img { height: 70px; width: auto; }
 .nav-links {
   display: flex; gap: 26px; align-items: center;
   margin-left: auto;
@@ -294,7 +294,7 @@ section { position: relative; }
 /* ---------- Photo hero ---------- */
 .photo-hero {
   background-size: cover; background-position: center right;
-  min-height: min(88vh, 760px);
+  min-height: min(94vh, 880px);
   display: flex; align-items: center;
   border-bottom: 3px solid var(--gold-soft);
 }

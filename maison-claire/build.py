@@ -143,7 +143,8 @@ def page(path, title, desc, body, active, jsonld=""):
                   "/banner-mistlake.jpg", "/banner-greenhills.jpg", "/portrait-bw.jpg",
                   "/window.jpg", "/nature-shore.jpg", "/nature-lake.jpg", "/nature-icecap.jpg",
                   "/maison-claire-logo.svg", "/maison-claire-logo-light.svg",
-                  "/first-step.jpg", "/private-journey.jpg"]:
+                  "/first-step.jpg", "/private-journey.jpg",
+                  "/contact-hero.jpg", "/about-hero.jpg"]:
         html = html.replace(asset, asset + "?v=" + VER)
     fn = os.path.join(HERE, ("index" if path == "index" else path) + ".html")
     with open(fn, "w", encoding="utf-8") as f:
@@ -166,7 +167,6 @@ def cta_band(heading="Your first step is a conversation", text="A free 15-minute
     <p>{text}</p>
     <div class="hero-cta" style="justify-content:center">
       <a href="/consultation" class="btn btn-primary">Request a Consultation</a>
-      <a href="tel:{PHONE_TEL}" class="btn btn-ghost">Call {PHONE_DISPLAY}</a>
     </div>
   </div></section>"""
 
@@ -244,7 +244,7 @@ home_body = f"""<section class="photo-hero" style="background-image:linear-gradi
     <p class="lead">At Maison Claire, we take the time to look at the whole picture: body, mind, lifestyle and environment, and explore what may be contributing to the way you feel.</p>
     <p>My approach combines natural health coaching, nutrition, cleansing and detox support, hypnotherapy, Reiki and complementary healing practices.</p>
     <p class="statement">There is no standard protocol.</p>
-    <p class="statement-sub">We begin with you. We look deeper. And we start where it makes sense.</p>
+    <p class="statement-sub">We begin with you. Together we look deeper. And we start where it makes sense.</p>
   </div>
 </section>
 
@@ -294,7 +294,7 @@ home_body = f"""<section class="photo-hero" style="background-image:linear-gradi
 
 {cta_band()}"""
 
-home_ld = """{"@context":"https://schema.org","@type":"HealthAndBeautyBusiness","name":"Maison Claire","description":"Reiki healing, hypnotherapy, intuitive guidance, liver cleanse and detox, and root cause healing with Stanislava.","image":"%s","email":"%s","telephone":"%s","url":"%s","slogan":"Natural Healing, Higher Wellbeing, A Brighter You","priceRange":"$$","areaServed":"Greater Vancouver","founder":{"@type":"Person","name":"Stanislava"}}""" % (OG, EMAIL, PHONE_DISPLAY, BASE)
+home_ld = """{"@context":"https://schema.org","@type":"HealthAndBeautyBusiness","name":"Maison Claire","description":"Reiki healing, hypnotherapy, intuitive guidance, liver cleanse and detox, and root cause healing with Stanislava.","image":"%s","email":"%s","url":"%s","slogan":"Natural Healing, Higher Wellbeing, A Brighter You","priceRange":"$$","areaServed":"Greater Vancouver","founder":{"@type":"Person","name":"Stanislava"}}""" % (OG, EMAIL, BASE)
 
 page("index", "Maison Claire | Reiki Healing & Natural Wellness with Stanislava",
      "Maison Claire offers Reiki healing, hypnotherapy, intuitive guidance, liver cleanse and detox, and root cause healing. Heal at the root and return to your natural state of balance with Stanislava.",
@@ -536,7 +536,7 @@ kind_words_html = '<div class="kind-words">' + "".join(
     f'<blockquote>{q}</blockquote><figcaption>{c}</figcaption></figure>'
     for q, c in TESTIMONIALS) + '</div>'
 
-about_body = f"""{photo_hero("About Me", "A guide, a practitioner, and a fellow traveller.", "My name is Stanislava Oben.", "portrait-bw.jpg", pos="center 32%")}
+about_body = f"""{photo_hero("About Me", "A guide, a practitioner, and a fellow traveller.", "My name is Stanislava Oben.", "about-hero.jpg", pos="center 58%")}
 
 <section class="pad">
   <div class="container split-about">
@@ -598,8 +598,8 @@ about_body = f"""{photo_hero("About Me", "A guide, a practitioner, and a fellow 
   <div class="container">
     <div class="gallery3">
       <img src="/nature-shore.jpg" alt="Golden light on a rocky shoreline" loading="lazy" />
-      <img src="/nature-lake.jpg" alt="Still lake at sunset" loading="lazy" />
       <img src="/nature-icecap.jpg" alt="Arms raised at a glacier lagoon" loading="lazy" />
+      <img src="/nature-lake.jpg" alt="Still lake at sunset" loading="lazy" />
     </div>
   </div>
 </section>
@@ -860,14 +860,13 @@ page("apply", "Apply for the Private Journey | Maison Claire Healing",
      '{"@context":"https://schema.org","@type":"ContactPage","name":"Private Journey Application"}')
 
 # ================================================================ CONTACT
-contact_body = f"""<section class="page-photo-hero" style="background-image:linear-gradient(180deg, rgba(18,32,50,0.58) 0%, rgba(18,32,50,0.40) 50%, rgba(18,32,50,0.66) 100%), url('/banner-village.jpg'); background-position:center;">
+contact_body = f"""<section class="page-photo-hero" style="background-image:linear-gradient(180deg, rgba(18,32,50,0.58) 0%, rgba(18,32,50,0.40) 50%, rgba(18,32,50,0.66) 100%), url('/contact-hero.jpg'); background-position:center;">
   <div class="container center">
     <p class="pph-eyebrow">Contact</p>
     <h1 class="pph-title">A conversation that can change everything.</h1>
     <p class="pph-lead">Your first step is a conversation. No pressure, no need to have all the answers before reaching out.</p>
     <div class="hero-cta" style="justify-content:center;margin-top:26px">
       <a href="/consultation" class="btn btn-primary">Request a Consultation</a>
-      <a href="tel:{PHONE_TEL}" class="btn btn-ghost light">Call or Text {PHONE_DISPLAY}</a>
     </div>
   </div>
 </section>
@@ -875,10 +874,10 @@ contact_body = f"""<section class="page-photo-hero" style="background-image:line
 <section class="pad">
   <div class="container">
     <div class="contact-grid three">
-      <a class="contact-card" href="tel:{PHONE_TEL}">
-        <span class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 4h3l2 5-2.5 1.5a12 12 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></span>
-        <span class="contact-label">Call or Text Stanislava</span>
-        <span class="contact-value">{PHONE_DISPLAY}</span>
+      <a class="contact-card" href="/consultation">
+        <span class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 3v3M16 3v3M4 8h16M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><path d="M9 14l2 2 4-4"/></svg></span>
+        <span class="contact-label">Book a Conversation</span>
+        <span class="contact-value">Free 15-minute consultation</span>
       </a>
       <a class="contact-card" href="mailto:{EMAIL}">
         <span class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 7l9 6 9-6"/></svg></span>
@@ -895,9 +894,9 @@ contact_body = f"""<section class="page-photo-hero" style="background-image:line
     <p class="disclaimer-note">{DISCLAIMER}</p>
   </div>
 </section>"""
-contact_ld = '{"@context":"https://schema.org","@type":"ContactPage","name":"Contact Maison Claire Healing","mainEntity":{"@type":"HealthAndBeautyBusiness","name":"Maison Claire Healing","email":"%s","telephone":"%s","areaServed":"Bowen Island, British Columbia","url":"%s"}}' % (EMAIL, PHONE_DISPLAY, BASE)
+contact_ld = '{"@context":"https://schema.org","@type":"ContactPage","name":"Contact Maison Claire Healing","mainEntity":{"@type":"HealthAndBeautyBusiness","name":"Maison Claire Healing","email":"%s","areaServed":"Bowen Island, British Columbia","url":"%s"}}' % (EMAIL, BASE)
 page("contact", "Contact | Maison Claire Healing, Bowen Island",
-     "Contact Stanislava at Maison Claire Healing. Call or text 604-841-4833, email booking@MaisonClaireHealing.com. Bowen Island, in-person and online.",
+     "Contact Stanislava at Maison Claire Healing. Email booking@MaisonClaireHealing.com to request a consultation. Bowen Island, in-person and online.",
      contact_body, "/contact", contact_ld)
 
 # ---------------------------------------------------------------- sitemap + robots
