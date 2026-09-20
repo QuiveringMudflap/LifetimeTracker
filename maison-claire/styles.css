@@ -137,17 +137,20 @@ h1, h2, h3, h4 { margin: 0; }
 .hero-mountains svg { width: 100%; height: 100%; }
 
 /* ---------- Page photo hero (subpages) ---------- */
+/* Heights scale with WIDTH and stay capped, so wide panoramas are shown wide
+   and short instead of being cropped and blown up to fill a tall box.
+   min-height (not height) means the section still grows if text needs room. */
 .page-photo-hero {
   background-size: cover; background-position: center;
-  min-height: min(62vh, 560px);
+  min-height: clamp(300px, 28vw, 430px);
   display: flex; align-items: center; text-align: center;
   border-bottom: 3px solid var(--gold-soft);
-  padding: clamp(80px, 12vw, 130px) 0;
+  padding: clamp(44px, 5vw, 72px) 0;
   position: relative; overflow: hidden;
 }
 .page-photo-hero > .container { position: relative; z-index: 2; }
 .pph-eyebrow { font-family: var(--sans); letter-spacing: 0.36em; text-transform: uppercase; font-size: 12px; color: #ecd9b3; margin: 0 0 16px; }
-.pph-title { font-family: var(--serif); font-weight: 500; color: #fdfaf3; font-size: clamp(34px, 5.6vw, 62px); line-height: 1.1; letter-spacing: 0.01em; margin: 0 auto; max-width: 15ch; text-shadow: 0 2px 22px rgba(14,24,38,0.4); }
+.pph-title { font-family: var(--serif); font-weight: 500; color: #fdfaf3; font-size: clamp(34px, 5.6vw, 62px); line-height: 1.1; letter-spacing: 0.01em; margin: 0 auto; max-width: 24ch; text-shadow: 0 2px 22px rgba(14,24,38,0.4); }
 .pph-lead { color: #eef2f6; font-size: clamp(17px, 2vw, 21px); max-width: 620px; margin: 20px auto 0; line-height: 1.6; text-shadow: 0 1px 14px rgba(14,24,38,0.45); }
 .page-photo-hero .btn-primary { background: var(--gold); border-color: var(--gold); color: #23364d; font-weight: 600; }
 .page-photo-hero .btn-primary:hover { background: #c9a86a; border-color: #c9a86a; }
@@ -296,11 +299,14 @@ section { position: relative; }
 /* ---------- Photo hero ---------- */
 .photo-hero {
   background-size: cover; background-position: center right;
-  min-height: min(94vh, 880px);
+  min-height: clamp(400px, 42vw, 640px);
   display: flex; align-items: center;
   border-bottom: 3px solid var(--gold-soft);
+  padding: clamp(40px, 5vw, 68px) 0;
   position: relative; overflow: hidden;
 }
+/* Journey heroes carry the widest panoramas, so keep them shorter still. */
+.photo-hero.journey-hero { min-height: clamp(320px, 29vw, 450px); }
 .photo-hero-inner { width: 100%; position: relative; z-index: 2; }
 
 /* Interactive fluid: subtle glow behind the hero, promoted full-screen for the intro */
