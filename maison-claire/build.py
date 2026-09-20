@@ -147,8 +147,9 @@ def page(path, title, desc, body, active, jsonld=""):
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css" />{trans_head}
-<link rel="icon" type="image/png" href="/favicon.png" />
-<link rel="apple-touch-icon" href="/crest.png" />{ld}
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+<link rel="apple-touch-icon" href="/favicon.png" />{ld}
 </head>
 <body class="{bodyclass}">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -170,7 +171,7 @@ def page(path, title, desc, body, active, jsonld=""):
                   "/banner-waterfall.jpg", "/banner-village.jpg", "/banner-seatree.jpg",
                   "/banner-mistlake.jpg", "/banner-greenhills.jpg", "/portrait-bw.jpg",
                   "/window.jpg", "/nature-shore.jpg", "/nature-lake.jpg", "/nature-icecap.jpg",
-                  "/maison-claire-logo.svg", "/maison-claire-logo-light.svg",
+                  "/maison-claire-logo.svg", "/maison-claire-logo-light.svg", "/favicon.svg",
                   "/first-step.jpg", "/private-journey.jpg",
                   "/contact-hero.jpg", "/about-hero.jpg", "/banner-sunset.jpg",
                   "/fluid.js", "/motion.js", "/transitions.js", "/transitions.css"]:

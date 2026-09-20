@@ -88,7 +88,7 @@ h1, h2, h3, h4 { margin: 0; }
   display: flex; align-items: center; gap: 22px;
 }
 .nav-brand { display: flex; align-items: center; flex: 0 0 auto; }
-.nav-brand img { height: 70px; width: auto; }
+.nav-brand img { height: 78px; width: auto; }
 .nav-links {
   display: flex; gap: 26px; align-items: center;
   margin-left: auto;
