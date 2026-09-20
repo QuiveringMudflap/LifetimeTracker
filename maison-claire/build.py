@@ -82,7 +82,7 @@ FOOTER = f"""<footer class="foot">
         <a href="/the-root">The Root</a>
         <a href="/restore">Restore</a>
         <a href="/the-private-journey">The Private Journey</a>
-        <a href="mailto:{EMAIL}">{EMAIL}</a>
+        <a href="mailto:{EMAIL}" target="_blank" rel="noopener">{EMAIL}</a>
       </div>
     </div>
     <div class="foot-bottom">
@@ -938,7 +938,7 @@ contact_body = f"""<section class="page-photo-hero" style="background-image:line
         <span class="contact-label">Book a Conversation</span>
         <span class="contact-value">Free 15-minute consultation</span>
       </a>
-      <a class="contact-card" href="mailto:{EMAIL}">
+      <a class="contact-card" href="mailto:{EMAIL}" target="_blank" rel="noopener">
         <span class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 7l9 6 9-6"/></svg></span>
         <span class="contact-label">Email</span>
         <span class="contact-value">{EMAIL}</span>
