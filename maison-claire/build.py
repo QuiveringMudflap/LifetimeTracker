@@ -155,7 +155,7 @@ def page(path, title, desc, body, active, jsonld=""):
                   "/window.jpg", "/nature-shore.jpg", "/nature-lake.jpg", "/nature-icecap.jpg",
                   "/maison-claire-logo.svg", "/maison-claire-logo-light.svg",
                   "/first-step.jpg", "/private-journey.jpg",
-                  "/contact-hero.jpg", "/about-hero.jpg", "/fluid.js", "/motion.js"]:
+                  "/contact-hero.jpg", "/about-hero.jpg", "/banner-sunset.jpg", "/fluid.js", "/motion.js"]:
         html = html.replace(asset, asset + "?v=" + VER)
     fn = os.path.join(HERE, ("index" if path == "index" else path) + ".html")
     with open(fn, "w", encoding="utf-8") as f:
@@ -305,7 +305,7 @@ home_body = f"""<section class="photo-hero" style="background-image:linear-gradi
   </div>
 </section>
 
-<section class="photo-band" style="background-image:linear-gradient(rgba(22,38,58,0.38), rgba(22,38,58,0.38)), url('/banner-waterfall.jpg');">
+<section class="photo-band" style="background-image:linear-gradient(rgba(22,38,58,0.38), rgba(22,38,58,0.38)), url('/banner-sunset.jpg');">
   <div class="container center"><p class="band-line">A more luminous you.</p></div>
 </section>
 
@@ -562,7 +562,7 @@ kind_words_html = '<div class="kind-words">' + "".join(
     f'<blockquote>{q}</blockquote><figcaption>{c}</figcaption></figure>'
     for q, c in TESTIMONIALS) + '</div>'
 
-about_body = f"""{photo_hero("About Me", "A guide, a practitioner, and a fellow traveller.", "My name is Stanislava Oben.", "about-hero.jpg", pos="center 58%")}
+about_body = f"""{photo_hero("About Me", "A guide, a practitioner, and a fellow traveller.", "My name is Stanislava Oben.", "about-hero.jpg", pos="center 50%")}
 
 <section class="pad">
   <div class="container split-about">
