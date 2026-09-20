@@ -721,8 +721,22 @@ FORM_JS = """<script>
       var body = lines.join('\\n');
       var status = form.querySelector('.form-status');
       function done(msg){
-        form.querySelectorAll('input,textarea,button').forEach(function(e){e.disabled=true;});
-        if (status) { status.textContent = msg; status.classList.add('show'); status.scrollIntoView({block:'center',behavior:'smooth'}); }
+        var panel = document.createElement('div');
+        panel.className = 'form-sent';
+        panel.setAttribute('role', 'status');
+        panel.innerHTML =
+          '<span class="form-sent-mark" aria-hidden="true">'
+          + '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.1">'
+          + '<circle cx="32" cy="32" r="26"/>'
+          + '<path d="M21 33l7.5 7.5L44 25" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'
+          + '</svg></span>'
+          + '<h2 class="form-sent-title">Thank you.</h2>'
+          + '<p class="form-sent-text"></p>'
+          + '<a class="btn btn-primary" href="/">Return home</a>';
+        panel.querySelector('.form-sent-text').textContent = msg;
+        form.parentNode.insertBefore(panel, form);
+        form.parentNode.removeChild(form);
+        panel.scrollIntoView({block:'center', behavior:'smooth'});
       }
       function fallback(){
         var href = 'mailto:' + TO + '?subject=' + encodeURIComponent(title)
@@ -743,7 +757,7 @@ FORM_JS = """<script>
           method: 'POST', headers: {'Content-Type':'application/json','Accept':'application/json'},
           body: JSON.stringify(payload)
         }).then(function(r){ return r.json(); })
-          .then(function(d){ if (d && d.success) { done('Thank you. Your message has been sent to Stanislava. She will personally review it and be in touch soon.'); } else { fallback(); } })
+          .then(function(d){ if (d && d.success) { done('Your message has been sent to Stanislava. She will personally review it and be in touch with you soon.'); } else { fallback(); } })
           .catch(fallback);
       } else { fallback(); }
     });

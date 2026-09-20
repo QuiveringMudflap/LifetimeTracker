@@ -588,3 +588,31 @@ section { position: relative; }
 @media (prefers-reduced-motion: reduce) {
   .motion .will-reveal { opacity: 1 !important; transform: none !important; }
 }
+
+/* ---- Sent confirmation (replaces the form on a successful send) ---- */
+.form-sent {
+  max-width: 640px;
+  margin: clamp(20px, 4vw, 48px) auto;
+  text-align: center;
+  background: var(--paper);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: clamp(42px, 6vw, 72px) clamp(24px, 5vw, 56px);
+  animation: formSentIn .6s cubic-bezier(.2, .75, .25, 1.02) both;
+}
+.form-sent-mark { display: block; width: 62px; height: 62px; margin: 0 auto 24px; color: var(--gold); }
+.form-sent-mark svg { width: 100%; height: 100%; }
+.form-sent-title {
+  font-family: var(--serif); font-weight: 500; color: var(--navy-ink);
+  font-size: clamp(30px, 4.4vw, 44px); line-height: 1.15; margin: 0 0 14px;
+}
+.form-sent-text {
+  color: var(--ink-soft); font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.65; margin: 0 auto 30px; max-width: 46ch;
+}
+@keyframes formSentIn {
+  from { opacity: 0; transform: translateY(16px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .form-sent { animation: none; } }

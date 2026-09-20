@@ -12,28 +12,28 @@
 <meta property="og:title" content="Request a Consultation | Maison Claire Healing" />
 <meta property="og:description" content="Request a consultation with Stanislava at Maison Claire Healing. Tell her what is bringing you here and she will personally review it before you speak." />
 <meta property="og:url" content="https://maisonclaire-mauve.vercel.app/consultation" />
-<meta property="og:image" content="https://maisonclaire-mauve.vercel.app/og.jpg?v=1789890200" />
+<meta property="og:image" content="https://maisonclaire-mauve.vercel.app/og.jpg?v=1789890354" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Request a Consultation | Maison Claire Healing" />
 <meta name="twitter:description" content="Request a consultation with Stanislava at Maison Claire Healing. Tell her what is bringing you here and she will personally review it before you speak." />
-<meta name="twitter:image" content="https://maisonclaire-mauve.vercel.app/og.jpg?v=1789890200" />
+<meta name="twitter:image" content="https://maisonclaire-mauve.vercel.app/og.jpg?v=1789890354" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=1789890200" />
-<link rel="stylesheet" href="/transitions.css?v=1789890200" />
+<link rel="stylesheet" href="/styles.css?v=1789890354" />
+<link rel="stylesheet" href="/transitions.css?v=1789890354" />
 <script>(function(){try{if(!('CSSViewTransitionRule' in window)&&!matchMedia('(prefers-reduced-motion:reduce)').matches){var r=document.documentElement;r.classList.add('pt-enter');setTimeout(function(){r.classList.remove('pt-enter');var m=document.getElementById('main');if(m){m.style.transition='none';m.style.opacity='1';}},2000);}}catch(e){}})();</script>
 <noscript><style>html.pt-enter #main{opacity:1 !important;}</style></noscript>
-<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1789890200" />
-<link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1789890200" />
-<link rel="apple-touch-icon" href="/favicon.png?v=1789890200" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1789890354" />
+<link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1789890354" />
+<link rel="apple-touch-icon" href="/favicon.png?v=1789890354" />
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"ContactPage","name":"Request a Consultation"}</script>
 </head>
 <body class="motion">
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="nav">
   <div class="nav-inner">
-    <a href="/" class="nav-brand" aria-label="Maison Claire Healing home"><img src="/maison-claire-logo.svg?v=1789890200" alt="Maison Claire Healing" width="1200" height="520" /></a>
+    <a href="/" class="nav-brand" aria-label="Maison Claire Healing home"><img src="/maison-claire-logo.svg?v=1789890354" alt="Maison Claire Healing" width="1200" height="520" /></a>
     <nav class="nav-links" aria-label="Primary"><a href="/">Home</a><a href="/journeys">Journeys</a><a href="/approach">Approach</a><a href="/about">About</a><a href="/contact">Contact</a></nav>
     <a href="/consultation" class="nav-cta">Request a Consultation</a>
     <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
@@ -114,8 +114,22 @@
       var body = lines.join('\n');
       var status = form.querySelector('.form-status');
       function done(msg){
-        form.querySelectorAll('input,textarea,button').forEach(function(e){e.disabled=true;});
-        if (status) { status.textContent = msg; status.classList.add('show'); status.scrollIntoView({block:'center',behavior:'smooth'}); }
+        var panel = document.createElement('div');
+        panel.className = 'form-sent';
+        panel.setAttribute('role', 'status');
+        panel.innerHTML =
+          '<span class="form-sent-mark" aria-hidden="true">'
+          + '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.1">'
+          + '<circle cx="32" cy="32" r="26"/>'
+          + '<path d="M21 33l7.5 7.5L44 25" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'
+          + '</svg></span>'
+          + '<h2 class="form-sent-title">Thank you.</h2>'
+          + '<p class="form-sent-text"></p>'
+          + '<a class="btn btn-primary" href="/">Return home</a>';
+        panel.querySelector('.form-sent-text').textContent = msg;
+        form.parentNode.insertBefore(panel, form);
+        form.parentNode.removeChild(form);
+        panel.scrollIntoView({block:'center', behavior:'smooth'});
       }
       function fallback(){
         var href = 'mailto:' + TO + '?subject=' + encodeURIComponent(title)
@@ -136,7 +150,7 @@
           method: 'POST', headers: {'Content-Type':'application/json','Accept':'application/json'},
           body: JSON.stringify(payload)
         }).then(function(r){ return r.json(); })
-          .then(function(d){ if (d && d.success) { done('Thank you. Your message has been sent to Stanislava. She will personally review it and be in touch soon.'); } else { fallback(); } })
+          .then(function(d){ if (d && d.success) { done('Your message has been sent to Stanislava. She will personally review it and be in touch with you soon.'); } else { fallback(); } })
           .catch(fallback);
       } else { fallback(); }
     });
@@ -148,7 +162,7 @@
   <div class="container">
     <div class="foot-top">
       <div class="foot-brand-block">
-        <img src="/maison-claire-logo-light.svg?v=1789890200" alt="Maison Claire Healing" />
+        <img src="/maison-claire-logo-light.svg?v=1789890354" alt="Maison Claire Healing" />
         <p class="foot-tag">A Clearer You &nbsp;&bull;&nbsp; A Brighter Tomorrow</p>
         <p class="foot-desc">A private space for deeper change with Stanislava, a whole-person healing practice on Bowen Island, British Columbia. In-person &amp; online.</p>
       </div>
@@ -182,9 +196,9 @@
   if(t&&l){t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o);});
   l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded',false);});});}
 </script>
-<script src="/fluid.js?v=1789890200" defer></script>
-<script src="/motion.js?v=1789890200" defer></script>
-<script src="/transitions.js?v=1789890200" defer></script>
+<script src="/fluid.js?v=1789890354" defer></script>
+<script src="/motion.js?v=1789890354" defer></script>
+<script src="/transitions.js?v=1789890354" defer></script>
 
 </body>
 </html>
