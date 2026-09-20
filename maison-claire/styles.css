@@ -142,10 +142,10 @@ h1, h2, h3, h4 { margin: 0; }
    min-height (not height) means the section still grows if text needs room. */
 .page-photo-hero {
   background-size: cover; background-position: center;
-  min-height: min(52vh, 470px);
+  min-height: min(64vh, 580px);
   display: flex; align-items: center; text-align: center;
   border-bottom: 3px solid var(--gold-soft);
-  padding: clamp(58px, 8vw, 96px) 0;
+  padding: clamp(80px, 12vw, 130px) 0;
   position: relative; overflow: hidden;
 }
 .page-photo-hero > .container { position: relative; z-index: 2; }
@@ -299,14 +299,14 @@ section { position: relative; }
 /* ---------- Photo hero ---------- */
 .photo-hero {
   background-size: cover; background-position: center right;
-  min-height: min(80vh, 740px);
+  min-height: min(94vh, 900px);
   display: flex; align-items: center;
   border-bottom: 3px solid var(--gold-soft);
-  padding: clamp(36px, 4.5vw, 60px) 0;
+  padding: clamp(48px, 6vw, 80px) 0;
   position: relative; overflow: hidden;
 }
-/* Journey heroes carry the widest panoramas, so trim them a little further. */
-.photo-hero.journey-hero { min-height: min(72vh, 650px); }
+/* Journey heroes carry the widest panoramas, so keep them a touch shorter. */
+.photo-hero.journey-hero { min-height: min(88vh, 830px); }
 .photo-hero-inner { width: 100%; position: relative; z-index: 2; }
 
 /* Interactive fluid: subtle glow behind the hero, promoted full-screen for the intro */
