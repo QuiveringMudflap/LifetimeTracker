@@ -107,6 +107,23 @@ def page(path, title, desc, body, active, jsonld=""):
         scripts += '<script src="/fluid.js" defer></script>\n'
     if MOTION:
         scripts += '<script src="/motion.js" defer></script>\n'
+        scripts += '<script src="/transitions.js" defer></script>\n'
+    # Page transitions: stylesheet + a pre-paint primer so the fallback fade
+    # never flickers. The primer opts out on Chromium (CSS View Transitions
+    # handle it there) and on reduced-motion; <noscript> keeps it visible.
+    trans_head = ""
+    if MOTION:
+        trans_head = (
+            '\n<link rel="stylesheet" href="/transitions.css" />'
+            "\n<script>(function(){try{if(!('CSSViewTransitionRule' in window)&&"
+            "!matchMedia('(prefers-reduced-motion:reduce)').matches)"
+            "{var r=document.documentElement;r.classList.add('pt-enter');"
+            "setTimeout(function(){r.classList.remove('pt-enter');"
+            "var m=document.getElementById('main');"
+            "if(m){m.style.transition='none';m.style.opacity='1';}},2000);}}"
+            "catch(e){}})();</script>"
+            '\n<noscript><style>html.pt-enter #main{opacity:1 !important;}</style></noscript>'
+        )
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -129,7 +146,7 @@ def page(path, title, desc, body, active, jsonld=""):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css" />
+<link rel="stylesheet" href="/styles.css" />{trans_head}
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/crest.png" />{ld}
 </head>
@@ -155,7 +172,8 @@ def page(path, title, desc, body, active, jsonld=""):
                   "/window.jpg", "/nature-shore.jpg", "/nature-lake.jpg", "/nature-icecap.jpg",
                   "/maison-claire-logo.svg", "/maison-claire-logo-light.svg",
                   "/first-step.jpg", "/private-journey.jpg",
-                  "/contact-hero.jpg", "/about-hero.jpg", "/banner-sunset.jpg", "/fluid.js", "/motion.js"]:
+                  "/contact-hero.jpg", "/about-hero.jpg", "/banner-sunset.jpg",
+                  "/fluid.js", "/motion.js", "/transitions.js", "/transitions.css"]:
         html = html.replace(asset, asset + "?v=" + VER)
     fn = os.path.join(HERE, ("index" if path == "index" else path) + ".html")
     with open(fn, "w", encoding="utf-8") as f:
