@@ -544,7 +544,7 @@ approach_body = f"""{photo_hero("The Maison Claire Approach", "Look deeper. Keep
   </div>
 </section>
 
-<section class="bms" style="background-image:linear-gradient(160deg, rgba(23,44,68,0.82) 0%, rgba(16,32,50,0.86) 100%), url('/banner-greenhills.jpg');">
+<section class="bms" style="background-image:linear-gradient(160deg, rgba(23,44,68,0.42) 0%, rgba(16,32,50,0.52) 100%), url('/banner-greenhills.jpg');">
   <div class="container center">
     <p class="bms-line">Body &nbsp;&middot;&nbsp; Mind &nbsp;&middot;&nbsp; Environment &nbsp;&middot;&nbsp; Self</p>
   </div>

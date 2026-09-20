@@ -485,7 +485,7 @@ section { position: relative; }
   border-top: 1px solid rgba(216,189,138,0.25);
   border-bottom: 1px solid rgba(216,189,138,0.25);
 }
-.bms-line { font-family: var(--display); letter-spacing: 0.26em; text-transform: uppercase; color: #ecd9a8; font-size: clamp(13px, 2.2vw, 21px); margin: 0; text-align: center; }
+.bms-line { font-family: var(--display); letter-spacing: 0.26em; text-transform: uppercase; color: #f4e6bd; font-size: clamp(13px, 2.2vw, 21px); margin: 0; text-align: center; text-shadow: 0 2px 16px rgba(10,20,34,0.75), 0 1px 3px rgba(10,20,34,0.5); }
 
 /* ---------- Photo bands & gallery ---------- */
 .photo-band {
