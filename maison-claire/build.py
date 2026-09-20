@@ -886,7 +886,7 @@ page("apply", "Apply for the Private Journey | Maison Claire Healing",
      '{"@context":"https://schema.org","@type":"ContactPage","name":"Private Journey Application"}')
 
 # ================================================================ CONTACT
-contact_body = f"""<section class="page-photo-hero" style="background-image:linear-gradient(180deg, rgba(18,32,50,0.58) 0%, rgba(18,32,50,0.40) 50%, rgba(18,32,50,0.66) 100%), url('/contact-hero.jpg'); background-position:center;">{'<canvas class="fluid-canvas" aria-hidden="true"></canvas>' if FLUID else ''}
+contact_body = f"""<section class="page-photo-hero" style="background-image:linear-gradient(180deg, rgba(18,32,50,0.58) 0%, rgba(18,32,50,0.40) 50%, rgba(18,32,50,0.66) 100%), url('/banner-mistlake.jpg'); background-position:center 40%;">{'<canvas class="fluid-canvas" aria-hidden="true"></canvas>' if FLUID else ''}
   <div class="container center">
     <p class="pph-eyebrow">Contact</p>
     <h1 class="pph-title">A conversation that can change everything.</h1>
