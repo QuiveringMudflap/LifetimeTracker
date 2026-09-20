@@ -173,7 +173,7 @@ def page(path, title, desc, body, active, jsonld=""):
                   "/window.jpg", "/nature-shore.jpg", "/nature-lake.jpg", "/nature-icecap.jpg",
                   "/maison-claire-logo.svg", "/maison-claire-logo-light.svg", "/favicon.svg",
                   "/first-step.jpg", "/private-journey.jpg",
-                  "/contact-hero.jpg", "/about-hero.jpg", "/banner-sunset.jpg",
+                  "/contact-hero.jpg", "/about-hero.jpg", "/banner-sunset.jpg", "/approach-hero.jpg",
                   "/fluid.js", "/motion.js", "/transitions.js", "/transitions.css"]:
         html = html.replace(asset, asset + "?v=" + VER)
     fn = os.path.join(HERE, ("index" if path == "index" else path) + ".html")
@@ -523,7 +523,7 @@ FLOW = ["We start with where you are.", "We listen.", "We investigate what is wi
         "Then we take the next step."]
 flow_html = "".join(f"<li>{f}</li>" for f in FLOW)
 
-approach_body = f"""{photo_hero("The Maison Claire Approach", "Look deeper. Keep it human.", "Maison Claire is built around a simple idea.", "banner-greenhills.jpg", pos="center 60%")}
+approach_body = f"""{photo_hero("The Maison Claire Approach", "Look deeper. Keep it human.", "Maison Claire is built around a simple idea.", "approach-hero.jpg", pos="center 55%")}
 
 <section class="pad">
   <div class="container narrow prose center-prose">
@@ -544,7 +544,7 @@ approach_body = f"""{photo_hero("The Maison Claire Approach", "Look deeper. Keep
   </div>
 </section>
 
-<section class="bms">
+<section class="bms" style="background-image:linear-gradient(160deg, rgba(23,44,68,0.82) 0%, rgba(16,32,50,0.86) 100%), url('/banner-greenhills.jpg');">
   <div class="container center">
     <p class="bms-line">Body &nbsp;&middot;&nbsp; Mind &nbsp;&middot;&nbsp; Environment &nbsp;&middot;&nbsp; Self</p>
   </div>

@@ -472,7 +472,13 @@ section { position: relative; }
 .steps.five { grid-template-columns: repeat(5, 1fr); }
 
 /* ---------- Body Mind Spirit band ---------- */
-.bms { background: linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%); padding: clamp(40px, 6vw, 66px) 0; }
+.bms {
+  background: linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%);
+  background-size: cover; background-position: center 55%;
+  padding: clamp(64px, 9vw, 110px) 0;
+  border-top: 1px solid rgba(216,189,138,0.25);
+  border-bottom: 1px solid rgba(216,189,138,0.25);
+}
 .bms-line { font-family: var(--display); letter-spacing: 0.26em; text-transform: uppercase; color: #ecd9a8; font-size: clamp(13px, 2.2vw, 21px); margin: 0; text-align: center; }
 
 /* ---------- Photo bands & gallery ---------- */
