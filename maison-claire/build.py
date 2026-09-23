@@ -134,7 +134,7 @@ def page(path, title, desc, body, active, jsonld=""):
 <link rel="canonical" href="{canonical}" />
 <meta name="theme-color" content="#fcf8f0" />
 <meta property="og:type" content="website" />
-<meta property="og:site_name" content="Maison Claire" />
+<meta property="og:site_name" content="Maison Claire Healing" />
 <meta property="og:title" content="{title}" />
 <meta property="og:description" content="{desc}" />
 <meta property="og:url" content="{canonical}" />
@@ -340,7 +340,7 @@ home_body = f"""<section class="photo-hero" style="background-image:linear-gradi
 
 home_ld = """{"@context":"https://schema.org","@type":"HealthAndBeautyBusiness","name":"Maison Claire","description":"Reiki healing, hypnotherapy, intuitive guidance, liver cleanse and detox, and root cause healing with Stanislava.","image":"%s","email":"%s","url":"%s","slogan":"Natural Healing, Higher Wellbeing, A Brighter You","priceRange":"$$","areaServed":"Greater Vancouver","founder":{"@type":"Person","name":"Stanislava"}}""" % (OG, EMAIL, BASE)
 
-page("index", "Maison Claire | Reiki Healing & Natural Wellness with Stanislava",
+page("index", "Maison Claire Healing | Certified Natural Health Coach",
      "Maison Claire offers Reiki healing, hypnotherapy, intuitive guidance, liver cleanse and detox, and root cause healing. Heal at the root and return to your natural state of balance with Stanislava.",
      home_body, "/", home_ld)
 
@@ -661,7 +661,7 @@ about_body = f"""{photo_hero("About Me", "A guide, a practitioner, and a fellow 
 
 {cta_band()}"""
 about_ld = '{"@context":"https://schema.org","@type":"AboutPage","name":"About Stanislava Oben","about":{"@type":"Person","name":"Stanislava Oben","jobTitle":"Certified Natural Health Coach, Certified Hypnotherapist, Reiki Practitioner","worksFor":{"@type":"Organization","name":"Maison Claire Healing"}}}'
-page("about", "About Stanislava Oben | Maison Claire Healing",
+page("about", "About Stanislava Oben | Certified Natural Health Coach",
      "Meet Stanislava Oben, founder of Maison Claire Healing on Bowen Island: Certified Natural Health Coach, Certified Hypnotherapist and Reiki Practitioner, with years of intuitive and mediumship work.",
      about_body, "/about", about_ld)
 
