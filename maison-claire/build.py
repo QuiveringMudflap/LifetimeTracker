@@ -338,10 +338,10 @@ home_body = f"""<section class="photo-hero" style="background-image:linear-gradi
 
 {cta_band()}{_home_splash}"""
 
-home_ld = """{"@context":"https://schema.org","@type":"HealthAndBeautyBusiness","name":"Maison Claire","description":"Reiki healing, hypnotherapy, intuitive guidance, liver cleanse and detox, and root cause healing with Stanislava.","image":"%s","email":"%s","url":"%s","slogan":"Natural Healing, Higher Wellbeing, A Brighter You","priceRange":"$$","areaServed":"Greater Vancouver","founder":{"@type":"Person","name":"Stanislava"}}""" % (OG, EMAIL, BASE)
+home_ld = """{"@context":"https://schema.org","@type":"HealthAndBeautyBusiness","name":"Maison Claire","description":"Natural health coaching, hypnotherapy, intuitive guidance, liver cleanse and detox, and root cause healing with Stanislava.","image":"%s","email":"%s","url":"%s","slogan":"Natural Healing, Higher Wellbeing, A Brighter You","priceRange":"$$","areaServed":"Greater Vancouver","founder":{"@type":"Person","name":"Stanislava"}}""" % (OG, EMAIL, BASE)
 
 page("index", "Maison Claire Healing | Certified Natural Health Coach",
-     "Maison Claire offers Reiki healing, hypnotherapy, intuitive guidance, liver cleanse and detox, and root cause healing. Heal at the root and return to your natural state of balance with Stanislava.",
+     "Maison Claire offers natural health coaching, hypnotherapy, intuitive guidance, liver cleanse and detox, and root cause healing. Heal at the root and return to your natural state of balance with Stanislava.",
      home_body, "/", home_ld)
 
 
