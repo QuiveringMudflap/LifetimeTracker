@@ -39,8 +39,8 @@ MOUNTAINS = """<div class="hero-mountains" aria-hidden="true"><svg viewBox="0 0 
 NAVLINKS = [
     ("Home", "/"),
     ("Journeys", "/journeys"),
-    ("WonderWomen", "/wonderwomen"),
     ("Approach", "/approach"),
+    ("WonderWomen", "/wonderwomen"),
     ("About", "/about"),
     ("Contact", "/contact"),
 ]
@@ -72,8 +72,8 @@ FOOTER = f"""<footer class="foot">
         <h4>Explore</h4>
         <a href="/">Home</a>
         <a href="/journeys">Journeys</a>
-        <a href="/wonderwomen">WonderWomen</a>
         <a href="/approach">Approach</a>
+        <a href="/wonderwomen">WonderWomen</a>
         <a href="/about">About</a>
         <a href="/contact">Contact</a>
       </div>
@@ -923,21 +923,21 @@ page("apply", "Apply for the Private Journey | Maison Claire Healing",
 
 # ================================================================ WONDERWOMEN
 def ww_sunburst():
-    """Gold sunrise ornament above the WonderWomen title (drawn, so it stays crisp)."""
-    cx, base, R, r = 80.0, 60.0, 25.0, 17.5
-    out = [f'<path d="M {cx-R} {base} A {R} {R} 0 0 1 {cx+R} {base} '
-           f'L {cx+r} {base} A {r} {r} 0 0 0 {cx-r} {base} Z" fill="currentColor"/>']
-    rays, n = [], 13
+    """Gold sunrise ornament: a solid half dome with long tapered rays."""
+    cx, base, R = 100.0, 100.0, 30.0
+    out = [f'<path d="M {cx-R} {base} A {R} {R} 0 0 1 {cx+R} {base} Z" fill="currentColor"/>']
+    n, r0, hw = 21, R + 3.5, 1.75
+    rays = []
     for i in range(n):
-        ang = math.radians(14 + (166 - 14) * i / (n - 1))
-        k = abs(i - n // 2)
-        ln = 15.0 if k == 0 else (7.5 if k % 2 else 10.5)
-        x1 = cx + math.cos(ang) * (R + 5); y1 = base - math.sin(ang) * (R + 5)
-        x2 = cx + math.cos(ang) * (R + 5 + ln); y2 = base - math.sin(ang) * (R + 5 + ln)
-        rays.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}"/>')
-    out.append('<g stroke="currentColor" stroke-width="2.1" stroke-linecap="round">'
-               + "".join(rays) + '</g>')
-    return ('<svg class="ww-sun" viewBox="0 0 160 66" aria-hidden="true">' + "".join(out) + '</svg>')
+        t = math.radians(7 + (173 - 7) * i / (n - 1))
+        ln = 40 + 26 * (math.sin(t) ** 0.75)
+        px, py = math.sin(t), math.cos(t)              # unit perpendicular to the ray
+        bx, by = cx + math.cos(t) * r0, base - math.sin(t) * r0
+        tx, ty = cx + math.cos(t) * (r0 + ln), base - math.sin(t) * (r0 + ln)
+        rays.append(f'<path d="M {bx+px*hw:.1f} {by+py*hw:.1f} L {tx:.1f} {ty:.1f} '
+                    f'L {bx-px*hw:.1f} {by-py*hw:.1f} Z"/>')
+    out.append('<g fill="currentColor">' + "".join(rays) + '</g>')
+    return ('<svg class="ww-sun" viewBox="0 0 200 102" aria-hidden="true">' + "".join(out) + '</svg>')
 
 def _ic(vb):
     return ('<svg viewBox="%s" fill="none" stroke="currentColor" stroke-width="1.6" '

@@ -790,3 +790,4 @@ section { position: relative; }
 .ww-sr .ww-btn { letter-spacing: 0.17em; padding: 13px 22px; }
 .ww-sr-eyebrow { letter-spacing: 0.15em; }
 @media (max-width: 1000px) { .ww-grid { grid-template-columns: 1fr; } }
+.ww-sun { width: clamp(150px, 18vw, 224px); margin-bottom: 14px; }
