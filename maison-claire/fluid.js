@@ -368,7 +368,7 @@
     p.moved = Math.abs(p.deltaX) > 0 || Math.abs(p.deltaY) > 0;
   }
 
-  var heroSection = canvas.closest ? canvas.closest('.photo-hero') : null;
+  var heroSection = canvas.closest ? canvas.closest('.photo-hero, .page-photo-hero, .ww-hero') : null;
   window.addEventListener('mousemove', function (e) {
     var rect = canvas.getBoundingClientRect();
     if (!introRunning) {

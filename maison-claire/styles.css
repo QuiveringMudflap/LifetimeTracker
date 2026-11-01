@@ -1,5 +1,5 @@
 /* ============================================================
-   Maison Claire — global styles
+   Maison Claire global styles
    Palette matched to the printed logo background (#fcf8f0)
    ============================================================ */
 :root {
@@ -622,3 +622,171 @@ section { position: relative; }
   to   { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) { .form-sent { animation: none; } }
+
+/* ============================================================
+   WonderWomen / She Rises
+   ============================================================ */
+.ww-hero {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center;
+  min-height: min(92vh, 860px);
+  padding: clamp(54px, 7vw, 96px) 0;
+  border-bottom: 3px solid var(--gold-soft);
+  background: radial-gradient(125% 95% at 60% 112%,
+      #ffe0a6 0%, #f6c089 12%, #c89a86 24%, #6b7f9e 40%,
+      #2c5688 62%, #11315a 84%, #04203f 100%);
+}
+.ww-figure {
+  position: absolute; left: 0; bottom: 0; top: 0;
+  width: clamp(320px, 42vw, 620px);
+  background: url('/wonderwomen-figure.jpg') left bottom / cover no-repeat;
+  -webkit-mask-image: linear-gradient(to right, #000 48%, transparent 97%),
+                      linear-gradient(to top, transparent 1%, #000 14%);
+  mask-image: linear-gradient(to right, #000 48%, transparent 97%),
+              linear-gradient(to top, transparent 1%, #000 14%);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+  pointer-events: none;
+}
+.ww-hero-inner { width: 100%; position: relative; z-index: 3; }
+.ww-copy { max-width: min(660px, 100%); margin-left: auto; text-align: center; }
+.ww-sun { width: clamp(120px, 14vw, 168px); height: auto; margin: 0 auto 6px; color: var(--gold-soft); display: block; }
+.ww-title {
+  font-family: var(--display); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.055em;
+  font-size: clamp(38px, 7.2vw, 92px); line-height: 1.02; margin: 0;
+  color: #e9c87f;
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .ww-title {
+    background: linear-gradient(180deg, #fbeec4 0%, #e7c87f 46%, #c69a4c 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+}
+.ww-kicker {
+  font-family: var(--sans); text-transform: uppercase; letter-spacing: 0.38em;
+  font-size: clamp(10px, 1.25vw, 13.5px); color: #f2f6fa; margin: 14px 0 0;
+  padding-left: 0.38em; text-shadow: 0 1px 10px rgba(8,20,36,0.5);
+}
+.ww-div { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 18px auto 10px; width: min(360px, 80%); color: var(--gold-soft); }
+.ww-div span { flex: 1; height: 1px; background: currentColor; opacity: .55; }
+.ww-div i { font-style: normal; font-size: 13px; }
+.ww-div.dark { color: var(--gold); margin: 22px auto; width: min(300px, 76%); }
+.ww-script {
+  font-family: "Great Vibes", "Cormorant Garamond", cursive;
+  font-size: clamp(54px, 10vw, 128px); line-height: 1.04;
+  color: #f0cf8a; margin: 2px 0 6px; font-weight: 400;
+  text-shadow: 0 3px 26px rgba(10,22,40,0.45);
+}
+.ww-lead {
+  font-style: italic; color: #f4f7fa; margin: 10px auto 0; max-width: 34ch;
+  font-size: clamp(17px, 2vw, 22px); line-height: 1.55;
+  text-shadow: 0 1px 14px rgba(10,22,40,0.5);
+}
+.ww-btn {
+  background: linear-gradient(180deg, #d9b069, #bd8f44);
+  border: 1px solid #c79a50; color: #23364d; font-weight: 600;
+  margin-top: 26px; box-shadow: 0 10px 26px rgba(14,28,46,0.26);
+}
+.ww-btn:hover { background: linear-gradient(180deg, #e3bd78, #c89a4e); border-color: #d2a85e; }
+
+/* cream panel */
+.ww-panel { position: relative; background: var(--cream); padding: clamp(56px, 8vw, 104px) 0 clamp(50px, 7vw, 92px); }
+.ww-wave { position: absolute; left: 0; right: 0; top: 0; transform: translateY(-100%); height: clamp(38px, 5.5vw, 84px); line-height: 0; pointer-events: none; }
+.ww-wave svg { width: 100%; height: 100%; display: block; }
+.ww-grid { display: grid; grid-template-columns: 1fr 0.92fr 1.08fr; gap: clamp(26px, 4vw, 56px); align-items: start; }
+.ww-grid > .ww-col + .ww-col { border-left: 1px solid var(--line-soft); padding-left: clamp(26px, 4vw, 56px); }
+.ww-col > p { color: var(--ink-soft); }
+.ww-col-title {
+  font-family: var(--serif); font-weight: 500; color: var(--navy-ink);
+  text-transform: uppercase; letter-spacing: 0.14em;
+  font-size: clamp(20px, 2.5vw, 30px); line-height: 1.25; margin: 0 0 18px;
+}
+.ww-accent { font-family: var(--serif); font-style: italic; color: var(--gold-deep); font-size: clamp(18px, 2.1vw, 22px); line-height: 1.5; margin: 0; }
+
+/* four pillars */
+.ww-pillars { display: grid; gap: clamp(16px, 2.2vw, 26px); }
+.ww-pillar { display: grid; grid-template-columns: 44px 1fr; gap: 16px; align-items: center; }
+.ww-ic { color: var(--gold); display: block; }
+.ww-ic svg { width: 40px; height: 40px; }
+.ww-pillar-txt { display: block; }
+.ww-pillar-t { display: block; font-family: var(--serif); font-weight: 600; text-transform: uppercase; letter-spacing: 0.13em; color: var(--navy-ink); font-size: clamp(14px, 1.6vw, 17px); }
+.ww-pillar-s { display: block; font-family: var(--serif); font-style: italic; color: var(--ink-soft); font-size: clamp(14px, 1.6vw, 17px); line-height: 1.4; }
+
+/* she rises column */
+.ww-sr-title { font-family: var(--serif); font-weight: 500; text-transform: uppercase; letter-spacing: 0.17em; color: var(--navy-ink); font-size: clamp(24px, 3.1vw, 38px); line-height: 1.15; margin: 0; }
+.ww-sr-eyebrow { font-family: var(--sans); text-transform: uppercase; letter-spacing: 0.2em; font-size: clamp(10px, 1.15vw, 12.5px); color: var(--gold-deep); margin: 10px 0 18px; }
+.ww-sr .btn { margin-top: 8px; }
+
+/* closing strip */
+.ww-strip { background-size: cover; background-position: center 58%; padding: clamp(34px, 5vw, 62px) 0; border-top: 1px solid rgba(216,189,138,0.3); border-bottom: 1px solid rgba(216,189,138,0.3); }
+.ww-strip-line {
+  display: flex; align-items: center; justify-content: center; gap: clamp(12px, 2vw, 26px);
+  font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em;
+  font-size: clamp(11px, 1.7vw, 19px); color: #f4e6bd; margin: 0; text-align: center;
+  text-shadow: 0 2px 16px rgba(10,20,34,0.75);
+}
+.ww-dash { flex: 0 0 auto; width: clamp(18px, 4vw, 58px); height: 1px; background: var(--gold-soft); opacity: .8; }
+
+@media (max-width: 1000px) {
+  .ww-grid { grid-template-columns: 1fr; gap: 34px; }
+  .ww-grid > .ww-col + .ww-col { border-left: 0; padding-left: 0; border-top: 1px solid var(--line-soft); padding-top: 30px; }
+  .ww-col, .ww-sr { text-align: center; }
+  .ww-pillar { grid-template-columns: 40px 1fr; text-align: left; max-width: 340px; margin: 0 auto; }
+}
+@media (max-width: 760px) {
+  .ww-hero { flex-direction: column; justify-content: flex-start; min-height: 0; padding: 0 0 clamp(36px, 8vw, 54px); }
+  .ww-figure {
+    position: static; width: 100%; height: clamp(230px, 54vw, 330px);
+    background-position: center 12%; background-size: cover;
+    -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 99%);
+    mask-image: linear-gradient(to bottom, #000 62%, transparent 99%);
+    -webkit-mask-composite: source-over; mask-composite: add;
+  }
+  .ww-hero-inner { margin-top: -18px; }
+  .ww-copy { margin: 0 auto; }
+}
+
+/* Six nav links need more room: keep items on one line, and switch to the
+   mobile menu earlier so the CTA never wraps. */
+.nav-links { gap: clamp(15px, 1.7vw, 26px); }
+.nav-links a, .nav-cta { white-space: nowrap; }
+@media (max-width: 1080px) {
+  .nav-cta { display: none; }
+  .nav-links {
+    position: absolute; top: 100%; left: 0; right: 0;
+    flex-direction: column; gap: 0; align-items: stretch;
+    background: var(--paper); border-bottom: 1px solid var(--line-soft);
+    padding: 6px var(--pad) 16px; display: none;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { padding: 13px 0; border-bottom: 1px solid var(--line-soft); }
+  .nav-toggle { display: inline-block; }
+}
+
+/* WonderWomen hero refinements: title must fit its column, and the figure
+   keeps its own proportions so it is never zoomed past native resolution. */
+.ww-hero { min-height: min(84vh, 780px); }
+.ww-copy { max-width: min(790px, 100%); }
+.ww-title { font-size: clamp(27px, 6.1vw, 78px); letter-spacing: 0.04em; }
+.ww-figure {
+  top: auto; height: auto;
+  width: clamp(340px, 45vw, 660px);
+  aspect-ratio: 606 / 434;
+  background: url('/wonderwomen-figure.jpg') center bottom / cover no-repeat;
+  -webkit-mask-image: linear-gradient(to right, #000 52%, transparent 100%),
+                      linear-gradient(to top, #000 56%, transparent 100%);
+  mask-image: linear-gradient(to right, #000 52%, transparent 100%),
+              linear-gradient(to top, #000 56%, transparent 100%);
+}
+@media (max-width: 760px) {
+  .ww-figure { aspect-ratio: auto; width: 100%; height: clamp(230px, 54vw, 330px); }
+}
+
+/* WonderWomen panel refinements */
+.ww-grid { grid-template-columns: 1fr 0.8fr 1.15fr; }
+.ww-pillar { grid-template-columns: 50px 1fr; }
+.ww-ic svg { width: 46px; height: 46px; }
+.ww-sr .ww-btn { letter-spacing: 0.17em; padding: 13px 22px; }
+.ww-sr-eyebrow { letter-spacing: 0.15em; }
+@media (max-width: 1000px) { .ww-grid { grid-template-columns: 1fr; } }

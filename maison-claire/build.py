@@ -8,7 +8,7 @@ consistent. Edit the CONTENT blocks below (or the templates) and run:
 
 It writes the .html files, sitemap.xml and robots.txt into this folder.
 """
-import os, time
+import os, time, math
 
 VER = str(int(time.time()))  # cache-buster, bumped every build
 BASE = "https://maisonclaire-mauve.vercel.app"
@@ -39,6 +39,7 @@ MOUNTAINS = """<div class="hero-mountains" aria-hidden="true"><svg viewBox="0 0 
 NAVLINKS = [
     ("Home", "/"),
     ("Journeys", "/journeys"),
+    ("WonderWomen", "/wonderwomen"),
     ("Approach", "/approach"),
     ("About", "/about"),
     ("Contact", "/contact"),
@@ -71,6 +72,7 @@ FOOTER = f"""<footer class="foot">
         <h4>Explore</h4>
         <a href="/">Home</a>
         <a href="/journeys">Journeys</a>
+        <a href="/wonderwomen">WonderWomen</a>
         <a href="/approach">Approach</a>
         <a href="/about">About</a>
         <a href="/contact">Contact</a>
@@ -98,7 +100,7 @@ FOOTER = f"""<footer class="foot">
   l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.setAttribute('aria-expanded',false);});});}
 </script>"""
 
-def page(path, title, desc, body, active, jsonld=""):
+def page(path, title, desc, body, active, jsonld="", extra_head=""):
     canonical = BASE + ("/" if path == "index" else "/" + path)
     ld = f'\n<script type="application/ld+json">{jsonld}</script>' if jsonld else ""
     bodyclass = "motion" if MOTION else ""
@@ -146,7 +148,7 @@ def page(path, title, desc, body, active, jsonld=""):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css" />{trans_head}
+<link rel="stylesheet" href="/styles.css" />{trans_head}{extra_head}
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/favicon.png" />{ld}
@@ -174,6 +176,7 @@ def page(path, title, desc, body, active, jsonld=""):
                   "/maison-claire-logo.svg", "/maison-claire-logo-light.svg", "/favicon.svg",
                   "/first-step.jpg", "/private-journey.jpg",
                   "/contact-hero.jpg", "/about-hero.jpg", "/banner-sunset.jpg", "/approach-hero.jpg",
+                  "/wonderwomen-figure.jpg",
                   "/fluid.js", "/motion.js", "/transitions.js", "/transitions.css"]:
         html = html.replace(asset, asset + "?v=" + VER)
     fn = os.path.join(HERE, ("index" if path == "index" else path) + ".html")
@@ -918,6 +921,139 @@ page("apply", "Apply for the Private Journey | Maison Claire Healing",
      apply_body, "/journeys",
      '{"@context":"https://schema.org","@type":"ContactPage","name":"Private Journey Application"}')
 
+# ================================================================ WONDERWOMEN
+def ww_sunburst():
+    """Gold sunrise ornament above the WonderWomen title (drawn, so it stays crisp)."""
+    cx, base, R, r = 80.0, 60.0, 25.0, 17.5
+    out = [f'<path d="M {cx-R} {base} A {R} {R} 0 0 1 {cx+R} {base} '
+           f'L {cx+r} {base} A {r} {r} 0 0 0 {cx-r} {base} Z" fill="currentColor"/>']
+    rays, n = [], 13
+    for i in range(n):
+        ang = math.radians(14 + (166 - 14) * i / (n - 1))
+        k = abs(i - n // 2)
+        ln = 15.0 if k == 0 else (7.5 if k % 2 else 10.5)
+        x1 = cx + math.cos(ang) * (R + 5); y1 = base - math.sin(ang) * (R + 5)
+        x2 = cx + math.cos(ang) * (R + 5 + ln); y2 = base - math.sin(ang) * (R + 5 + ln)
+        rays.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}"/>')
+    out.append('<g stroke="currentColor" stroke-width="2.1" stroke-linecap="round">'
+               + "".join(rays) + '</g>')
+    return ('<svg class="ww-sun" viewBox="0 0 160 66" aria-hidden="true">' + "".join(out) + '</svg>')
+
+def _ic(vb):
+    return ('<svg viewBox="%s" fill="none" stroke="currentColor" stroke-width="1.6" '
+            'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' % vb)
+WW_IC = {
+"butterfly": _ic("6 9 36 30")
+  + '<path d="M24 17.5v16.8"/>'
+    '<path d="M23.5 19c-2-4.6-6.4-8-10.4-8-3 0-4.9 2-4.9 5 0 4.2 4 7.6 8.8 8.6-3.3.7-5.8 3-5.8 5.9 0 2.5 1.8 4.2 4.2 4.2 3.6 0 7-3.4 8.6-7.9"/>'
+    '<path d="M24.5 19c2-4.6 6.4-8 10.4-8 3 0 4.9 2 4.9 5 0 4.2-4 7.6-8.8 8.6 3.3.7 5.8 3 5.8 5.9 0 2.5-1.8 4.2-4.2 4.2-3.6 0-7-3.4-8.6-7.9"/>'
+    '<path d="M23.6 17.4c-.5-1.9-1.9-3.4-3.6-4.1"/><path d="M24.4 17.4c.5-1.9 1.9-3.4 3.6-4.1"/></svg>',
+"lotus": '<svg viewBox="11 21 42 28" fill="none" stroke="currentColor" stroke-width="2" '
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    '<path d="M32 47 C22 41 18 33 22 27 C26 23 30 27 32 31 C34 27 38 23 42 27 C46 33 42 41 32 47 Z"/>'
+    '<path d="M32 47 C28 41 26 35 28 29"/><path d="M32 47 C36 41 38 35 36 29"/>'
+    '<path d="M32 47 C24 43 17 43 13 39 C18 34 25 37 32 44"/>'
+    '<path d="M32 47 C40 43 47 43 51 39 C46 34 39 37 32 44"/></svg>',
+"bolt": _ic("11 4 26 39") + '<path d="M27.5 6.5 L13 27.8 h8.3 L20 41.5 L35 20.2 h-8.3 z"/></svg>',
+"heart": _ic("10 12 28 28")
+  + '<path d="M24 38.6c-1.3-.9-11.6-8.2-11.6-16.1a7.4 7.4 0 0 1 11.6-6.1 7.4 7.4 0 0 1 11.6 6.1c0 7.9-10.3 15.2-11.6 16.1z"/></svg>',
+}
+
+WW_PILLARS = [
+    ("butterfly", "Release", "what no longer fits"),
+    ("lotus", "Reconnect", "with your true self"),
+    ("bolt", "Reclaim", "your confidence"),
+    ("heart", "Rise", "into the woman you are meant to be"),
+]
+ww_pillars_html = "".join(
+    f'<div class="ww-pillar"><span class="ww-ic">{WW_IC[k]}</span>'
+    f'<span class="ww-pillar-txt"><span class="ww-pillar-t">{t}</span>'
+    f'<span class="ww-pillar-s">{s}</span></span></div>'
+    for k, t, s in WW_PILLARS)
+
+WW_WAVE = ('<div class="ww-wave" aria-hidden="true">'
+  '<svg viewBox="0 0 1440 96" preserveAspectRatio="none">'
+  '<path d="M0,96 L0,52 C200,14 480,6 760,26 C1040,46 1240,70 1440,40 L1440,96 Z" fill="#fcf8f0"/>'
+  '<path d="M0,52 C200,14 480,6 760,26 C1040,46 1240,70 1440,40" fill="none" '
+  'stroke="#d8bd8a" stroke-width="2.5" vector-effect="non-scaling-stroke"/>'
+  '</svg></div>')
+
+ww_body = f"""<section class="ww-hero">{'<canvas class="fluid-canvas" aria-hidden="true"></canvas>' if FLUID else ''}
+  <div class="ww-figure" aria-hidden="true"></div>
+  <div class="container ww-hero-inner">
+    <div class="ww-copy">
+      {ww_sunburst()}
+      <h1 class="ww-title">WonderWomen</h1>
+      <p class="ww-kicker">A Maison Claire Community</p>
+      <div class="ww-div"><span></span><i aria-hidden="true">&#10022;</i><span></span></div>
+      <p class="ww-script">She Rises</p>
+      <p class="ww-lead">A joyful gathering for women ready to let go, break free and remember who they truly are, and always have been.</p>
+      <div class="hero-cta" style="justify-content:center"><a href="#join" class="btn ww-btn">Join the next She Rises &nbsp;&rarr;</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="ww-panel">
+  {WW_WAVE}
+  <div class="container ww-grid">
+    <div class="ww-col">
+      <h2 class="ww-col-title">It&rsquo;s time to put some things down&hellip;</h2>
+      <p>The judgement, the shame, the self-doubt, the need to please, the old stories and the expectations that keep you small.</p>
+      <div class="ww-div dark"><span></span><i aria-hidden="true">&#10022;</i><span></span></div>
+      <p class="ww-accent">And make room for more of what really lights you up.</p>
+    </div>
+    <div class="ww-col ww-pillars">{ww_pillars_html}</div>
+    <div class="ww-col ww-sr">
+      <h2 class="ww-sr-title">She Rises</h2>
+      <p class="ww-sr-eyebrow">Our signature monthly gathering</p>
+      <p>Once a month, we come together for meaningful conversations, playful exercises, movement, reflection, laughter and real connection.</p>
+      <p>A space to be seen, supported and inspired by other women on the same journey.</p>
+      <a href="#join" class="btn ww-btn">Join the next She Rises &nbsp;&rarr;</a>
+    </div>
+  </div>
+</section>
+
+<section class="ww-strip" style="background-image:linear-gradient(rgba(14,28,46,0.74), rgba(14,28,46,0.74)), url('/mountains.jpg');">
+  <div class="container center">
+    <p class="ww-strip-line"><span class="ww-dash" aria-hidden="true"></span>Come as you are. Laugh a little. Let go a little. Rise together.<span class="ww-dash" aria-hidden="true"></span></p>
+  </div>
+</section>
+
+<section class="pad" id="join">
+  <div class="container narrow">
+    <div class="section-head"><div class="rule"></div><p class="eyebrow">Join the next She Rises</p><div class="rule"></div></div>
+    <p class="approach-lead center">Leave your details and Stanislava will let you know when the next gathering is open, with the date, the place and everything you need.</p>
+    <form class="mc-form" data-title="She Rises join request (Maison Claire website)">
+      <input type="text" name="_trap" class="trap" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <div class="frow">
+        {field("Name", "name", req=True)}
+        {field("Email", "email", kind="email", req=True)}
+      </div>
+      {field("Phone", "phone", kind="tel")}
+      {field("Anything you would like Stanislava to know?", "about_you", kind="textarea", rows=3)}
+      <div class="fsubmit">
+        <button type="submit" class="btn btn-primary">Save My Place</button>
+      </div>
+      <div class="form-status" role="status" aria-live="polite"></div>
+    </form>
+    <p class="disclaimer-note">{DISCLAIMER}</p>
+  </div>
+</section>
+{FORM_JS}"""
+
+ww_ld = ('{"@context":"https://schema.org","@type":"EventSeries","name":"She Rises",'
+         '"description":"A joyful monthly gathering for women to let go, break free and remember who they truly are.",'
+         '"eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode",'
+         '"location":{"@type":"Place","name":"Bowen Island, British Columbia",'
+         '"address":{"@type":"PostalAddress","addressLocality":"Bowen Island","addressRegion":"BC","addressCountry":"CA"}},'
+         '"organizer":{"@type":"Organization","name":"Maison Claire Healing","url":"%s"},'
+         '"url":"%s/wonderwomen"}') % (BASE, BASE)
+
+page("wonderwomen", "WonderWomen &amp; She Rises | Maison Claire Healing",
+     "WonderWomen is a Maison Claire community. She Rises is our signature monthly gathering for women to release, reconnect, reclaim and rise together on Bowen Island.",
+     ww_body, "/wonderwomen", ww_ld,
+     extra_head='\n<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">')
+
 # ================================================================ CONTACT
 contact_body = f"""<section class="page-photo-hero" style="background-image:linear-gradient(180deg, rgba(18,32,50,0.58) 0%, rgba(18,32,50,0.40) 50%, rgba(18,32,50,0.66) 100%), url('/banner-mistlake.jpg'); background-position:center 40%;">{'<canvas class="fluid-canvas" aria-hidden="true"></canvas>' if FLUID else ''}
   <div class="container center">
@@ -960,7 +1096,7 @@ page("contact", "Contact | Maison Claire Healing, Bowen Island",
 
 # ---------------------------------------------------------------- sitemap + robots
 urls = ["/", "/journeys", "/the-first-step", "/the-reset", "/the-root", "/restore",
-        "/the-private-journey", "/approach", "/about", "/consultation", "/apply", "/contact"]
+        "/the-private-journey", "/wonderwomen", "/approach", "/about", "/consultation", "/apply", "/contact"]
 sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 for u in urls:
     pr = "1.0" if u == "/" else "0.8"
